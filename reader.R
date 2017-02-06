@@ -66,84 +66,97 @@ readMessage.definition <- function(con, devFields = FALSE) {
   message$field_definition <- processFieldDefs(
       readBin(con = con, what = "raw", n = 3 * message$n_fields, size = 1)
     )
+  bytesRead <- 5 + (3*message$n_fields)
   if(devFields){
     ## do something with the developer fields
   }
-  return(message)
+  return(list(message = message,
+              bytesRead = bytesRead))
 }
 
 data_type_lookup <- list(
-  '00' = c('raw', FALSE, 1, 1),
-  '01' = c('integer', TRUE, 1, 1),
-  '02' = c('integer', FALSE, 1, 1),
-  '83' = c('integer', TRUE, 2, 1),
-  '84' = c('integer', FALSE, 2, 1),
-  '85' = c('integer', TRUE, 4, 1),
-  '86' = c('raw', TRUE, 1, 4), ## this hould be unsigned int32
-  '07' = c('character', TRUE, 1, 1),
-  '88' = c('numeric', TRUE, 4, 1),
-  '89' = c('numeric', TRUE, 8, 1),
-  '0a' = c('integer', FALSE, 1, 1),
-  '8b' = c('integer', FALSE, 2, 1),
-  '8c' = c('raw', TRUE, 1, 4)  ## this hould be unsigned int32
+  '00' = c('raw', FALSE, 1L, 1),
+  '01' = c('integer', TRUE, 1L, 1),
+  '02' = c('integer', FALSE, 1L, 1),
+  '83' = c('integer', TRUE, 2L, 1),
+  '84' = c('integer', FALSE, 2L, 1),
+  '85' = c('integer', TRUE, 4L, 1),
+  '86' = c('raw', TRUE, 1L, 4), ## this hould be unsigned int32
+  '07' = c('character', TRUE, 1L, 1),
+  '88' = c('numeric', TRUE, 4L, 1),
+  '89' = c('numeric', TRUE, 8L, 1),
+  '0a' = c('integer', FALSE, 1L, 1),
+  '8b' = c('integer', FALSE, 2L, 1),
+  '8c' = c('raw', TRUE, 1L, 4)  ## this hould be unsigned int32
 )
 
 readMessage.data <- function(con, definition) {
   
-  fieldTypes <- as.character(as.hexmode(definition$field_definition$base_type))
+  fieldTypes <- definition$field_definition$base_type
+  
+  bytesRead <- 0
   
   message <- list()
   for(i in 1:length(fieldTypes)) {
     readInfo <- data_type_lookup[[ fieldTypes[i] ]]
     message[[i]] <- readBin(con, what = readInfo[[1]], signed = readInfo[[2]],
                             size = readInfo[[3]], n = readInfo[[4]])
+    bytesRead <- bytesRead + (as.integer(readInfo[[3]]) * as.integer(readInfo[[4]]))
     if(fieldTypes[i] %in% c('86', '8c')) {
       message[[i]] <- sum(2^(.subset(0:31, as.logical(rawToBits(message[[i]])))))
     }
   }
   names(message) <- definition$field_definition$field_def_num
   message <- as_data_frame(message)
-  return(message)
+  return(list(message = message,
+              bytesRead = bytesRead))
 }
 
 readFile <- function() {
   
   defs <- list()
   data <- list()
+  messageTable <- data_frame(lmt = character(0), gmn = character(0))
+  bytesRead <- 0
   
-  con <- file("/home/msmith/Code/Fit_files/fitR/2016-10-23-14-09-05.fit", "rb")
+  con <- file("/home/msmith/projects/fitR/2016-10-23-14-09-05.fit", "rb")
   on.exit(close(con))
   file_header <- readHeader(con)
   
   ## read some records
-  for(i in 1:500) {
-  #for(i in 1:file_header$data_size) {
+  #for(i in 1:2000) {
+  while(bytesRead < file_header$data_size) {
     
     record_header <- readRecordHeader(con)
     lmt <- as.character(record_header$local_message_type)
     if(record_header$message_type == "definition") {
-      defs[[ lmt ]] <- 
-        readMessage.definition(con, devFields = record_header$developer_data)
+      
+      message <- readMessage.definition(con, devFields = record_header$developer_data)
+      defs[[ lmt ]] <- message$message
+        
+      gmn <- as.character(defs[[ lmt ]]$global_message_num)
+      messageTable <- rbind(messageTable, data_frame(lmt = lmt, gmn = gmn))
       data[[ lmt ]] <- NULL
+      
     } else if(record_header$message_type == "data") {
-      data[[ lmt ]] <-
-        rbind(data[[ lmt ]], 
-              readMessage.data(con, defs[[ lmt ]] ))
+      
+      message <- readMessage.data(con, defs[[ lmt ]])
+      data[[ lmt ]] <- rbind(data[[ lmt ]], message$message)
+      
     } else {
       stop("unknown message type")
     }
-    
+    bytesRead <- bytesRead + message$bytesRead + 1
   }
-  return(list(defs, data))
+  
+  ## for now, lets just return the 'record' table
+  lmt_record <- (filter(messageTable, gmn ==20) %>% 
+    select(lmt))[[1]]
+  
+  return(data[[lmt_record]])
 }
 
-# con <- file("/home/msmith/Code/Fit_files/fitR/2016-10-23-14-09-05.fit", "rb")
-# file_header <- readHeader(con)
-# record_header <- readRecordHeader(con)
-# defintion_message <- readMessage.definition(con, devFields = record_header$developer_data)
-# record_header2 <- readRecordHeader(con)
-# data_message <- readMessage.data(con, defintion_message)
-# record_header3 <- readRecordHeader(con)
-# defintion_message2 <- readMessage.definition(con, devFields = record_header$developer_data)
-# 
-# close(con)
+tmp3 <- tmp2 %>% 
+  mutate(time = as.POSIXct(`253`, origin = "31-12-1989")) %>%
+  rename(latitude = `0`, longitude = `1`, distance = `5`, altitude = `2`, speed = `6`, temperature = `13`)
+
