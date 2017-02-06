@@ -50,7 +50,7 @@ processFieldDefs <- function(fields) {
   fields <- split(fields, rep(1:3, by = length(fields)/3))
   names(fields) = c('field_def_num', 'size', 'base_type')
   fields <- as_data_frame(fields) %>%
-    mutate(base_type = as.character(as.hexmode(base_type)))
+    mutate(base_type = format(as.hexmode(base_type), width = 2))
   return(fields)
 }
 
@@ -100,10 +100,17 @@ readMessage.data <- function(con, definition) {
   for(i in 1:length(fieldTypes)) {
     readInfo <- data_type_lookup[[ fieldTypes[i] ]]
     message[[i]] <- readBin(con, what = readInfo[[1]], signed = readInfo[[2]],
-                            size = readInfo[[3]], n = readInfo[[4]])
+                            size = readInfo[[3]], n = readInfo[[4]], 
+                            endian = definition$architecture)
     bytesRead <- bytesRead + (as.integer(readInfo[[3]]) * as.integer(readInfo[[4]]))
+    if(is.character(message[[i]])) {
+      bytesRead <- bytesRead + nchar(message[[i]])
+    }
     if(fieldTypes[i] %in% c('86', '8c')) {
-      message[[i]] <- sum(2^(.subset(0:31, as.logical(rawToBits(message[[i]])))))
+      if(definition$architecture == "little" )
+        message[[i]] <- sum(2^(.subset(0:31, as.logical(rawToBits(message[[i]])))))
+      else 
+        message[[i]] <- sum(2^(.subset(0:31, as.logical(rawToBits(message[[i]][4:1])))))
     }
   }
   names(message) <- definition$field_definition$field_def_num
@@ -112,14 +119,15 @@ readMessage.data <- function(con, definition) {
               bytesRead = bytesRead))
 }
 
-readFile <- function() {
+readFile <- function(fileName) {
   
   defs <- list()
   data <- list()
   messageTable <- data_frame(lmt = character(0), gmn = character(0))
   bytesRead <- 0
+  i = 0
   
-  con <- file("/home/msmith/projects/fitR/2016-10-23-14-09-05.fit", "rb")
+  con <- file(fileName, "rb")
   on.exit(close(con))
   file_header <- readHeader(con)
   
@@ -136,12 +144,16 @@ readFile <- function() {
         
       gmn <- as.character(defs[[ lmt ]]$global_message_num)
       messageTable <- rbind(messageTable, data_frame(lmt = lmt, gmn = gmn))
-      data[[ lmt ]] <- NULL
+      
+      cat(message$message$global_message_num, "\t", message$message$n_fields, "\n")
+      
+      i = i + 1
+      data[[ as.character(i) ]] <- NULL
       
     } else if(record_header$message_type == "data") {
       
       message <- readMessage.data(con, defs[[ lmt ]])
-      data[[ lmt ]] <- rbind(data[[ lmt ]], message$message)
+      data[[ as.character(i) ]] <- rbind(data[[ as.character(i) ]], message$message)
       
     } else {
       stop("unknown message type")
@@ -150,13 +162,17 @@ readFile <- function() {
   }
   
   ## for now, lets just return the 'record' table
-  lmt_record <- (filter(messageTable, gmn ==20) %>% 
-    select(lmt))[[1]]
+  #lmt_record <- (filter(messageTable, gmn == 20) %>% 
+  #  select(lmt))[[1]]
   
-  return(data[[lmt_record]])
+  return(data)
 }
 
-tmp3 <- tmp2 %>% 
-  mutate(time = as.POSIXct(`253`, origin = "31-12-1989")) %>%
-  rename(latitude = `0`, longitude = `1`, distance = `5`, altitude = `2`, speed = `6`, temperature = `13`)
+formatData <- function(dat) {
+  dat <- dat %>%
+    mutate(time = as.POSIXct(`253`, origin = "1989-12-31")) %>%
+    rename(latitude = `0`, longitude = `1`, distance = `5`, altitude = `2`, speed = `6`, temperature = `13`)
+  return(dat)
+}
+  
 
