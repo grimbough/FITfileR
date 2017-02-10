@@ -36,25 +36,26 @@ scanFile <- function(fileName) {
       
       if(lmt == prev_lmt) {
         plmt = plmt + 1
+        defs[[ as.character(plmt) ]] <- defs[[ as.character(prev_lmt) ]]
       } else {
         plmt <- lmt
       }
       prev_lmt <- lmt
       
       message <- readMessage.definition(con, devFields = record_header$developer_data)
-      defs[[ plmt ]] <- message$message
+      defs[[ as.character(lmt) ]] <- message$message
       
-      cat(lmt, "\t", plmt, "\t", defs[[ plmt ]]$global_message_num, "\n")
+      cat(lmt, "\t", plmt, "\t", defs[[ as.character(lmt) ]]$global_message_num, "\n")
       
     } else if(record_header$message_type == "data") {
       
-      message <- scanMessage.data(con, defs[[ plmt ]])
+      message <- scanMessage.data(con, defs[[ as.character(lmt) ]])
       
     } else {
       stop("unknown message type")
     }
-    bytesRead <- bytesRead + message$bytesRead + 1
+    #bytesRead <- bytesRead + message$bytesRead + 1
   }
   
-  return(data)
+  return(NULL)
 }
