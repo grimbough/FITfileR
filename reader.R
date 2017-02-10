@@ -122,51 +122,49 @@ readMessage.data <- function(con, definition) {
 
 readFile <- function(fileName) {
   
-  defs <- list()
+  defs <- vector("list", 20)
   data <- list()
+  data_counter <- list()
   messageTable <- data_frame(lmt = character(0), gmn = character(0))
+  messages <- matrix(nrow = 2000, ncol = 5)
   bytesRead <- 0
-  i = 0
+  plmt = 0 ## pseudo local message type
+  prev_lmt <- NULL
   
   con <- file(fileName, "rb")
   on.exit(close(con))
   file_header <- readHeader(con)
   
   ## read some records
-  #for(i in 1:2000) {
-  while(bytesRead < file_header$data_size) {
+  
+  for(j in 1:2000) {
+  #while(bytesRead < file_header$data_size) {
     
     record_header <- readRecordHeader(con)
     lmt <- as.character(record_header$local_message_type)
     if(record_header$message_type == "definition") {
       
+      plmt = plmt + 1
+      
       message <- readMessage.definition(con, devFields = record_header$developer_data)
       defs[[ lmt ]] <- message$message
-        
-      gmn <- as.character(defs[[ lmt ]]$global_message_num)
-      messageTable <- rbind(messageTable, data_frame(lmt = lmt, gmn = gmn))
-      
+
   #    cat(message$message$global_message_num, "\t", message$message$n_fields, "\n")
-      
-      i = i + 1
-      data[[ as.character(i) ]] <- NULL
+      data[[ as.character(plmt) ]] <- vector("list", 2000)
+      data_counter[[ as.character(plmt) ]] <- 1
       
     } else if(record_header$message_type == "data") {
       
       message <- readMessage.data(con, defs[[ lmt ]])
-      data[[ as.character(i) ]] <- rbind(data[[ as.character(i) ]], message$message)
+      data[[ as.character(plmt) ]][[ data_counter[[ as.character(plmt) ]] ]] <- message$message
+      data_counter[[ as.character(plmt) ]] <- data_counter[[ as.character(plmt) ]]+1
       
     } else {
       stop("unknown message type")
     }
     bytesRead <- bytesRead + message$bytesRead + 1
-##    cat(i, "\t", bytesRead, "\n")
   }
-  
-  ## for now, lets just return the 'record' table
-  #lmt_record <- (filter(messageTable, gmn == 20) %>% 
-  #  select(lmt))[[1]]
-  
+
   return(data)
 }
 
