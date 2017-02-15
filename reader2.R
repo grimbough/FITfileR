@@ -31,7 +31,7 @@ readFile_withScaffold <- function(fileName, scaffold, message_defs) {
     } else if(record_header$message_type == "data") {
       
       defIdx <- pseudoMessageTab[ max(which(pseudoMessageTab[,1] == lmt)), 2]
-      message <- readMessage.data(con, defs[[ defIdx ]])
+      message <- readMessage.data(con, message_defs[[ defIdx ]])
       currentRow <- defs_count[[ defIdx ]]
       scaffold[[ defIdx ]][ currentRow , ] <- message$message
       defs_count[[ defIdx ]] <- defs_count[[ defIdx ]] + 1
@@ -51,13 +51,28 @@ renameWithGlobalNumbers <- function(scaffold, defs) {
   result <- vector("list", length = length(unique(globalMessageNum)))
   
   for(i in seq_along(result)) {
-    gmn <- unique(gloablMessageNum)[i]
+    gmn <- unique(globalMessageNum)[i]
     idx <- which(globalMessageNum == gmn)
     result[[ i ]] <- bind_rows(scaffold[idx])
-    value_name <- filter(global_message_table, key == gmn) %>% 
+    value_name <- filter(key_value.global_message, key == gmn) %>% 
       select(value) %>% 
       as.character()
     names(result)[i] <- value_name
   }
   return(result)
+}
+
+processMessageType <- function(obj, name) {
+  
+  obj = jo
+  name = "record"
+  
+  kv.table <- eval(parse(text = paste0("key_value.", name)))
+  current <- obj[[ name ]]
+  idx <- match(names(current), kv.table[['key']])
+  names(current) <- kv.table[['value']][idx]
+
+  obj[[ name ]] <- current
+  return(obj)
+  
 }

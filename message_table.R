@@ -1,4 +1,9 @@
-value <- c("file_id","capabilities","device_settings","user_profile","hrm_profile",
+key_value.global_message <- data_frame(
+  key = c(0,1,2,3,4,5,6,7,8,9,10,12,15,18,19,20,21,23,26,27,28,30,31,32,33,
+           34,35,37,38,39,49,51,53,55,72,78,80,81,82,101,103,105,106,127,128,
+           129,131,132,142,145,148,149,150,151,159,160,161,162,164,165,167,169,
+           174,177,178,184,185,186,187,188,200,201,202,206,207,208),
+  value = c("file_id","capabilities","device_settings","user_profile","hrm_profile",
            "sdm_profile","bike_profile","zones_target","hr_zone","power_zone","met_zone",
            "sport","goal","session","lap","record","event","device_info","workout",
            "workout_step","schedule","weight_scale","course","course_point","totals",
@@ -14,10 +19,24 @@ value <- c("file_id","capabilities","device_settings","user_profile","hrm_profil
            "aviation_attitude","video","video_title","video_description","video_clip",
            "ohr_settings","exd_screen_configuration","exd_data_field_configuration",
            "exd_data_concept_configuration","field_description","developer_data_id",
-           "magnetometer_data")
-key <- c(0,1,2,3,4,5,6,7,8,9,10,12,15,18,19,20,21,23,26,27,28,30,31,32,33,
-         34,35,37,38,39,49,51,53,55,72,78,80,81,82,101,103,105,106,127,128,
-         129,131,132,142,145,148,149,150,151,159,160,161,162,164,165,167,169,
-         174,177,178,184,185,186,187,188,200,201,202,206,207,208)
+           "magnetometer_data"))
 
-global_message_table <- data_frame(key, value)
+
+key_value.record <- data_frame(
+  key = c(253,0,1,2,3,4,5,6,7,8,9,10,11,12,13,17,18,19,28,29,30,31,32,33,
+          39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,62,67,68,
+          69,70,71,72,73,78,81,82,83,84,85),
+  value = c("timestamp","position_lat","position_long","altitude","heart_rate",
+            "cadence","distance","speed","power","compressed_speed_distance","grade",
+            "resistance","time_from_course","cycle_length","temperature","speed_1s",
+            "cycles","total_cycles","compressed_accumulated_power","accumulated_power",
+            "left_right_balance","gps_accuracy","vertical_speed","calories",
+            "vertical_oscillation","stance_time_percent","stance_time","activity_type",
+            "left_torque_effectiveness","right_torque_effectiveness","left_pedal_smoothness",
+            "right_pedal_smoothness","combined_pedal_smoothness","time128","stroke_type","zone",
+            "ball_speed","cadence256","fractional_cadence","total_hemoglobin_conc",
+            "total_hemoglobin_conc_min","total_hemoglobin_conc_max","saturated_hemoglobin_percent",
+            "saturated_hemoglobin_percent_min","saturated_hemoglobin_percent_max","device_index",
+            "left_pco","right_pco","left_power_phase","left_power_phase_peak","right_power_phase",
+            "right_power_phase_peak","enhanced_speed","enhanced_altitude","battery_soc","motor_power",
+            "vertical_ratio","stance_time_balance","step_length"))
