@@ -76,19 +76,19 @@ readMessage.definition <- function(con, devFields = FALSE) {
 }
 
 data_type_lookup <- list(
-  '00' = c('raw', FALSE, 1L, 1),
+  '00' = c('integer', FALSE, 1L, 1), ## was original raw, but plyr doesn't like it!
   '01' = c('integer', TRUE, 1L, 1),
   '02' = c('integer', FALSE, 1L, 1),
   '83' = c('integer', TRUE, 2L, 1),
   '84' = c('integer', FALSE, 2L, 1),
   '85' = c('integer', TRUE, 4L, 1),
-  '86' = c('raw', TRUE, 1L, 4), ## this hould be unsigned int32
+  '86' = c('raw', TRUE, 1L, 4), ## this should be unsigned int32
   '07' = c('character', TRUE, 1L, 1),
   '88' = c('numeric', TRUE, 4L, 1),
   '89' = c('numeric', TRUE, 8L, 1),
   '0a' = c('integer', FALSE, 1L, 1),
   '8b' = c('integer', FALSE, 2L, 1),
-  '8c' = c('raw', TRUE, 1L, 4)  ## this hould be unsigned int32
+  '8c' = c('raw', TRUE, 1L, 4)  ## this should be unsigned int32
 )
 
 readMessage.data <- function(con, definition) {
