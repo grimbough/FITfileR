@@ -1,15 +1,12 @@
-#source("~/projects/fitR/reader.R")
-
-scanMessage.data <- function(con, definition) {
+#' @import tibble
+.scanMessage.data <- function(con, definition) {
   
   fieldTypes <- definition$field_definition$base_type
   
   ##if we have character data we have to treat it a little differently
-  ## since we don't know the length of the string.  Otherwise just calc
-  ## how many bytes we're going to use
+  ## since we don't know the length of the string.
   if('07' %in% fieldTypes) {
     totalBytesRead <- 0
-    
     message <- list()
     for(i in 1:length(fieldTypes)) {
       readInfo <- data_type_lookup[[ fieldTypes[i] ]]
@@ -24,6 +21,7 @@ scanMessage.data <- function(con, definition) {
       }
       totalBytesRead <- totalBytesRead + bytesRead 
     }
+  ## if there aren't any strings we can just calc how many bytes we need
   } else {
     dataTable <- do.call("rbind", data_type_lookup[ fieldTypes ])
     bytesRead <- sum(as.integer(dataTable[,3]) * as.integer(dataTable[,4]))
@@ -34,66 +32,61 @@ scanMessage.data <- function(con, definition) {
 }
 
 
-scanFile <- function(fileName) {
+.scanFile <- function(fileName) {
   
   con <- file(fileName, "rb")
   on.exit(close(con))
-  file_header <- readHeader(con)
   
   plmt <- "-1";
   pseudoMessageTab <- NULL
   prev_lmt <- "0"
   defs <- list()
   defs_count <- list()
-  
-  bytesRead <- 0
+
+  file_header <- .readFileHeader(con)
   
   ## read some records
-  #for(j in 1:2000) {
   while(seek(con, where = NA) < (file_header$data_size + 14)) {
     
-    record_header <- readRecordHeader(con)
+    record_header <- .readRecordHeader(con)
     lmt <- as.character(record_header$local_message_type)
     if(record_header$message_type == "definition") {
-      cat(lmt, "\t")
+
       if(lmt == prev_lmt) {
         plmt <- as.character(as.integer(plmt) + 1)
-       # defs[[ plmt ]] <- defs[[ as.character(prev_lmt) ]]
       } else {
         plmt <- lmt
       }
       pseudoMessageTab <- rbind(pseudoMessageTab, c(lmt, plmt))
       prev_lmt <- lmt
       
-      message <- readMessage.definition(con, devFields = record_header$developer_data)
+      message <- .readMessage.definition(con, devFields = record_header$developer_data)
       defs[[ plmt ]] <- message$message
       defs_count[[ plmt ]] <- 0
-      
-      cat(plmt, "\t", defs[[ as.character(lmt) ]]$global_message_num, "\n")
-      
+
     } else if(record_header$message_type == "data") {
       
       defIdx <- pseudoMessageTab[ max(which(pseudoMessageTab[,1] == lmt)), 2]
-      message <- scanMessage.data(con, defs[[ defIdx ]])
+      message <- .scanMessage.data(con, defs[[ defIdx ]])
       defs_count[[ defIdx ]] <- defs_count[[ defIdx ]] + 1
       
     } else {
       stop("unknown message type")
     }
-    #bytesRead <- bytesRead + message$bytesRead + 1
   }
   
   return(list(defs, defs_count))
 }
 
-buildMessageStructure <- function(defs, defs_count) {
+.buildMessageStructure <- function(defs, defs_count) {
   
   scaffold <- list()
     for(i in 1:length(defs)) {
-      message(i)
+
       fieldTypes <- defs[[i]]$field_definition$base_type
       dataTypes <- do.call("rbind", data_type_lookup[ fieldTypes ])[,1]
       
+      ## unsigned ints will be stored as numerics in our object
       if(any(names(dataTypes) %in% c('86', '8c'))) {
         idx <- which(names(dataTypes) %in% c('86', '8c'))
         dataTypes[idx] <- "numeric"

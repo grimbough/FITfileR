@@ -1,0 +1,10 @@
+Package: fitFileR
+Version: 0.0.1
+Title: 
+Author: Mike Smith <grimbough@gmail.com>
+Maintainer: Mike Smith <grimbough@gmail.com>
+VignetteBuilder: knitr
+Description:
+License: Artistic-2.0
+LazyLoad: yes
+RoxygenNote: 6.0.1
