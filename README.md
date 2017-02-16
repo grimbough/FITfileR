@@ -1,4 +1,4 @@
-# fitR
+# fitFileR
 
 An experimental package to read .fit files produced by fitness tracking devices 
 like Garmin Edge cycle computers or sports watches.  Other R packagesfor this task already exist,
