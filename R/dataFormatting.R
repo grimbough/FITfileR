@@ -1,19 +1,33 @@
+## Given the populated list of data, and the list of message definitions,
+## looks up the plain text name of each message type associated with the
+## global message number. Drops any that can't be identified.
+## Also merges entries with the same message number but different defintions.
 .renameMessages <- function(scaffold, defs) {
   
   ## load the appropriate key/value table
-  data("key_value.global_message", 
+  data("fit_global_messages", 
        package = "fitFileR", 
-       envir = parent.frame())
+       envir = environment())
   
   globalMessageNum <- sapply(defs, function(x) { x$global_message_num } )
   
-  result <- vector("list", length = length(unique(globalMessageNum)))
+  ## we are going to remove any entries that have a global message number
+  ## we can't identify from the SDK.  (Edge 500 has message 22 a lot).
+  rm_idx <- which(!globalMessageNum %in% fit_global_messages[['key']])
+  if(length(rm_idx)) {
+    scaffold <- scaffold[ -rm_idx ]
+    globalMessageNum <- globalMessageNum[ -rm_idx ]
+  }
   
+  ## Merge entries with the same global message number, but are separate.
+  ## This arises when a few records are written with different columns 
+  ## e.g. before a cadence or hr sensor is detected. We NA missing values.
+  result <- vector("list", length = length(unique(globalMessageNum)))
   for(i in seq_along(result)) {
     gmn <- unique(globalMessageNum)[i]
     idx <- which(globalMessageNum == gmn)
     result[[ i ]] <- bind_rows(scaffold[idx])
-    value_name <- filter(key_value.global_message, key == gmn) %>% 
+    value_name <- filter(fit_global_messages, key == gmn) %>% 
       select(value) %>% 
       as.character()
     names(result)[i] <- value_name
@@ -24,16 +38,59 @@
 .processMessageType <- function(obj, name) {
   
   ## load the appropriate key/value table
-  data(paste0("key_value.", name), 
+  data("fit_message_types", 
        package = "fitFileR", 
-       envir = parent.frame())
+       envir = environment())
   
-  kv.table <- eval(parse(text = paste0("key_value.", name)))
-  current <- obj[[ name ]]
-  idx <- match(names(current), kv.table[['key']])
-  names(current) <- kv.table[['value']][idx]
-  
-  obj[[ name ]] <- current
+  if(!name %in% names(fit_message_types)) {
+    warning("Renaming variables for message type '", name, "' is not currently supported")
+  } else {
+    
+    message.table <- fit_message_types[[ name ]]
+    current <- obj[[ name ]]
+    
+    idx <- match(names(current), message.table[['key']])
+    names(current) <- message.table[['value']][idx]
+    
+    for(i in seq_along(current)) {
+      current[[i]] <- .fixDataType(values = current[[i]],
+                                   type = message.table[['type']][ idx[i] ])
+    }
+    obj[[ name ]] <- current
+  }
+
   return(obj)
-  
 }
+
+.fixDataType <- function(values, type) {
+  
+  if(grepl(pattern = "date_time", x = type)) {
+    values <- .adjustTimeStamp(values)
+  } else {
+    values <- .getFromDataTypeFactor(values, type)
+  }
+  return(values)
+}
+
+.adjustTimeStamp <- function(values) {
+  as.POSIXct(values, origin = "1989-12-31")  
+}
+
+.getFromDataTypeFactor <- function(values, type) {
+  
+  ## for 'non-standard' units, see if we have them stored and 
+  ## replace if we can
+  data("fit_data_types", 
+       package = "fitFileR", 
+       envir = environment())
+  
+  enum <- fit_data_types[[ as.character(type) ]]
+  if(!is.null(enum) && is.integer(values)) {
+    ## we add one as C is 0-bases and R isn't
+    idx <- match(values, enum[['key']])
+    values <- enum[['value']][ idx ]
+  }
+  return(values)
+}
+
+
