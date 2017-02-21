@@ -27,3 +27,4 @@
 #             "stop_disable","stop_disable_all"))
 # 
 # save(fit_data_types, file = "~/Code/Fit_files/fitFileR/data/fit_data_types.rda", compress = TRUE)
+
