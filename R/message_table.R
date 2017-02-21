@@ -171,3 +171,17 @@
 # 
 # save(fit_message_types, file = "~/Code/Fit_files/fitFileR/data/fit_message_types.rda", compress = TRUE)
 # 
+
+# library(openxlsx)
+# t2 <- read.xlsx('~/projects/fit_files/Profile_gsheets.xlsx', sheet = 2)
+# rm.idx <- which(is.na(t2[,1]) & is.na(t2[,2]) & is.na(t2[,3]))
+# t3 <- t2[-rm.idx,1:4]
+# names(t3) <- c("message_type", "key", "value", "type")
+# t3[,'type'] <- as.factor(t3[,'type'])
+# 
+# idx <- which(!is.na(t3[,1]))
+# t3[,1] <- rep(t3[idx,1], 
+#               diff(c(idx, nrow(t3)+1)))
+# t3 <- as_data_frame(t3[-which(is.na(t3[,2])),])
+# 
+# message_list <- split(t3[,2:4], t3[[1]])
