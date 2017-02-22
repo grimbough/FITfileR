@@ -1,6 +1,6 @@
 
 #' @export
-readFitFile <- function(fileName) {
+readFitFile <- function(fileName, dropUnknown = TRUE) {
   
   data("data_type_lookup", package = "fitFileR", envir = parent.frame())
   
@@ -10,6 +10,10 @@ readFitFile <- function(fileName) {
   scaffold <- .buildMessageStructure(scan_result[[1]], scan_result[[2]])
   all_records <- .readFileWithScaffold(fileName, scaffold = scaffold, message_defs = scan_result[[1]])
   all_records <- .renameMessages(all_records, scan_result[[1]])
+  
+  for(i in names(all_records)) {
+    all_records <- .processMessageType(all_records, name = i, drop = dropUnknown)
+  }
   
   return(all_records)
 }
