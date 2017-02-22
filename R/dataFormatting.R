@@ -35,7 +35,7 @@
   return(result)
 }
 
-.processMessageType <- function(obj, name) {
+.processMessageType <- function(obj, name, drop = TRUE) {
   
   ## load the appropriate key/value table
   data("fit_message_types", 
@@ -50,7 +50,18 @@
     current <- obj[[ name ]]
     
     idx <- match(names(current), message.table[['key']])
-    names(current) <- message.table[['value']][idx]
+    if(any(is.na(idx))) {
+      if(drop) {
+        current <- current[,-which(is.na(idx))]
+        idx <- idx[-which(is.na(idx))]
+        names(current) <- message.table[['value']][idx]
+      } else {
+        names(current)[which(!is.na(idx))] <- message.table[['value']][idx[which(!is.na(idx))]]
+      }
+    } else { ## TODO:  come back and tidy this logic up later
+      names(current)[which(!is.na(idx))] <- message.table[['value']][idx[which(!is.na(idx))]]
+    }
+    
     
     for(i in seq_along(current)) {
       current[[i]] <- .fixDataType(values = current[[i]],
@@ -86,7 +97,6 @@
   
   enum <- fit_data_types[[ as.character(type) ]]
   if(!is.null(enum) && is.integer(values)) {
-    ## we add one as C is 0-bases and R isn't
     idx <- match(values, enum[['key']])
     values <- enum[['value']][ idx ]
   }
