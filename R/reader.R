@@ -8,8 +8,8 @@ readFitFile <- function(fileName, dropUnknown = TRUE) {
   scan_result <- .scanFile(fileName)
   ## create a scaffold to fit the data in
   scaffold <- .buildMessageStructure(scan_result[[1]], scan_result[[2]])
-  #all_records <- .readFileWithScaffold(fileName, scaffold = scaffold, message_defs = scan_result[[1]])
-  all_records <- .readFileWithScaffold2(fileName, scaffold = scaffold, message_defs = scan_result[[1]])
+  all_records <- .readFileWithScaffold(fileName, scaffold = scaffold, message_defs = scan_result[[1]])
+  #all_records <- .readFileWithScaffold2(fileName, scaffold = scaffold, message_defs = scan_result[[1]])
   all_records <- .renameMessages(all_records, scan_result[[1]])
   
   for(i in names(all_records)) {

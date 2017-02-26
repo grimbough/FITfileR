@@ -5,7 +5,7 @@
 .renameMessages <- function(scaffold, defs) {
   
   ## load the appropriate key/value table
-  data("fit_global_messages", 
+  data("fit_data_types", 
        package = "fitFileR", 
        envir = environment())
   
@@ -13,7 +13,7 @@
   
   ## we are going to remove any entries that have a global message number
   ## we can't identify from the SDK.  (Edge 500 has message 22 a lot).
-  rm_idx <- which(!globalMessageNum %in% fit_global_messages[['key']])
+  rm_idx <- which(!globalMessageNum %in% fit_data_types$mesg_num[['key']])
   if(length(rm_idx)) {
     scaffold <- scaffold[ -rm_idx ]
     globalMessageNum <- globalMessageNum[ -rm_idx ]
@@ -27,7 +27,7 @@
     gmn <- unique(globalMessageNum)[i]
     idx <- which(globalMessageNum == gmn)
     result[[ i ]] <- bind_rows(scaffold[idx])
-    value_name <- filter(fit_global_messages, key == gmn) %>% 
+    value_name <- filter(fit_data_types$mesg_num, key == gmn) %>% 
       select(value) %>% 
       as.character()
     names(result)[i] <- value_name
@@ -62,7 +62,6 @@
       names(current)[which(!is.na(idx))] <- message.table[['value']][idx[which(!is.na(idx))]]
     }
     
-    
     for(i in seq_along(current)) {
       current[[i]] <- .fixDataType(values = current[[i]],
                                    type = message.table[['type']][ idx[i] ])
@@ -73,6 +72,10 @@
   return(obj)
 }
 
+## lots of fields store numeric references to a value in a factor
+## this function takes the name of the appropriate data type
+## and checks whether it is a time stamp, or we should test
+## whether it comes from a factor data type.
 .fixDataType <- function(values, type) {
   
   if(grepl(pattern = "date_time", x = type)) {
@@ -83,6 +86,8 @@
   return(values)
 }
 
+## fit time stamps are from 31st December 1989
+## this function transforms them into data/times
 .adjustTimeStamp <- function(values) {
   as.POSIXct(values, origin = "1989-12-31")  
 }
