@@ -47,7 +47,8 @@ message_list <- split(t3[,2:4], t3[[1]])
 
 ```{r, eval = FALSE}
 library(tibble)
-t1 <- read.xlsx('~/projects/fit_files/Profile_gsheets.xlsx', sheet = 1)[,c(1,4,3,2)]
+library(dplyr)
+t1 <- read.xlsx(system.file("extdata/Profile_gsheets.xlsx", package = "fitFileR"), sheet = 1)[,c(1,4,3,2)]
 t1 <- setNames(t1, c("data_type", "key", "value", "key_type"))
 idx <- which(!is.na(t1[,1]))
 t1[,1] <- rep(t1[idx,1], 
@@ -62,7 +63,6 @@ fit_data_types <- lapply(fit_data_types, FUN = function(x) {
                          no = as.integer(key))) %>%
     select(-key_type)
 })
-save(fit_data_types, file = '~/projects/fit_files/fitFileR/data/fit_data_types.rda')
 ```
 
 
