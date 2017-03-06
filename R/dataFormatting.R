@@ -66,6 +66,7 @@
       current[[i]] <- .fixDataType(values = current[[i]],
                                    type = message.table[['type']][ idx[i] ])
     }
+    current <- .fixGarminProducts(current)
     obj[[ name ]] <- current
   }
 
@@ -108,4 +109,14 @@
   return(values)
 }
 
+.fixGarminProducts <- function(message) {
+  if(("manufacturer" %in% names(message)) && ("product" %in% names(message))) {
+    garmin_idx <- which(message$manufacturer == "garmin")
+    if(length(garmin_idx)) {
+      message$product[garmin_idx] <- .getFromDataTypeFactor(values = message$product[garmin_idx], 
+                                                            type = "garmin_product")
+    }
+  }
+  return(message)
+}
 
