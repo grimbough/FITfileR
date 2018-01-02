@@ -1,0 +1,38 @@
+
+# Generating internal lists of data types and messages
+
+```{r, eval = FALSE}
+library(openxlsx)
+t2 <- read.xlsx(system.file("extdata/Profile_gsheets.xlsx", package = "fitFileR"), sheet = 2)
+rm.idx <- which(is.na(t2[,1]) & is.na(t2[,2]) & is.na(t2[,3]))
+t3 <- t2[-rm.idx,1:4]
+names(t3) <- c("message_type", "key", "value", "type")
+t3[,'type'] <- as.factor(t3[,'type'])
+
+idx <- which(!is.na(t3[,1]))
+t3[,1] <- rep(t3[idx,1], 
+                diff(c(idx, nrow(t3)+1)))
+t3 <- as_data_frame(t3[-which(is.na(t3[,2])),])
+
+message_list <- split(t3[,2:4], t3[[1]])
+```
+
+```{r, eval = FALSE}
+library(tibble)
+library(dplyr)
+t1 <- read.xlsx(system.file("extdata/Profile_gsheets.xlsx", package = "fitFileR"), sheet = 1)[,c(1,4,3,2)]
+t1 <- setNames(t1, c("data_type", "key", "value", "key_type"))
+idx <- which(!is.na(t1[,1]))
+t1[,1] <- rep(t1[idx,1], 
+              diff(c(idx, nrow(t1)+1)))
+t1[,4] <- rep(t1[idx,4], 
+              diff(c(idx, nrow(t1)+1)))
+t1 <- as_data_frame(t1[-which(is.na(t1[,2])),])
+fit_data_types <- split(t1[,2:4], t1[[1]])
+fit_data_types <- lapply(fit_data_types, FUN = function(x) {
+  mutate(x, key = ifelse(grepl('uint32', key_type), 
+                         yes = as.numeric(key), 
+                         no = as.integer(key))) %>%
+    select(-key_type)
+})
+```
