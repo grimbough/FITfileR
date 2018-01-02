@@ -12,6 +12,8 @@ knitr::opts_chunk$set(echo = TRUE)
 library(fitFileR)
 ```
 
+# Reading files
+
 ## Example fit files
 
 The package comes with two example fit files, recorded during a ride in early 2017.  They are of the same ride and record the same rider, but the data logging was carried out on two different devices: a Garmin Edge 500 and a TomTom Runner 3.  
@@ -21,48 +23,61 @@ garmin_file <- system.file("extdata/Garmin.fit", package = "fitFileR")
 tomtom_file <- system.file("extdata/TomTom.fit", package = "fitFileR")
 ```
 
+## Reading
+
+We read files using the function `readFitFile()`.
+
 ```{r reading_files}
 garmin <- readFitFile(garmin_file)
 tomtom <- readFitFile(tomtom_file)
 ```
 
+The resulting object is a `list` of `tibbles` containing all the data stored in the fit file.
 
-# Generating internal lists of data types and messages
-
-```{r, eval = FALSE}
-library(openxlsx)
-t2 <- read.xlsx('~/projects/fit_files/Profile_gsheets.xlsx', sheet = 2)
-rm.idx <- which(is.na(t2[,1]) & is.na(t2[,2]) & is.na(t2[,3]))
-t3 <- t2[-rm.idx,1:4]
-names(t3) <- c("message_type", "key", "value", "type")
-t3[,'type'] <- as.factor(t3[,'type'])
-
-idx <- which(!is.na(t3[,1]))
-t3[,1] <- rep(t3[idx,1], 
-                diff(c(idx, nrow(t3)+1)))
-t3 <- as_data_frame(t3[-which(is.na(t3[,2])),])
-
-message_list <- split(t3[,2:4], t3[[1]])
+```{r exploring_list}
+names(garmin)
 ```
 
-```{r, eval = FALSE}
-library(tibble)
-library(dplyr)
-t1 <- read.xlsx(system.file("extdata/Profile_gsheets.xlsx", package = "fitFileR"), sheet = 1)[,c(1,4,3,2)]
-t1 <- setNames(t1, c("data_type", "key", "value", "key_type"))
-idx <- which(!is.na(t1[,1]))
-t1[,1] <- rep(t1[idx,1], 
-              diff(c(idx, nrow(t1)+1)))
-t1[,4] <- rep(t1[idx,4], 
-              diff(c(idx, nrow(t1)+1)))
-t1 <- as_data_frame(t1[-which(is.na(t1[,2])),])
-fit_data_types <- split(t1[,2:4], t1[[1]])
-fit_data_types <- lapply(fit_data_types, FUN = function(x) {
-  mutate(x, key = ifelse(grepl('uint32', key_type), 
-                         yes = as.numeric(key), 
-                         no = as.integer(key))) %>%
-    select(-key_type)
-})
+# Working with the data
+
+The data most often wanted from a fit file are the values such as location, speed, altitude, etc recorded during an activity.  These can be found in the `record` entry in the list.  Here's the first few rows from our TomTom file:
+
+```{r print_record}
+tomtom$record
 ```
 
+## Plotting a route
 
+Before we can plot locations need to process the values held in the fit file into longitude and latitude.  First, we remove any entries recorded when satelite reception was lost; these have a value of `2^31-1` in this file, but appear as `NA` in the data from the Garmin so we remove both.  We then convert to longitude and latitude coordinates.
+
+```{r process_coords}
+
+coords <- cbind(tomtom$record$position_long, tomtom$record$position_lat)
+coords <- coords[ apply(coords, 1, function(x) { !any(is.na(x) || x == 2^31-1) }), ]
+coords <- coords * (180 / (2^31))
+```
+
+We can now use the **leaflet** package to create an interactive map, with our route overlayed on top.
+
+```{r mapping}
+library(leaflet)
+
+m <- leaflet( coords ) %>%
+     addTiles() %>%
+     addPolylines( )
+    
+m
+```
+
+## Comparing heart rates
+
+```{r plot_hr}
+ggplot() + 
+    geom_line(data = garmin$record, aes(x = timestamp, y = heart_rate), col = "blue") + 
+    geom_line(data = tomtom$record, aes(x = timestamp, y = heart_rate), col = "red")
+
+ggplot() + 
+    geom_line(data = garmin$record, aes(x = timestamp, y = heart_rate), col = "blue") + 
+    geom_line(data = dplyr::filter(tomtom$record, heart_rate != 255), 
+              aes(x = timestamp, y = heart_rate), col = "red")
+```

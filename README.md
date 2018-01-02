@@ -16,6 +16,7 @@ devtools::install_github("grimbough/fitFileR")
 # Reading Data
 
 ```{r readingData}
+library(fitFileR)
 garmin_file <- system.file("extdata/Garmin.fit", package = "fitFileR")
 garmin <- readFitFile(garmin_file)
 ```
