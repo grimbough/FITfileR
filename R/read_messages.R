@@ -58,8 +58,8 @@
     }
     
   }
-  names(message) <- definition$field_definition$field_def_num
-  message <- as_data_frame(message)
+
+  message <- as.data.frame(message, col.names = definition$field_definition$field_def_num)
   return(list(message = message,
               bytesRead = bytesRead))
 }
