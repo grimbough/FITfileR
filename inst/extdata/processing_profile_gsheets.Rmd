@@ -1,36 +1,49 @@
 
 # Generating internal lists of data types and messages
 
-```{r, eval = FALSE}
-library(openxlsx)
-t2 <- read.xlsx(system.file("extdata/Profile_gsheets.xlsx", package = "fitFileR"), sheet = 2)
-rm.idx <- which(is.na(t2[,1]) & is.na(t2[,2]) & is.na(t2[,3]))
-t3 <- t2[-rm.idx,1:4]
-names(t3) <- c("message_type", "key", "value", "type")
-t3[,'type'] <- as.factor(t3[,'type'])
+Many of the data points in a FIT file are integers that correspond to specific values a variety of enum types.  These are defined in the file `Profile.xlsx`, which is included in the FIT SDK.  In order to convert these into their intended values when reading a FIT file I have included the contents of this file as two `lists` saved in .rda files.  The code below details how these two objects were creates.
 
-idx <- which(!is.na(t3[,1]))
-t3[,1] <- rep(t3[idx,1], 
-                diff(c(idx, nrow(t3)+1)))
-t3 <- as_data_frame(t3[-which(is.na(t3[,2])),])
+*Note: For some reason I am unable to read the original version of `Profile.xlsx` in any of the R/Excel packages I tried.  Instead, I uploaded the file to Google Sheets, converted it to that format, and then downloaded it again as a `.xlsx`.  This version is included in the package as `Profile_gsheets.xlsx`*
 
-message_list <- split(t3[,2:4], t3[[1]])
-```
-
-```{r, eval = FALSE}
+```{r, eval= FALSE}
 library(tibble)
 library(dplyr)
-t1 <- read.xlsx(system.file("extdata/Profile_gsheets.xlsx", package = "fitFileR"), sheet = 1)[,c(1,4,3,2)]
-t1 <- setNames(t1, c("data_type", "key", "value", "key_type"))
-idx <- which(!is.na(t1[,1]))
-t1[,1] <- rep(t1[idx,1], 
-              diff(c(idx, nrow(t1)+1)))
-t1[,4] <- rep(t1[idx,4], 
-              diff(c(idx, nrow(t1)+1)))
-t1 <- as_data_frame(t1[-which(is.na(t1[,2])),])
-fit_data_types <- split(t1[,2:4], t1[[1]])
+library(openxlsx)
+```
+
+Here we read the message definitions:
+
+```{r, eval = FALSE}
+messages <- read.xlsx(system.file("extdata/Profile_gsheets.xlsx", package = "fitFileR"), 
+                      sheet = 2)
+rm.idx <- which(is.na(messages[,1]) & is.na(messages[,2]) & is.na(messages[,3]))
+messages <- messages[-rm.idx,1:4]
+names(messages) <- c("message_type", "key", "value", "type")
+messages[,'type'] <- as.factor(messages[,'type'])
+
+idx <- which(!is.na(messages[,1]))
+messages[,1] <- rep(messages[idx,1], 
+                diff(c(idx, nrow(messages)+1)))
+messages <- as_data_frame(messages[-which(is.na(messages[,2])),])
+
+fit_message_types <- split(messages[,2:4], messages[[1]])
+```
+
+Here we read the data type definitions:
+
+```{r, eval = FALSE}
+data_types <- read.xlsx(system.file("extdata/Profile_gsheets.xlsx", package = "fitFileR"), 
+                             sheet = 1)[,c(1,4,3,2)]
+data_types <- setNames(data_types, c("data_type", "key", "value", "key_type"))
+idx <- which(!is.na(data_types[,1]))
+data_types[,1] <- rep(data_types[idx,1], 
+              diff(c(idx, nrow(data_types)+1)))
+data_types[,4] <- rep(data_types[idx,4], 
+              diff(c(idx, nrow(data_types)+1)))
+data_types <- as_data_frame(data_types[-which(is.na(data_types[,2])),])
+fit_data_types <- split(data_types[,2:4], data_types[[1]])
 fit_data_types <- lapply(fit_data_types, FUN = function(x) {
-  mutate(x, key = ifelse(grepl('uint32', key_type), 
+    mutate(x, key = ifelse(grepl('uint32', key_type), 
                          yes = as.numeric(key), 
                          no = as.integer(key))) %>%
     select(-key_type)
