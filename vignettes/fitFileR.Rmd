@@ -16,7 +16,7 @@ library(fitFileR)
 
 ## Example fit files
 
-The package comes with two example fit files, recorded during a ride in early 2017.  They are of the same ride and record the same rider, but the data logging was carried out on two different devices: a Garmin Edge 500 and a TomTom Runner 3.  
+The package comes with two example fit files, recorded during a ride in early 2017.  They are of the same ride and record the same rider, but the data logging was carried out on two different devices: a Garmin Edge 500 and a TomTom Runner 3.  The files can be found in the `extdata` folder of the package, and identified on your system using the following code. 
 
 ```{r data_files}
 garmin_file <- system.file("extdata/Garmin.fit", package = "fitFileR")
