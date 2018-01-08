@@ -1,7 +1,7 @@
 #' @import tibble
 .scanMessage.data <- function(con, definition) {
   
-  fieldTypes <- definition$field_definition$base_type
+  fieldTypes <- definition[['field_definition']][['base_type']]
   
   ##if we have character data we have to treat it a little differently
   ## since we don't know the length of the string.
@@ -97,11 +97,37 @@
       structure <- sapply(paste0(dataTypes, "(", nMessages, ")"), 
                           function(x) eval(parse(text = x)),
                           simplify = FALSE, USE.NAMES = FALSE)
-      structure <- as_data_frame(structure, validate = FALSE) %>%
+      structure <- as.data.frame(structure, validate = FALSE) %>%
         setNames(defs[[i]]$field_definition$field_def_num)
       scaffold[[ names(defs)[i] ]] <- structure
     }
   return(scaffold)
+}
+
+## list of lists, rather than list of data.frames
+.buildMessageStructure2 <- function(defs, defs_count) {
+    
+    scaffold <- list()
+    for(i in 1:length(defs)) {
+        
+        fieldTypes <- defs[[i]]$field_definition$base_type
+        dataTypes <- do.call("rbind", data_type_lookup[ fieldTypes ])[,1]
+        
+        ## unsigned ints will be stored as numerics in our object
+        if(any(names(dataTypes) %in% c('86', '8c'))) {
+            idx <- which(names(dataTypes) %in% c('86', '8c'))
+            dataTypes[idx] <- "numeric"
+        }
+        
+        nMessages <- defs_count[[i]]
+        
+        structure <- sapply(paste0(dataTypes, "(", nMessages, ")"), 
+                            function(x) eval(parse(text = x)),
+                            simplify = FALSE, USE.NAMES = FALSE)
+
+        scaffold[[ names(defs)[i] ]] <- structure
+    }
+    return(scaffold)
 }
 
 
