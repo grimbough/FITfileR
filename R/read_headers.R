@@ -62,6 +62,7 @@
   header <- list()
   header$type <- "compressed_timestamp"
   header$message_type <- "data"
+  header$developer_data <- FALSE
   header$local_message_type <- .binaryToInt(record_header[6:7])
   header$time_offset <- .binaryToInt(record_header[1:5])
   return(header)
