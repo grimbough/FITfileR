@@ -24,109 +24,50 @@
   if(devFields){
     ## do something with the developer fields
     ## currently not supported
+    messages$n_dev_fields <- readBin(con = con, what = "int", n = 1, size = 1)
+    message$dev_field_definition <- .processFieldDefs(
+      readBin(con = con, what = "raw", n = 3 * message$n_dev_fields, size = 1)
+    )
+    bytesRead <- 1 + (3*message$n_dev_fields)
   }
   return(list(message = message,
               bytesRead = bytesRead))
 }
 
 
-.readMessage.data <- function(con, definition) {
+.readMessage.data <- function(con, definition, compressed_timestamp = FALSE) {
   
   fieldTypes <- definition$field_definition$base_type
   
   bytesRead <- 0
   
   message <- list()
-  for(i in 1:length(fieldTypes)) {
+  for(i in seq_along(fieldTypes)) {
     readInfo <- data_type_lookup[[ fieldTypes[i] ]]
-    message[[i]] <- readBin(con, what = readInfo[[1]], signed = readInfo[[2]],
-                            size = readInfo[[3]], n = readInfo[[4]], 
-                            endian = definition$architecture)
-    bytesRead <- bytesRead + (as.integer(readInfo[[3]]) * as.integer(readInfo[[4]]))
-    #if(is.character(message[[i]])) {
-    #  bytesRead <- bytesRead + nchar(message[[i]])
-    #}
-    
-    ## if we have unsigned ints, turn the bits into a numeric
-    if(fieldTypes[i] %in% c('86', '8c')) {
-      if(definition$architecture == "little") {
-        bits <- as.logical(rawToBits(message[[i]][1:4]))
-      } else {
-        bits <- as.logical(rawToBits(message[[i]][4:1]))
+    ## if we have a compressed timestamp this is now missing
+    if(compressed_timestamp && definition$field_definition$field_def_num[i] == 253 ) {
+      message[[i]] <- 0
+    } else {
+      message[[i]] <- readBin(con, what = readInfo[[1]], signed = readInfo[[2]],
+                              size = readInfo[[3]], n = readInfo[[4]], 
+                              endian = definition$architecture)
+      bytesRead <- bytesRead + (as.integer(readInfo[[3]]) * as.integer(readInfo[[4]]))
+
+      ## if we have unsigned ints, turn the bits into a numeric
+      if(fieldTypes[i] %in% c('86', '8c')) {
+        if(definition$architecture == "little") {
+          bits <- as.logical(rawToBits(message[[i]][1:4]))
+        } else {
+          bits <- as.logical(rawToBits(message[[i]][4:1]))
+        }
+        message[[i]] <- sum(2^(.subset(0:31, bits)))
       }
-      message[[i]] <- sum(2^(.subset(0:31, bits)))
     }
-    
   }
 
-  #message <- as.data.frame(message, col.names = definition$field_definition$field_def_num)
   message <- data.frame(message)
   colnames(message) <- definition$field_definition$field_def_num
   return(list(message = message,
               bytesRead = bytesRead))
 }
 
-.readMessage.data2 <- function(con, definition, scaffold, defIdx, row) {
-  
-  fieldTypes <- definition$field_definition$base_type
-  
-  bytesRead <- 0
-  
-  #message <- list()
-  for(i in 1:length(fieldTypes)) {
-    readInfo <- data_type_lookup[[ fieldTypes[i] ]]
-    message <- readBin(con, what = readInfo[[1]], signed = readInfo[[2]],
-                            size = readInfo[[3]], n = readInfo[[4]], 
-                            endian = definition$architecture)
-    bytesRead <- bytesRead + (as.integer(readInfo[[3]]) * as.integer(readInfo[[4]]))
-    if(is.character(message)) {
-      bytesRead <- bytesRead + nchar(message)
-    }
-    
-    ## if we have unsigned ints, turn the bits into a numeric
-    if(fieldTypes[i] %in% c('86', '8c')) {
-      if(definition$architecture == "little") {
-        bits <- as.logical(rawToBits(message[1:4]))
-      } else {
-        bits <- as.logical(rawToBits(message[4:1]))
-      }
-      message <- sum(2^(.subset(0:31, bits)))
-    }
-    scaffold[[ defIdx ]][row,i] <- message
-  }
-  #names(message) <- definition$field_definition$field_def_num
-  #message <- as_data_frame(message)
-  return(scaffold)
-}
-
-
-.readMessage.data3 <- function(con, definition, scaffold, defIdx, row) {
-    
-    fieldTypes <- definition[['field_definition']][['base_type']]
-    
-    bytesRead <- 0
-    
-    #message <- list()
-    for(i in 1:length(fieldTypes)) {
-        readInfo <- data_type_lookup[[ fieldTypes[i] ]]
-        message <- readBin(con, what = readInfo[[1]], signed = readInfo[[2]],
-                           size = readInfo[[3]], n = readInfo[[4]], 
-                           endian = definition$architecture)
-        bytesRead <- bytesRead + (as.integer(readInfo[[3]]) * as.integer(readInfo[[4]]))
-        if(is.character(message)) {
-            bytesRead <- bytesRead + nchar(message)
-        }
-        
-        ## if we have unsigned ints, turn the bits into a numeric
-        if(fieldTypes[i] %in% c('86', '8c')) {
-            if(definition$architecture == "little") {
-                bits <- as.logical(rawToBits(message[1:4]))
-            } else {
-                bits <- as.logical(rawToBits(message[4:1]))
-            }
-            message <- sum(2^(.subset(0:31, bits)))
-        }
-        scaffold[[ defIdx ]][[i]][row] <- message
-    }
-    return(scaffold)
-}
