@@ -34,9 +34,11 @@ readFitFile <- function(fileName, dropUnknown = TRUE) {
         
         record_header <- .readRecordHeader(con)
         lmt <- as.character(record_header$local_message_type)
-        message(lmt)
+
         if(record_header$message_type == "definition") {
             
+          message("Def: ", lmt)
+          
             if(lmt == prev_lmt) {
                 plmt <- as.character(as.integer(plmt) + 1)
             } else {
@@ -53,8 +55,11 @@ readFitFile <- function(fileName, dropUnknown = TRUE) {
             defs_count[[ plmt ]] <- 1
             
         } else if(record_header$message_type == "data") {
+          
+          message("Data: ", lmt)
             
             if(record_header$type == "compressed_timestamp") {
+              message("Compressed")
               defIdx <- pseudoMessageTab[ max(which(pseudoMessageTab[,1] == lmt)), 2]
               message <- .readMessage.data(con, message_defs[[ defIdx ]], compressed_timestamp = TRUE)$message
               scaffold[[ defIdx ]] <- rbind(scaffold[[ defIdx ]], 
@@ -62,9 +67,9 @@ readFitFile <- function(fileName, dropUnknown = TRUE) {
             } else {
           
               defIdx <- pseudoMessageTab[ max(which(pseudoMessageTab[,1] == lmt)), 2]
+              message <- .readMessage.data(con, message_defs[[ defIdx ]], compressed_timestamp = FALSE)$message
               scaffold[[ defIdx ]] <- rbind(scaffold[[ defIdx ]], 
-                                            .readMessage.data(con, message_defs[[ defIdx ]])$message)
-            }
+                                            message) }
             
         } else {
             stop("unknown message type")
