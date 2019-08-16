@@ -39,7 +39,7 @@ readFitFile <- function(fileName, dropUnknown = TRUE) {
             
           message("Def: ", lmt)
           
-            if(lmt == prev_lmt) {
+            if(lmt %in% pseudoMessageTab[,2]) {
                 plmt <- as.character(as.integer(plmt) + 1)
             } else {
                 plmt <- lmt

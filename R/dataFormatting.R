@@ -66,6 +66,14 @@
       current[[i]] <- .fixDataType(values = current[[i]],
                                    type = message.table[['type']][ idx[i] ])
     }
+    
+    ## some values need to be divided by a scaling factor
+    scale_table <- filter(message.table, value %in% names(current), !is.na(scale))
+    for(i in seq_len(nrow(scale_table))) {
+       idx <- match(scale_table$value[i], names(current))
+       current[[ idx ]] <- current[[ idx ]] / scale_table$scale[i]
+    }
+    
     current <- .fixGarminProducts(current)
     obj[[ name ]] <- current
   }
