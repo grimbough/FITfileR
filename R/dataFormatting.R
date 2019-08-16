@@ -2,7 +2,7 @@
 ## looks up the plain text name of each message type associated with the
 ## global message number. Drops any that can't be identified.
 ## Also merges entries with the same message number but different defintions.
-.renameMessages <- function(scaffold, defs) {
+.renameMessages <- function(scaffold, defs, merge = TRUE) {
   
   ## load the appropriate key/value table
   data("fit_data_types", 
@@ -19,6 +19,7 @@
     globalMessageNum <- globalMessageNum[ -rm_idx ]
   }
   
+  if(merge) {
   ## Merge entries with the same global message number, but are separate.
   ## This arises when a few records are written with different columns 
   ## e.g. before a cadence or hr sensor is detected. We NA missing values.
@@ -33,6 +34,16 @@
     names(result)[i] <- value_name
   }
   return(result)
+  } else {
+    for(gmn in unique(globalMessageNum)) {
+      idx <- which(globalMessageNum == gmn)
+      value_names <- filter(fit_data_types$mesg_num, key == gmn) %>% 
+        select(value) %>% 
+        paste(seq_along(idx), sep = "-")
+      names(scaffold)[idx] <- value_names
+      }
+  return(scaffold)
+  }
 }
 
 .processMessageType <- function(obj, name, drop = TRUE) {
@@ -42,11 +53,14 @@
        package = "fitFileR", 
        envir = environment())
   
-  if(!name %in% names(fit_message_types)) {
+  ## strip any numbering from the message name
+  name_short <- gsub(x = name, pattern = "-[0-9]*", replacement = "")
+  
+  if(!name_short %in% names(fit_message_types)) {
     warning("Renaming variables for message type '", name, "' is not currently supported")
   } else {
     
-    message.table <- fit_message_types[[ name ]]
+    message.table <- fit_message_types[[ name_short ]]
     current <- obj[[ name ]]
     
     idx <- match(names(current), message.table[['key']])
