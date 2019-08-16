@@ -1,11 +1,11 @@
   
 #' @export
-readFitFile <- function(fileName, dropUnknown = TRUE) {
+readFitFile <- function(fileName, dropUnknown = TRUE, mergeMessages = TRUE) {
   
   data("data_type_lookup", package = "fitFileR", envir = parent.frame())
   
   tmp <- .readFile(fileName)
-  all_records <- .renameMessages(tmp[[1]], tmp[[2]])
+  all_records <- .renameMessages(tmp[[1]], tmp[[2]], merge = mergeMessages)
   
   for(i in names(all_records)) {
     all_records <- .processMessageType(all_records, name = i, drop = dropUnknown)
