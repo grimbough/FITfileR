@@ -3,7 +3,7 @@
     fields <- as.integer(fields)
     fields <- split(fields, rep(1:3, by = length(fields)/3))
     names(fields) = c('field_def_num', 'size', 'base_type')
-    fields <- as_data_frame(fields) %>%
+    fields <- as_tibble(fields) %>%
         mutate(base_type = format(as.hexmode(base_type), width = 2))
     return(fields)
 }
@@ -40,9 +40,10 @@
     
     message <- list()
     for(i in seq_along(fieldTypes)) {
-        readInfo <- data_type_lookup[[ fieldTypes[i] ]]
         
-        if(is.null(readInfo)) { stop('Something when wrong. Unknown field type') }
+        if( fieldTypes[i] %in% names(data_type_lookup) ) {
+        
+        readInfo <- data_type_lookup[[ fieldTypes[i] ]]
         
         ## a single field can have an array of values 
         single_size <- prod(as.integer(readInfo[3:4]))
@@ -60,6 +61,12 @@
                 }
                 message[[i]] <- sum(2^(.subset(0:31, bits)))
             }
+        }
+        } else {
+            ## we end up here if the datatype is not defined in the FIT spec
+            message("unknown data type")
+            readBin(con, what = "integer", size = 1, n = sizes[i])
+            message[[i]] <- 0
         }
     }
     
