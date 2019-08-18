@@ -42,26 +42,26 @@
     for(i in seq_along(fieldTypes)) {
         
         if( fieldTypes[i] %in% names(data_type_lookup) ) {
-        
-        readInfo <- data_type_lookup[[ fieldTypes[i] ]]
-        
-        ## a single field can have an array of values 
-        single_size <- prod(as.integer(readInfo[3:4]))
-        for(j in seq_len( sizes[i] %/% single_size ) ) {
-            message[[i]] <- readBin(con, what = readInfo[[1]], signed = readInfo[[2]],
-                                    size = readInfo[[3]], n = readInfo[[4]], 
-                                    endian = definition$architecture)
             
-            ## if we have unsigned ints, turn the bits into a numeric
-            if(fieldTypes[i] %in% c('86', '8c')) {
-                if(definition$architecture == "little") {
-                    bits <- as.logical(rawToBits(message[[i]][1:4]))
-                } else {
-                    bits <- as.logical(rawToBits(message[[i]][4:1]))
+            readInfo <- data_type_lookup[[ fieldTypes[i] ]]
+            
+            ## a single field can have an array of values 
+            single_size <- prod(as.integer(readInfo[3:4]))
+            for(j in seq_len( sizes[i] %/% single_size ) ) {
+                message[[i]] <- readBin(con, what = readInfo[[1]], signed = readInfo[[2]],
+                                        size = readInfo[[3]], n = readInfo[[4]], 
+                                        endian = definition$architecture)
+                
+                ## if we have unsigned ints, turn the bits into a numeric
+                if(fieldTypes[i] %in% c('86', '8c')) {
+                    if(definition$architecture == "little") {
+                        bits <- as.logical(rawToBits(message[[i]][1:4]))
+                    } else {
+                        bits <- as.logical(rawToBits(message[[i]][4:1]))
+                    }
+                    message[[i]] <- sum(2^(.subset(0:31, bits)))
                 }
-                message[[i]] <- sum(2^(.subset(0:31, bits)))
             }
-        }
         } else {
             ## we end up here if the datatype is not defined in the FIT spec
             #message("unknown data type")
@@ -71,8 +71,9 @@
     }
     
     #message <- as.data.frame(message)
-    message <- structure(message, row.names = c(NA, -1), class = "data.frame")
-    colnames(message) <- definition$field_definition$field_def_num
+    message <- structure(message, row.names = c(NA, -1), 
+                         names = definition$field_definition$field_def_num, class = "data.frame")
+    #colnames(message) <- definition$field_definition$field_def_num
     return(list(message = message))
 }
 
