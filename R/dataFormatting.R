@@ -76,6 +76,10 @@
       names(current)[which(!is.na(idx))] <- message.table[['value']][idx[which(!is.na(idx))]]
     }
     
+    data("fit_data_types", 
+         package = "fitFileR", 
+         envir = environment())
+    
     for(i in seq_along(current)) {
       current[[i]] <- .fixDataType(values = current[[i]],
                                    type = message.table[['type']][ idx[i] ])
@@ -119,10 +123,10 @@
   
   ## for 'non-standard' units, see if we have them stored and 
   ## replace if we can
-  data("fit_data_types", 
-       package = "fitFileR", 
-       envir = environment())
-  
+  # data("fit_data_types", 
+  #      package = "fitFileR", 
+  #      envir = environment())
+  # 
   enum <- fit_data_types[[ as.character(type) ]]
   if(!is.null(enum) && is.integer(values)) {
     idx <- match(values, enum[['key']])
