@@ -37,7 +37,7 @@ readFitFile <- function(fileName, dropUnknown = TRUE, mergeMessages = TRUE) {
 
         if(record_header$message_type == "definition") {
             
-          message("Def: ", lmt)
+          #message("Def: ", lmt)
           
             if(lmt %in% pseudoMessageTab[,2]) {
                 plmt <- as.character(as.integer(plmt) + 1)
@@ -56,10 +56,10 @@ readFitFile <- function(fileName, dropUnknown = TRUE, mergeMessages = TRUE) {
             
         } else if(record_header$message_type == "data") {
           
-          message("Data: ", lmt)
+          #message("Data: ", lmt)
             
             if(record_header$type == "compressed_timestamp") {
-              message("Compressed")
+             # message("Compressed")
               defIdx <- pseudoMessageTab[ max(which(pseudoMessageTab[,1] == lmt)), 2]
               message <- .readMessage.data(con, message_defs[[ defIdx ]], compressed_timestamp = TRUE)$message
               scaffold[[ defIdx ]] <- rbind(scaffold[[ defIdx ]], 
@@ -68,7 +68,7 @@ readFitFile <- function(fileName, dropUnknown = TRUE, mergeMessages = TRUE) {
           
               defIdx <- pseudoMessageTab[ max(which(pseudoMessageTab[,1] == lmt)), 2]
               message <- .readMessage.data(con, message_defs[[ defIdx ]], compressed_timestamp = FALSE)$message
-              scaffold[[ defIdx ]] <- rbind(scaffold[[ defIdx ]], 
+              scaffold[[ defIdx ]] <- dplyr::bind_rows(scaffold[[ defIdx ]], 
                                             message) }
             
         } else {

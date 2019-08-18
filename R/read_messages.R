@@ -17,7 +17,7 @@
     message$global_message_num <- readBin(con = con, what = "int", n = 1, size = 2,
                                           endian = message$architecture)
     message$n_fields <- readBin(con = con, what = "int", n = 1, size = 1)
-    message( message$n_fields )
+    #message( message$n_fields )
     message$field_definition <- .processFieldDefs(
         readBin(con = con, what = "raw", n = 3 * message$n_fields, size = 1)
     )
@@ -64,13 +64,14 @@
         }
         } else {
             ## we end up here if the datatype is not defined in the FIT spec
-            message("unknown data type")
+            #message("unknown data type")
             readBin(con, what = "integer", size = 1, n = sizes[i])
             message[[i]] <- 0
         }
     }
     
-    message <- data.frame(message)
+    #message <- as.data.frame(message)
+    message <- structure(message, row.names = c(NA, -1), class = "data.frame")
     colnames(message) <- definition$field_definition$field_def_num
     return(list(message = message))
 }
