@@ -1,5 +1,5 @@
 #' @import tibble
-.scanMessage.data <- function(con, definition) {
+.scanMessage.data <- function(con, definition, compressed_timestamp = FALSE) {
   
   fieldTypes <- definition[['field_definition']][['base_type']]
   
@@ -25,6 +25,7 @@
   } else {
     dataTable <- do.call("rbind", data_type_lookup[ fieldTypes ])
     bytesRead <- sum(as.integer(dataTable[,3]) * as.integer(dataTable[,4]))
+    if(compressed_timestamp) { bytesRead <- bytesRead-4 }
     seek(con, where = bytesRead, origin = "current")
     totalBytesRead <- bytesRead
   }
@@ -66,9 +67,18 @@
 
     } else if(record_header$message_type == "data") {
       
+      if(record_header$type == "compressed_timestamp") {
+        
+        defIdx <- pseudoMessageTab[ max(which(pseudoMessageTab[,1] == lmt)), 2]
+        message <- .scanMessage.data(con, defs[[ defIdx ]], compressed_timestamp = TRUE)
+        defs_count[[ defIdx ]] <- defs_count[[ defIdx ]] + 1
+        
+      } else {
+      
       defIdx <- pseudoMessageTab[ max(which(pseudoMessageTab[,1] == lmt)), 2]
       message <- .scanMessage.data(con, defs[[ defIdx ]])
       defs_count[[ defIdx ]] <- defs_count[[ defIdx ]] + 1
+      }
       
     } else {
       stop("unknown message type")

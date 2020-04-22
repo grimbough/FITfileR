@@ -1,18 +1,11 @@
-
+  
 #' @export
-readFitFile <- function(fileName, dropUnknown = TRUE) {
+readFitFile <- function(fileName, dropUnknown = TRUE, mergeMessages = TRUE) {
   
   data("data_type_lookup", package = "fitFileR", envir = parent.frame())
   
-  ## scan the file to find the number of each message type
-  scan_result <- .scanFile(fileName)
-  ## create a scaffold to fit the data in
-  #scaffold <- .buildMessageStructure(scan_result[[1]], scan_result[[2]])
-  scaffold <- .buildMessageStructure2(scan_result[[1]], scan_result[[2]])
-  #all_records <- .readFileWithScaffold(fileName, scaffold = scaffold, message_defs = scan_result[[1]])
-  #all_records <- .readFileWithScaffold2(fileName, scaffold = scaffold, message_defs = scan_result[[1]])
-  all_records <- .readFileWithScaffold3(fileName, scaffold = scaffold, message_defs = scan_result[[1]])
-  all_records <- .renameMessages(all_records, scan_result[[1]])
+  tmp <- .readFile(fileName)
+  all_records <- .renameMessages(tmp[[1]], tmp[[2]], merge = mergeMessages)
   
   for(i in names(all_records)) {
     all_records <- .processMessageType(all_records, name = i, drop = dropUnknown)
@@ -21,119 +14,32 @@ readFitFile <- function(fileName, dropUnknown = TRUE) {
   return(all_records)
 }
 
-## primary reading function, which extracts data from file and places
-## it into the appropriate place in an already existing scaffold
-.readFileWithScaffold <- function(fileName, scaffold, message_defs) {
-  
-  con <- file(fileName, "rb")
-  on.exit(close(con))
-  file_header <- .readFileHeader(con)
-  
-  plmt <- "-1";
-  prev_lmt <- "0"
-  defs_count <- list()
-  pseudoMessageTab <- NULL
-  
-  while(seek(con, where = NA) < (file_header$data_size + 14)) {
-    
-    record_header <- .readRecordHeader(con)
-    lmt <- as.character(record_header$local_message_type)
-    if(record_header$message_type == "definition") {
-      
-      if(lmt == prev_lmt) {
-        plmt <- as.character(as.integer(plmt) + 1)
-      } else {
-        plmt <- lmt
-      }
-      pseudoMessageTab <- rbind(pseudoMessageTab, c(lmt, plmt))
-      prev_lmt <- lmt
-      
-      ## read the message definition just to get through the bytes
-      message <- .readMessage.definition(con, devFields = record_header$developer_data)
-      
-      defs_count[[ plmt ]] <- 1
-      
-    } else if(record_header$message_type == "data") {
-      
-      defIdx <- pseudoMessageTab[ max(which(pseudoMessageTab[,1] == lmt)), 2]
-      message <- .readMessage.data(con, message_defs[[ defIdx ]])
-      currentRow <- defs_count[[ defIdx ]]
-      scaffold[[ defIdx ]][ currentRow , ] <- message$message
-      defs_count[[ defIdx ]] <- defs_count[[ defIdx ]] + 1
-      
-    } else {
-      stop("unknown message type")
-    }
-  }
-  
-  return(scaffold)
-}
-
-
-.readFileWithScaffold2 <- function(fileName, scaffold, message_defs) {
-  
-  con <- file(fileName, "rb")
-  on.exit(close(con))
-  file_header <- .readFileHeader(con)
-  
-  plmt <- "-1";
-  prev_lmt <- "0"
-  defs_count <- list()
-  pseudoMessageTab <- NULL
-  
-  while(seek(con, where = NA) < (file_header$data_size + 14)) {
-    
-    record_header <- .readRecordHeader(con)
-    lmt <- as.character(record_header$local_message_type)
-    if(record_header$message_type == "definition") {
-      
-      if(lmt == prev_lmt) {
-        plmt <- as.character(as.integer(plmt) + 1)
-      } else {
-        plmt <- lmt
-      }
-      pseudoMessageTab <- rbind(pseudoMessageTab, c(lmt, plmt))
-      prev_lmt <- lmt
-      
-      ## read the message definition just to get through the bytes
-      message <- .readMessage.definition(con, devFields = record_header$developer_data)
-      
-      defs_count[[ plmt ]] <- 1
-      
-    } else if(record_header$message_type == "data") {
-      
-      defIdx <- pseudoMessageTab[ max(which(pseudoMessageTab[,1] == lmt)), 2]
-      currentRow <- defs_count[[ defIdx ]]
-      scaffold <- .readMessage.data2(con, message_defs[[ defIdx ]],
-                                     scaffold, defIdx, currentRow)
-      defs_count[[ defIdx ]] <- defs_count[[ defIdx ]] + 1
-      
-    } else {
-      stop("unknown message type")
-    }
-  }
-  
-  return(scaffold)
-}
-
-.readFileWithScaffold3 <- function(fileName, scaffold, message_defs) {
+.readFile <- function(fileName) {
     
     con <- file(fileName, "rb")
     on.exit(close(con))
     file_header <- .readFileHeader(con)
     
-    plmt <- "-1";
+    message_defs <- list()
+    defs_idx <- 1
+    
+    plmt <- "-1"
     prev_lmt <- "0"
     defs_count <- list()
     pseudoMessageTab <- NULL
+    
+    scaffold <- list()
     
     while(seek(con, where = NA) < (file_header$data_size + 14)) {
         
         record_header <- .readRecordHeader(con)
         lmt <- as.character(record_header$local_message_type)
+
         if(record_header$message_type == "definition") {
             
-            if(lmt == prev_lmt) {
+          #message("Def: ", lmt)
+          
+            if(lmt %in% pseudoMessageTab[,2]) {
                 plmt <- as.character(as.integer(plmt) + 1)
             } else {
                 plmt <- lmt
@@ -142,17 +48,28 @@ readFitFile <- function(fileName, dropUnknown = TRUE) {
             prev_lmt <- lmt
             
             ## read the message definition just to get through the bytes
-            message <- .readMessage.definition(con, devFields = record_header$developer_data)
+            message_res <- .readMessage.definition(con, devFields = record_header$developer_data)
+            message_defs[[ plmt ]] <- message_res$message
+            defs_idx <- defs_idx + 1
             
             defs_count[[ plmt ]] <- 1
             
         } else if(record_header$message_type == "data") {
+          
+          #message("Data: ", lmt)
             
-            defIdx <- pseudoMessageTab[ max(which(pseudoMessageTab[,1] == lmt)), 2]
-            currentRow <- defs_count[[ defIdx ]]
-            scaffold <- .readMessage.data3(con, message_defs[[ defIdx ]],
-                                           scaffold, defIdx, currentRow)
-            defs_count[[ defIdx ]] <- defs_count[[ defIdx ]] + 1
+            if(record_header$type == "compressed_timestamp") {
+             # message("Compressed")
+              defIdx <- pseudoMessageTab[ max(which(pseudoMessageTab[,1] == lmt)), 2]
+              message <- .readMessage.data(con, message_defs[[ defIdx ]], compressed_timestamp = TRUE)$message
+              scaffold[[ defIdx ]] <- rbind(scaffold[[ defIdx ]], 
+                                            message)
+            } else {
+          
+              defIdx <- pseudoMessageTab[ max(which(pseudoMessageTab[,1] == lmt)), 2]
+              message <- .readMessage.data(con, message_defs[[ defIdx ]], compressed_timestamp = FALSE)$message
+              scaffold[[ defIdx ]] <- dplyr::bind_rows(scaffold[[ defIdx ]], 
+                                            message) }
             
         } else {
             stop("unknown message type")
@@ -163,12 +80,8 @@ readFitFile <- function(fileName, dropUnknown = TRUE) {
         stop("Unequal lengths")
     } 
     
-    for(i in seq_along(message_defs)) {
-        names(scaffold[[ i ]]) <- message_defs[[ i ]]$field_definition$field_def_num
-    }
+    scaffold <- lapply(scaffold, as_tibble)
     
-    scaffold <- lapply(scaffold, as_data_frame)
-    
-    return(scaffold)
+    return(list(scaffold, message_defs))
 }
 
