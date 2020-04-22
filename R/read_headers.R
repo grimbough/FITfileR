@@ -28,10 +28,11 @@
   if(record_header[8]) {
     ## compressed time stamp header
     ## currently not handled
-    stop("Compressed time stamp header not currently supported")
+    # stop("Compressed time stamp header not currently supported")
+    header <- .readMessageHeader_compressed(record_header)
   } else {
     ## normal header
-    header <- .readMessageHeader.normal(record_header)
+    header <- .readMessageHeader_normal(record_header)
   }
   
 }
@@ -42,13 +43,28 @@
 ## 
 ## Currently developer data isn't supported
 ##
-.readMessageHeader.normal <- function(record_header) {
+.readMessageHeader_normal <- function(record_header) {
   
   header <- list()
   header$type <- "normal"
   header$message_type <- ifelse(record_header[7], "definition", "data")
   header$developer_data <- as.logical(record_header[6])
   header$local_message_type <- .binaryToInt(record_header[1:4])
+  return(header)
+  
+}
+
+## takes the 8 bits from a compressed timestamp message header
+## determines the local message type and the time offset
+##
+.readMessageHeader_compressed <- function(record_header) {
+  
+  header <- list()
+  header$type <- "compressed_timestamp"
+  header$message_type <- "data"
+  header$developer_data <- FALSE
+  header$local_message_type <- .binaryToInt(record_header[6:7])
+  header$time_offset <- .binaryToInt(record_header[1:5])
   return(header)
   
 }

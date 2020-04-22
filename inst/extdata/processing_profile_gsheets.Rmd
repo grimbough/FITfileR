@@ -14,25 +14,25 @@ library(openxlsx)
 Here we read the message definitions:
 
 ```{r, eval = FALSE}
-messages <- read.xlsx(system.file("extdata/Profile_gsheets.xlsx", package = "fitFileR"), 
+messages <- read.xlsx(system.file("extdata/Profile_gsheets_Aug19.xlsx", package = "fitFileR"), 
                       sheet = 2)
 rm.idx <- which(is.na(messages[,1]) & is.na(messages[,2]) & is.na(messages[,3]))
-messages <- messages[-rm.idx,1:4]
-names(messages) <- c("message_type", "key", "value", "type")
-messages[,'type'] <- as.factor(messages[,'type'])
+messages <- messages[-rm.idx,c(1:4,7)]
+names(messages) <- c("message_type", "key", "value", "type", "scale")
+messages <- mutate(messages, type = as.factor(type), scale = as.numeric(scale))
 
 idx <- which(!is.na(messages[,1]))
 messages[,1] <- rep(messages[idx,1], 
                 diff(c(idx, nrow(messages)+1)))
-messages <- as_data_frame(messages[-which(is.na(messages[,2])),])
+messages <- as_tibble(messages[-which(is.na(messages[,2])),])
 
-fit_message_types <- split(messages[,2:4], messages[[1]])
+fit_message_types <- split(messages[,2:5], messages[[1]])
 ```
 
 Here we read the data type definitions:
 
 ```{r, eval = FALSE}
-data_types <- read.xlsx(system.file("extdata/Profile_gsheets.xlsx", package = "fitFileR"), 
+data_types <- read.xlsx(system.file("extdata/Profile_gsheets_Aug19.xlsx", package = "fitFileR"), 
                              sheet = 1)[,c(1,4,3,2)]
 data_types <- setNames(data_types, c("data_type", "key", "value", "key_type"))
 idx <- which(!is.na(data_types[,1]))
