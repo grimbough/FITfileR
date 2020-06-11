@@ -38,7 +38,7 @@
     fieldTypes <- definition$field_definition$base_type
     sizes <- definition$field_definition$size
     
-    message <- list()
+    message <- vector(mode = "list", length = length(fieldTypes))
     for(i in seq_along(fieldTypes)) {
         
         if( fieldTypes[i] %in% names(data_type_lookup) ) {
@@ -47,19 +47,29 @@
             
             ## a single field can have an array of values 
             single_size <- prod(as.integer(readInfo[3:4]))
-            for(j in seq_len( sizes[i] %/% single_size ) ) {
-                message[[i]] <- readBin(con, what = readInfo[[1]], signed = readInfo[[2]],
-                                        size = readInfo[[3]], n = readInfo[[4]], 
+            
+            n_values <- sizes[i] %/% single_size
+            if(fieldTypes[i] == "07") {
+                message[[i]] <- readBin(con, what = "character", signed = readInfo[[2]],
+                                        size = 1, n = n_values, 
                                         endian = definition$architecture)
-                
-                ## if we have unsigned ints, turn the bits into a numeric
-                if(fieldTypes[i] %in% c('86', '8c')) {
-                    if(definition$architecture == "little") {
-                        bits <- as.logical(rawToBits(message[[i]][1:4]))
-                    } else {
-                        bits <- as.logical(rawToBits(message[[i]][4:1]))
+            } else {
+                for(j in seq_len( n_values ) ) {
+     
+                    dat <- readBin(con, what = readInfo[[1]], signed = readInfo[[2]],
+                                            size = readInfo[[3]], n = readInfo[[4]], 
+                                            endian = definition$architecture)
+                    
+                    ## if we have unsigned ints, turn the bits into a numeric
+                    if(fieldTypes[i] %in% c('86', '8c')) {
+                        if(definition$architecture == "little") {
+                            bits <- as.logical(rawToBits(dat[1:4]))
+                        } else {
+                            bits <- as.logical(rawToBits(dat[4:1]))
+                        }
+                        dat <- sum(2^(.subset(0:31, bits)))
                     }
-                    message[[i]] <- sum(2^(.subset(0:31, bits)))
+                    message[[i]] <- c(message[[i]], dat)
                 }
             }
         } else {
@@ -70,10 +80,11 @@
         }
     }
     
-    #message <- as.data.frame(message)
-    message <- structure(message, row.names = c(NA, -1), 
-                         names = definition$field_definition$field_def_num, class = "data.frame")
+    names(message) <- definition$field_definition$field_def_num
+    message <- as_tibble(message)
+    #message <- structure(message, row.names = c(NA, -1), 
+    #                     names = definition$field_definition$field_def_num, class = "data.frame")
     #colnames(message) <- definition$field_definition$field_def_num
-    return(list(message = message))
+    return(message)
 }
 
