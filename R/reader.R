@@ -67,10 +67,10 @@ readFitFile <- function(fileName, dropUnknown = TRUE, mergeMessages = TRUE) {
             } else {
           
               defIdx <- pseudoMessageTab[ max(which(pseudoMessageTab[,1] == lmt)), 2]
-              message <- .readMessage.data(con, message_defs[[ defIdx ]], compressed_timestamp = FALSE)$message
+              message <- .readMessage.data(con, message_defs[[ defIdx ]], compressed_timestamp = FALSE)
               scaffold[[ defIdx ]] <- dplyr::bind_rows(scaffold[[ defIdx ]], 
-                                            message) }
-            
+                                            message) 
+            }
         } else {
             stop("unknown message type")
         }

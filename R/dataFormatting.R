@@ -82,7 +82,8 @@
     
     for(i in seq_along(current)) {
       current[[i]] <- .fixDataType(values = current[[i]],
-                                   type = message.table[['type']][ idx[i] ])
+                                   type = message.table[['type']][ idx[i] ],
+                                   fit_data_types)
     }
     
     ## some values need to be divided by a scaling factor
@@ -92,7 +93,7 @@
        current[[ idx ]] <- current[[ idx ]] / scale_table$scale[i]
     }
     
-    current <- .fixGarminProducts(current)
+    current <- .fixGarminProducts(current, fit_data_types)
     obj[[ name ]] <- current
   }
 
@@ -103,12 +104,12 @@
 ## this function takes the name of the appropriate data type
 ## and checks whether it is a time stamp, or we should test
 ## whether it comes from a factor data type.
-.fixDataType <- function(values, type) {
+.fixDataType <- function(values, type, fit_data_types) {
   
   if(grepl(pattern = "date_time", x = type)) {
     values <- .adjustTimeStamp(values)
   } else {
-    values <- .getFromDataTypeFactor(values, type)
+    values <- .getFromDataTypeFactor(values, type, fit_data_types)
   }
   return(values)
 }
@@ -119,7 +120,7 @@
   as.POSIXct(values, origin = "1989-12-31")  
 }
 
-.getFromDataTypeFactor <- function(values, type) {
+.getFromDataTypeFactor <- function(values, type, fit_data_types) {
   
   ## for 'non-standard' units, see if we have them stored and 
   ## replace if we can
@@ -135,12 +136,13 @@
   return(values)
 }
 
-.fixGarminProducts <- function(message) {
+.fixGarminProducts <- function(message, fit_data_types) {
   if(("manufacturer" %in% names(message)) && ("product" %in% names(message))) {
     garmin_idx <- which(message$manufacturer == "garmin")
     if(length(garmin_idx)) {
       message$product[garmin_idx] <- .getFromDataTypeFactor(values = message$product[garmin_idx], 
-                                                            type = "garmin_product")
+                                                            type = "garmin_product",
+                                                            fit_data_types)
     }
   }
   return(message)
