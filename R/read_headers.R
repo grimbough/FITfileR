@@ -16,11 +16,9 @@
   return(header)
 }
 
-## reads the 1 byte header that preceeds each record/message
+## reads the 1 byte header that proceeds each record/message
 ## The 8th bit determines if this is a standard or compressed header and 
 ## we dispatch the appropriate function here
-## 
-## Currenly only normal headers are supported
 ## 
 .readRecordHeader <- function(con) {
   

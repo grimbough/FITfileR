@@ -8,4 +8,5 @@ Description:
 Suggests: leaflet
 License: Artistic-2.0
 LazyLoad: yes
-RoxygenNote: 6.0.1
+RoxygenNote: 7.1.0
+Encoding: UTF-8

@@ -8,10 +8,17 @@ readFitFile <- function(fileName, dropUnknown = TRUE, mergeMessages = TRUE) {
   all_records <- .renameMessages(tmp[[1]], tmp[[2]], merge = mergeMessages)
   
   for(i in names(all_records)) {
-    all_records <- .processMessageType(all_records, name = i, drop = dropUnknown)
+    all_records[[i]] <- .processMessageType(all_records[[i]], name = i, drop = dropUnknown)
   }
   
-  return(all_records)
+  fitFile <- new("FitFile", 
+                 header = tmp[[3]],
+                 file_id = all_records$file_id, 
+                 events = all_records$event, 
+                 records = all_records$record, 
+                 lap = all_records$lap)
+  
+  return(fitFile)
 }
 
 .readFile <- function(fileName) {
@@ -82,6 +89,6 @@ readFitFile <- function(fileName, dropUnknown = TRUE, mergeMessages = TRUE) {
     
     scaffold <- lapply(scaffold, as_tibble)
     
-    return(list(scaffold, message_defs))
+    return(list(scaffold, message_defs, file_header))
 }
 

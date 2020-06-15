@@ -1,7 +1,8 @@
 ## Given the populated list of data, and the list of message definitions,
 ## looks up the plain text name of each message type associated with the
 ## global message number. Drops any that can't be identified.
-## Also merges entries with the same message number but different defintions.
+## Also merges entries with the same message number but different definitions.
+#' @importFrom dplyr filter
 .renameMessages <- function(scaffold, defs, merge = TRUE) {
   
   ## load the appropriate key/value table
@@ -16,6 +17,7 @@
   rm_idx <- which(!globalMessageNum %in% fit_data_types$mesg_num[['key']])
   if(length(rm_idx)) {
     scaffold <- scaffold[ -rm_idx ]
+    defs <- defs[ -rm_idx ]
     globalMessageNum <- globalMessageNum[ -rm_idx ]
   }
   
@@ -27,7 +29,21 @@
   for(i in seq_along(result)) {
     gmn <- unique(globalMessageNum)[i]
     idx <- which(globalMessageNum == gmn)
-    result[[ i ]] <- bind_rows(scaffold[idx])
+    
+    ## find the subset of the message definitions
+    defs_sub <- defs[idx]
+    if(length(defs_sub) > 1) {
+      longest_def <- vapply(defs_sub, function(x) x$n_fields, 
+                          FUN.VALUE = integer(1), USE.NAMES = FALSE ) %>%
+        which.max()
+      defs_sub <- defs_sub[ longest_def ]
+    } 
+    
+    message <- new("FitMessage", global_message_number = gmn, 
+        field_definition = defs_sub[[1]]$field_definition,
+        messages = bind_rows(scaffold[idx]))
+    
+    result[[ i ]] <- message
     value_name <- filter(fit_data_types$mesg_num, key == gmn) %>% 
       select(value) %>% 
       as.character()
@@ -60,44 +76,41 @@
     warning("Renaming variables for message type '", name, "' is not currently supported")
   } else {
     
-    message.table <- fit_message_types[[ name_short ]]
-    current <- obj[[ name ]]
+    message_table <- fit_message_types[[ name_short ]]
+    ##current <- obj[[ name ]]
+    current <- obj
     
-    idx <- match(names(current), message.table[['key']])
-    if(any(is.na(idx))) {
-      if(drop) {
-        current <- current[,-which(is.na(idx))]
-        idx <- idx[-which(is.na(idx))]
-        names(current) <- message.table[['value']][idx]
-      } else {
-        names(current)[which(!is.na(idx))] <- message.table[['value']][idx[which(!is.na(idx))]]
-      }
-    } else { ## TODO:  come back and tidy this logic up later
-      names(current)[which(!is.na(idx))] <- message.table[['value']][idx[which(!is.na(idx))]]
+    idx <- match(names(current@messages), message_table[['key']])
+    if(any(is.na(idx)) && isTRUE(drop)) {
+      current@messages <- current@messages[,-which(is.na(idx))]
+      idx <- idx[-which(is.na(idx))]
+      names(current@messages) <- message_table[['value']][idx]
+    } else {
+      names(current@messages)[which(!is.na(idx))] <- message_table[['value']][idx[which(!is.na(idx))]]
     }
     
     data("fit_data_types", 
          package = "fitFileR", 
          envir = environment())
     
-    for(i in seq_along(current)) {
-      current[[i]] <- .fixDataType(values = current[[i]],
-                                   type = message.table[['type']][ idx[i] ],
+    for(i in seq_along(current@messages)) {
+      current@messages[[i]] <- .fixDataType(values = current@messages[[i]],
+                                   type = message_table[['type']][ idx[i] ],
                                    fit_data_types)
     }
     
     ## some values need to be divided by a scaling factor
-    scale_table <- filter(message.table, value %in% names(current), !is.na(scale))
+    scale_table <- filter(message_table, value %in% names(current@messages), !is.na(scale))
     for(i in seq_len(nrow(scale_table))) {
-       idx <- match(scale_table$value[i], names(current))
-       current[[ idx ]] <- current[[ idx ]] / scale_table$scale[i]
+       idx <- match(scale_table$value[i], names(current@messages))
+       current@messages[[ idx ]] <- current@messages[[ idx ]] / scale_table$scale[i]
     }
     
-    current <- .fixGarminProducts(current, fit_data_types)
-    obj[[ name ]] <- current
+    current@messages <- .fixGarminProducts(current@messages, fit_data_types)
+    #obj[[ name ]] <- current
   }
 
-  return(obj)
+  return(current)
 }
 
 ## lots of fields store numeric references to a value in a factor

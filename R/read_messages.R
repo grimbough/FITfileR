@@ -17,13 +17,11 @@
     message$global_message_num <- readBin(con = con, what = "int", n = 1, size = 2,
                                           endian = message$architecture)
     message$n_fields <- readBin(con = con, what = "int", n = 1, size = 1)
-    #message( message$n_fields )
     message$field_definition <- .processFieldDefs(
         readBin(con = con, what = "raw", n = 3 * message$n_fields, size = 1)
     )
     if(devFields){
         ## do something with the developer fields
-        ## currently not supported
         messages$n_dev_fields <- readBin(con = con, what = "int", n = 1, size = 1)
         message$dev_field_definition <- .processFieldDefs(
             readBin(con = con, what = "raw", n = 3 * message$n_dev_fields, size = 1)
@@ -81,9 +79,9 @@
     }
     
     names(message) <- definition$field_definition$field_def_num
-    message <- as_tibble(message)
-    #message <- structure(message, row.names = c(NA, -1), 
-    #                     names = definition$field_definition$field_def_num, class = "data.frame")
+    #message <- as_tibble(message)
+    message <- structure(message, row.names = c(NA, -1), 
+                         names = definition$field_definition$field_def_num, class = "data.frame")
     #colnames(message) <- definition$field_definition$field_def_num
     return(message)
 }
