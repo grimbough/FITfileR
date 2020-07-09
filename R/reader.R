@@ -16,7 +16,7 @@ readFitFile <- function(fileName, dropUnknown = TRUE, mergeMessages = TRUE) {
                  file_id = all_records$file_id, 
                  events = all_records$event, 
                  records = all_records$record, 
-                 lap = all_records$lap)
+                 laps = all_records$lap)
   
   return(fitFile)
 }
