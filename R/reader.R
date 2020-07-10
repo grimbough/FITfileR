@@ -3,6 +3,7 @@
 readFitFile <- function(fileName, dropUnknown = TRUE, mergeMessages = TRUE) {
   
   data("data_type_lookup", package = "fitFileR", envir = parent.frame())
+  #data("data_type_lookup", package = "fitFileR", envir = environment())
   
   tmp <- .readFile(fileName)
   all_records <- .renameMessages(tmp[[1]], tmp[[2]], merge = mergeMessages)
@@ -20,6 +21,10 @@ readFitFile <- function(fileName, dropUnknown = TRUE, mergeMessages = TRUE) {
     on.exit(close(con))
     file_header <- .readFileHeader(con)
     
+    if(file_header$data_type != ".FIT") {
+      stop("This does not look like a FIT file")
+    }
+    
     message_defs <- list()
     defs_idx <- 1
     
@@ -30,14 +35,20 @@ readFitFile <- function(fileName, dropUnknown = TRUE, mergeMessages = TRUE) {
     
     scaffold <- list()
     
+    count <- 1
+     
     while(seek(con, where = NA) < (file_header$data_size + 14)) {
         
+      #message(count)
+      count <- count+1
+      warnings()
+      
         record_header <- .readRecordHeader(con)
         lmt <- as.character(record_header$local_message_type)
 
         if(record_header$message_type == "definition") {
             
-          #message("Def: ", lmt)
+         # message("Def: ", lmt)
           
             if(lmt %in% pseudoMessageTab[,2]) {
                 plmt <- as.character(as.integer(plmt) + 1)
@@ -56,12 +67,12 @@ readFitFile <- function(fileName, dropUnknown = TRUE, mergeMessages = TRUE) {
             
         } else if(record_header$message_type == "data") {
           
-          #message("Data: ", lmt)
+         # message("Data: ", lmt)
             
             if(record_header$type == "compressed_timestamp") {
              # message("Compressed")
               defIdx <- pseudoMessageTab[ max(which(pseudoMessageTab[,1] == lmt)), 2]
-              message <- .readMessage.data(con, message_defs[[ defIdx ]], compressed_timestamp = TRUE)$message
+              message <- .readMessage.data(con, message_defs[[ defIdx ]], compressed_timestamp = TRUE)
               scaffold[[ defIdx ]] <- rbind(scaffold[[ defIdx ]], 
                                             message)
             } else {
