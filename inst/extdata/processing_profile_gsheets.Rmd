@@ -14,7 +14,7 @@ library(openxlsx)
 Here we read the message definitions:
 
 ```{r, eval = FALSE}
-messages <- read.xlsx(system.file("extdata/Profile_gsheets_Aug19.xlsx", package = "fitFileR"), 
+messages <- read.xlsx(system.file("extdata/Profile_gsheets_July20.xlsx", package = "fitFileR"), 
                       sheet = 2)
 rm.idx <- which(is.na(messages[,1]) & is.na(messages[,2]) & is.na(messages[,3]))
 messages <- messages[-rm.idx,c(1:4,7)]
@@ -32,7 +32,7 @@ fit_message_types <- split(messages[,2:5], messages[[1]])
 Here we read the data type definitions:
 
 ```{r, eval = FALSE}
-data_types <- read.xlsx(system.file("extdata/Profile_gsheets_Aug19.xlsx", package = "fitFileR"), 
+data_types <- read.xlsx("inst/extdata/Profile_gsheets_July20.xlsx", 
                              sheet = 1)[,c(1,4,3,2)]
 data_types <- setNames(data_types, c("data_type", "key", "value", "key_type"))
 idx <- which(!is.na(data_types[,1]))
@@ -40,7 +40,7 @@ data_types[,1] <- rep(data_types[idx,1],
               diff(c(idx, nrow(data_types)+1)))
 data_types[,4] <- rep(data_types[idx,4], 
               diff(c(idx, nrow(data_types)+1)))
-data_types <- as_data_frame(data_types[-which(is.na(data_types[,2])),])
+data_types <- as_tibble(data_types[-which(is.na(data_types[,2])),])
 fit_data_types <- split(data_types[,2:4], data_types[[1]])
 fit_data_types <- lapply(fit_data_types, FUN = function(x) {
     mutate(x, key = ifelse(grepl('uint32', key_type), 
