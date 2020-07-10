@@ -3,8 +3,4 @@
 \docType{package}
 \name{fitFileR}
 \alias{fitFileR}
-\alias{fitFileR-package}
 \title{fitFileR: A package reading .fit files using native R code.}
-\description{
-fitFileR: A package reading .fit files using native R code.
-}

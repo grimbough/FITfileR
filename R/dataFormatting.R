@@ -90,7 +90,12 @@
     scale_table <- filter(message.table, value %in% names(current), !is.na(scale))
     for(i in seq_len(nrow(scale_table))) {
        idx <- match(scale_table$value[i], names(current))
-       current[[ idx ]] <- current[[ idx ]] / scale_table$scale[i]
+       if(is.list(current[[ idx ]])) {
+         current[[ idx ]] <- lapply(current[[idx]], function(x, scale) { x / scale }, 
+                                    scale = as.numeric(scale_table$scale[i]))
+       } else {
+         current[[ idx ]] <- current[[ idx ]] / as.numeric(scale_table$scale[i])
+       }
     }
     
     current <- .fixGarminProducts(current, fit_data_types)
