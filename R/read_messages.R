@@ -54,8 +54,10 @@
                 #                        size = 1, n = n_values, 
                 #                        endian = definition$architecture), 
                 #                      collapse = "")
-                #message[[i]] <- rawToChar(readBin(con = con, what = "raw", n = n_values, size = 1))
-                message[[i]] <- readChar(con = con, nchars = n_values, useBytes = TRUE)
+                raw_bytes <- readBin(con = con, what = "raw", n = n_values, size = 1)
+                message[[i]] <- rawToChar(raw_bytes)
+                #message[[i]] <- readChar(con = con, nchars = n_values, useBytes = TRUE)
+                #message[[i]] <- intToUtf8(readBin(con = con, what = "integer", signed = FALSE, n = n_values, size = 1))
             } else {
                 for(j in seq_len( n_values ) ) {
      
