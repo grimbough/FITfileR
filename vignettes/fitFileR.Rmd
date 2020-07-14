@@ -43,16 +43,16 @@ names(garmin)
 The data most often wanted from a fit file are the values such as location, speed, altitude, etc recorded during an activity.  These can be found in the `record` entry in the list.  Here's the first few rows from our TomTom file:
 
 ```{r print_record}
-tomtom$record
+garmin$record
 ```
 
 ## Plotting a route
 
-Before we can plot locations need to process the values held in the fit file into longitude and latitude.  First, we remove any entries recorded when satelite reception was lost; these have a value of `2^31-1` in this file, but appear as `NA` in the data from the Garmin so we remove both.  We then convert to longitude and latitude coordinates.
+Before we can plot locations need to process the values held in the fit file into longitude and latitude.  First, we remove any entries recorded when satelite reception was lost; these have a value of `NA` in this file, but appear as `2^31-1` in the data from the TomTom so we remove both.  We then convert to longitude and latitude coordinates.
 
 ```{r process_coords}
 
-coords <- cbind(tomtom$record$position_long, tomtom$record$position_lat)
+coords <- cbind(garmin$record$position_long, garmin$record$position_lat)
 coords <- coords[ apply(coords, 1, function(x) { !any(is.na(x) || x == 2^31-1) }), ]
 coords <- coords * (180 / (2^31))
 ```
