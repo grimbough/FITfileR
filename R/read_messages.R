@@ -17,7 +17,6 @@
     message$global_message_num <- readBin(con = con, what = "int", n = 1, size = 2,
                                           endian = message$architecture)
     message$n_fields <- readBin(con = con, what = "int", n = 1, size = 1)
-    #message( message$n_fields )
     message$field_definition <- .processFieldDefs(
         readBin(con = con, what = "raw", n = 3 * message$n_fields, size = 1, signed = FALSE)
     )
@@ -35,8 +34,15 @@
 
 .readMessage.data <- function(con, definition, compressed_timestamp = FALSE) {
     
+    #str(definition)
+    
     fieldTypes <- definition$field_definition$base_type
     sizes <- definition$field_definition$size
+    
+#    if(!is.null(definition$n_dev_fields)) {
+#        fieldTypes <- c(fieldTypes, definition$dev_field_definition$base_type)
+#        sizes <- 
+#    }
     
     message <- vector(mode = "list", length = length(fieldTypes))
     for(i in seq_along(fieldTypes)) {
@@ -50,14 +56,8 @@
             
             n_values <- sizes[i] %/% single_size
             if(fieldTypes[i] == "07") {
-                #message[[i]] <- paste(readBin(con, what = "character", signed = readInfo[[2]],
-                #                        size = 1, n = n_values, 
-                #                        endian = definition$architecture), 
-                #                      collapse = "")
                 raw_bytes <- readBin(con = con, what = "raw", n = n_values, size = 1)
                 message[[i]] <- rawToChar(raw_bytes)
-                #message[[i]] <- readChar(con = con, nchars = n_values, useBytes = TRUE)
-                #message[[i]] <- intToUtf8(readBin(con = con, what = "integer", signed = FALSE, n = n_values, size = 1))
             } else {
                 for(j in seq_len( n_values ) ) {
      

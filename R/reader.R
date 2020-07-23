@@ -48,7 +48,7 @@ readFitFile <- function(fileName, dropUnknown = TRUE, mergeMessages = TRUE) {
 
         if(record_header$message_type == "definition") {
             
-         # message("Def: ", lmt)
+          #message("Def: ", lmt)
           
             if(lmt %in% pseudoMessageTab[,2]) {
                 plmt <- as.character(as.integer(plmt) + 1)
@@ -67,7 +67,7 @@ readFitFile <- function(fileName, dropUnknown = TRUE, mergeMessages = TRUE) {
             
         } else if(record_header$message_type == "data") {
           
-         # message("Data: ", lmt)
+         #message("Data: ", lmt)
             
             if(record_header$type == "compressed_timestamp") {
              # message("Compressed")
@@ -82,6 +82,13 @@ readFitFile <- function(fileName, dropUnknown = TRUE, mergeMessages = TRUE) {
               scaffold[[ defIdx ]] <- dplyr::bind_rows(scaffold[[ defIdx ]], 
                                             message) 
             }
+          
+            if( !is.null(message_defs[[ defIdx ]]$n_dev_fields) ) {
+                skip <- sum(message_defs[[ defIdx ]]$dev_field_definition$size)
+                #message("Skipping dev data: ", skip, " bytes")
+                readBin(con, what = "integer", n = skip, size = 1)
+            }
+          
         } else {
             stop("unknown message type")
         }

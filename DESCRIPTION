@@ -9,3 +9,4 @@ Suggests: leaflet
 License: Artistic-2.0
 LazyLoad: yes
 RoxygenNote: 7.1.1
+Encoding: UTF-8
