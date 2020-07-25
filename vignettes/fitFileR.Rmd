@@ -48,7 +48,7 @@ garmin$record
 
 ## Plotting a route
 
-Before we can plot locations need to process the values held in the fit file into longitude and latitude.  First, we remove any entries recorded when satelite reception was lost; these have a value of `NA` in this file, but appear as `2^31-1` in the data from the TomTom so we remove both.  We then convert to longitude and latitude coordinates.
+Before we can plot locations need to process the values held in the fit file into longitude and latitude.  First, we remove any entries recorded when satellite reception was lost; these have a value of `NA` in this file, but appear as `2^31-1` in the data from the TomTom so we remove both.  We then convert to longitude and latitude coordinates.
 
 ```{r process_coords}
 
