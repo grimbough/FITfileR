@@ -7,7 +7,11 @@ Description: Allows reading FIT (Flexible and Interoperable Data Transfer)
     files without any dependence on external software or SDKs.
 Depends: R (>= 3.5.0)
 Imports: dplyr, tibble, magrittr
-Suggests: leaflet, knitr, tinytest, ggplot2
+Suggests: knitr,
+    rmarkdown,
+    leaflet, 
+    ggplot2,
+    tinytest
 VignetteBuilder: knitr
 License: Artistic-2.0
 LazyLoad: yes

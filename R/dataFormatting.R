@@ -2,6 +2,7 @@
 ## looks up the plain text name of each message type associated with the
 ## global message number. Drops any that can't be identified.
 ## Also merges entries with the same message number but different defintions.
+#' @importFrom utils data
 .renameMessages <- function(scaffold, defs, merge = TRUE) {
   
   ## load the appropriate key/value table

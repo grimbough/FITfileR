@@ -9,18 +9,18 @@ readFitFile(fileName, dropUnknown = TRUE, mergeMessages = TRUE)
 \arguments{
 \item{fileName}{A character specifying the FIT file to be read.}
 
+\item{dropUnknown}{Many FIT files contain data that is not defined in the FIT
+file specification.  This may be used by the device manufacturer for 
+debugging purposes, but is typically not useful to an end user.  The default
+value of this argument will exclude these fields from the returned data 
+structure.  Setting a value of \code{FALSE} will retain them.}
+
 \item{mergeMessages}{FIT files may contain similar 'messages' with varying 
 numbers of fields e.g. if a new sensor is added during an activity the 
 'records' messages recorded after this will contain an extra data column.
 The default value of this argument will merge all messages of the same type,
 and insert \code{NA} to pad missing fields.  Setting this to \code{FALSE}
 will return a separate \code{data.frame} for each distinct message type.}
-
-\item{dropUknown}{Many FIT files contain data that is not defined in the FIT
-file specification.  This may be used by the device manufacturer for 
-debugging purposes, but is typically not useful to an end user.  The default
-value of this argument will exclude these fields from the returned data 
-structure.  Setting a value of \code{FALSE} will retain them.}
 }
 \value{
 A \code{list} of \code{tibbles}.  Each \code{tibble} holds a 
@@ -37,5 +37,5 @@ garmin <- readFitFile(garmin_file)
 
 ## examine the 'file ID' messages
 garmin$file_id
-      
+
 }
