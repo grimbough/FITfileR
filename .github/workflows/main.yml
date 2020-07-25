@@ -44,7 +44,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          Rscript -e "install.packages(c('knitr', 'rmarkdown', 'ggplot2', 'leaflet', 'tinytest', 'rcmdcheck'))"
+          Rscript -e "install.packages(c('dplyr', 'magrittr', 'tibble', 'knitr', 'rmarkdown', 'ggplot2', 'leaflet', 'tinytest', 'rcmdcheck'))"
 
       - name: R CMD check
         run: |
