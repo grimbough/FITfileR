@@ -6,9 +6,9 @@
 .renameMessages <- function(scaffold, defs, merge = TRUE) {
   
   ## load the appropriate key/value table
-  data("fit_data_types", 
-       package = "fitFileR", 
-       envir = environment())
+  #data("fit_data_types", 
+  #     package = "fitFileR", 
+  #     envir = environment())
   
   globalMessageNum <- sapply(defs, function(x) { x$global_message_num } )
   
@@ -50,9 +50,9 @@
 .processMessageType <- function(obj, name, drop = TRUE) {
   
   ## load the appropriate key/value table
-  data("fit_message_types", 
-       package = "fitFileR", 
-       envir = environment())
+  #data("fit_message_types", 
+  #     package = "fitFileR", 
+  #     envir = environment())
   
   ## strip any numbering from the message name
   name_short <- gsub(x = name, pattern = "-[0-9]*", replacement = "")
@@ -77,9 +77,9 @@
       names(current)[which(!is.na(idx))] <- message.table[['value']][idx[which(!is.na(idx))]]
     }
     
-    data("fit_data_types", 
-         package = "fitFileR", 
-         envir = environment())
+    #data("fit_data_types", 
+    #     package = "fitFileR", 
+    #     envir = environment())
     
     for(i in seq_along(current)) {
       current[[i]] <- .fixDataType(values = current[[i]],
