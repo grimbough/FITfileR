@@ -1,7 +1,11 @@
 ---
-title: "Reading .fit files"
+title: "Reading FIT files"
 author: "Mike Smith"
 output: html_document
+vignette: |
+  %\VignetteIndexEntry{Reading FIT files}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
@@ -71,11 +75,18 @@ m
 
 ## Comparing heart rates
 
-```{r plot_hr}
-ggplot() + 
-    geom_line(data = garmin$record, aes(x = timestamp, y = heart_rate), col = "blue") + 
-    geom_line(data = tomtom$record, aes(x = timestamp, y = heart_rate), col = "red")
+Here we compare the heart rate recorded during the activity by the two devices.
 
+```{r plot_hr}
+library(ggplot2)
+ggplot() + 
+    geom_line(data = garmin$record, aes(x = timestamp, y = heart_rate), col = 1) + 
+    geom_line(data = tomtom$record, aes(x = timestamp, y = heart_rate), col = 2)
+```
+
+That's pretty messy as the TomTom data seem to have lots of 255 values (These are presumably dropouts in the data recording that get assigned the maximum value). We can filter those entries out to compare the two traces more easily.
+
+```{r plot-hr-2}
 ggplot() + 
     geom_line(data = garmin$record, aes(x = timestamp, y = heart_rate), col = "blue") + 
     geom_line(data = dplyr::filter(tomtom$record, heart_rate != 255), 
