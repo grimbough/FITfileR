@@ -38,12 +38,7 @@
     
     fieldTypes <- definition$field_definition$base_type
     sizes <- definition$field_definition$size
-    
-#    if(!is.null(definition$n_dev_fields)) {
-#        fieldTypes <- c(fieldTypes, definition$dev_field_definition$base_type)
-#        sizes <- 
-#    }
-    
+
     message <- vector(mode = "list", length = length(fieldTypes))
     for(i in seq_along(fieldTypes)) {
         
