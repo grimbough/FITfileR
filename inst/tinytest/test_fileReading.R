@@ -8,10 +8,12 @@ expect_silent(
     garmin <- readFitFile(garmin_file)
 )
 
+## check we got a list back
+expect_true( class(garmin) == "list" )
+
 expect_silent(
     tomtom <- readFitFile(tomtom_file)
 )
 
-## check we got a list back
-expect_true( class(garmin) == "list" )
+
 expect_true( class(tomtom) == "list" )
