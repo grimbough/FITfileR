@@ -1,11 +1,12 @@
 Package: fitFileR
-Version: 0.0.4
-Title: Reading .fit files using only native R code
+Version: 0.0.5
+Title: Reading FIT files using only native R code
 Author: Mike Smith <grimbough@gmail.com>
 Maintainer: Mike Smith <grimbough@gmail.com>
 VignetteBuilder: knitr
-Description:
-Suggests: leaflet
+Description: Allows reading FIT (Flexible and Interoperable Data Transfer) 
+    files without any dependence on external software or SDKs.
+Suggests: leaflet, tinytest
 License: Artistic-2.0
 LazyLoad: yes
 RoxygenNote: 7.1.1
