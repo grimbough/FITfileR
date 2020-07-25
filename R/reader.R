@@ -1,10 +1,10 @@
 #' Read a FIT file
 #' 
 #' Reads a given FIT file and returns a list of data.frames, one for each
-#' message type stored in the input file.
+#' message type stored in the input file. 
 #' 
 #' @param fileName A character specifying the FIT file to be read.
-#' @param dropUknown Many FIT files contain data that is not defined in the FIT
+#' @param dropUnknown Many FIT files contain data that is not defined in the FIT
 #' file specification.  This may be used by the device manufacturer for 
 #' debugging purposes, but is typically not useful to an end user.  The default
 #' value of this argument will exclude these fields from the returned data 
@@ -25,7 +25,8 @@
 #' 
 #' ## examine the 'file ID' messages
 #' garmin$file_id
-#'       
+#'
+#' @importFrom utils data
 #' @export
 readFitFile <- function(fileName, dropUnknown = TRUE, mergeMessages = TRUE) {
   

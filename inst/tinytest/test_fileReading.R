@@ -1,3 +1,4 @@
+library(fitFileR)
 
 garmin_file <- system.file("extdata/Garmin.fit", package = "fitFileR")
 tomtom_file <- system.file("extdata/TomTom.fit", package = "fitFileR")
