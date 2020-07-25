@@ -3,10 +3,12 @@ Version: 0.0.5
 Title: Reading FIT files using only native R code
 Author: Mike Smith <grimbough@gmail.com>
 Maintainer: Mike Smith <grimbough@gmail.com>
-VignetteBuilder: knitr
 Description: Allows reading FIT (Flexible and Interoperable Data Transfer) 
     files without any dependence on external software or SDKs.
-Suggests: leaflet, tinytest
+Depends: R (>= 3.5.0)
+Imports: dplyr, tibble, magrittr
+Suggests: leaflet, knitr, tinytest, ggplot2
+VignetteBuilder: knitr
 License: Artistic-2.0
 LazyLoad: yes
 RoxygenNote: 7.1.1
