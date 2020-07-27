@@ -18,11 +18,11 @@
                                           endian = message$architecture)
     message$n_fields <- readBin(con = con, what = "int", n = 1, size = 1)
     message$field_definition <- .processFieldDefs(
-        readBin(con = con, what = "raw", n = 3 * message$n_fields, size = 1)
+        readBin(con = con, what = "raw", n = 3 * message$n_fields, size = 1, signed = FALSE)
     )
     if(devFields){
         ## do something with the developer fields
-        messages$n_dev_fields <- readBin(con = con, what = "int", n = 1, size = 1)
+        message$n_dev_fields <- readBin(con = con, what = "int", n = 1, size = 1, signed = FALSE)
         message$dev_field_definition <- .processFieldDefs(
             readBin(con = con, what = "raw", n = 3 * message$n_dev_fields, size = 1)
         )
@@ -33,9 +33,11 @@
 
 .readMessage.data <- function(con, definition, compressed_timestamp = FALSE) {
     
+    #str(definition)
+    
     fieldTypes <- definition$field_definition$base_type
     sizes <- definition$field_definition$size
-    
+
     message <- vector(mode = "list", length = length(fieldTypes))
     for(i in seq_along(fieldTypes)) {
         
@@ -48,9 +50,8 @@
             
             n_values <- sizes[i] %/% single_size
             if(fieldTypes[i] == "07") {
-                message[[i]] <- readBin(con, what = "character", signed = readInfo[[2]],
-                                        size = 1, n = n_values, 
-                                        endian = definition$architecture)
+                raw_bytes <- readBin(con = con, what = "raw", n = n_values, size = 1)
+                message[[i]] <- rawToChar(raw_bytes)
             } else {
                 for(j in seq_len( n_values ) ) {
      
@@ -67,7 +68,16 @@
                         }
                         dat <- sum(2^(.subset(0:31, bits)))
                     }
-                    message[[i]] <- c(message[[i]], dat)
+                    
+                    if(n_values == 1) {
+                        message[[i]] <- c(message[[i]], dat)
+                    } else { ## put multiple values in a list, otherwise the tibble has columns with different lengths.
+                        if(j == 1) {
+                            message[[i]] <- list(dat)
+                        } else {
+                            message[[i]][[1]] <- c(message[[i]][[1]], dat)
+                        }
+                    }
                 }
             }
         } else {

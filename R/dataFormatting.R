@@ -3,12 +3,13 @@
 ## global message number. Drops any that can't be identified.
 ## Also merges entries with the same message number but different definitions.
 #' @importFrom dplyr filter
+#' @importFrom utils data
 .renameMessages <- function(scaffold, defs, merge = TRUE) {
   
   ## load the appropriate key/value table
-  data("fit_data_types", 
-       package = "fitFileR", 
-       envir = environment())
+  #data("fit_data_types", 
+  #     package = "fitFileR", 
+  #     envir = environment())
   
   globalMessageNum <- sapply(defs, function(x) { x$global_message_num } )
   
@@ -65,9 +66,9 @@
 .processMessageType <- function(obj, name, drop = TRUE) {
   
   ## load the appropriate key/value table
-  data("fit_message_types", 
-       package = "fitFileR", 
-       envir = environment())
+  #data("fit_message_types", 
+  #     package = "fitFileR", 
+  #     envir = environment())
   
   ## strip any numbering from the message name
   name_short <- gsub(x = name, pattern = "-[0-9]*", replacement = "")
@@ -89,9 +90,9 @@
       names(current@messages)[which(!is.na(idx))] <- message_table[['value']][idx[which(!is.na(idx))]]
     }
     
-    data("fit_data_types", 
-         package = "fitFileR", 
-         envir = environment())
+    #data("fit_data_types", 
+    #     package = "fitFileR", 
+    #     envir = environment())
     
     for(i in seq_along(current@messages)) {
       current@messages[[i]] <- .fixDataType(values = current@messages[[i]],
@@ -102,8 +103,13 @@
     ## some values need to be divided by a scaling factor
     scale_table <- filter(message_table, value %in% names(current@messages), !is.na(scale))
     for(i in seq_len(nrow(scale_table))) {
-       idx <- match(scale_table$value[i], names(current@messages))
-       current@messages[[ idx ]] <- current@messages[[ idx ]] / scale_table$scale[i]
+       idx <- match(scale_table$value[i], names(current))
+       if(is.list(current[[ idx ]])) {
+         current@messages[[ idx ]] <- lapply(current[[idx]], function(x, scale) { x / scale }, 
+                                    scale = as.numeric(scale_table$scale[i]))
+       } else {
+         current@messages[[ idx ]] <- current[[ idx ]] / as.numeric(scale_table$scale[i])
+       }
     }
     
     current@messages <- .fixGarminProducts(current@messages, fit_data_types)
