@@ -30,9 +30,6 @@
 #' @export
 readFitFile <- function(fileName, dropUnknown = TRUE, mergeMessages = TRUE) {
   
-  ## load the mapping tables for data_types and messages
-  #load(file.path("R", "sysdata.rda"))
-  
   tmp <- .readFile(fileName)
   all_records <- .renameMessages(tmp[[1]], tmp[[2]], merge = mergeMessages)
   
