@@ -31,7 +31,8 @@
 readFitFile <- function(fileName, dropUnknown = TRUE, mergeMessages = TRUE) {
   
   tmp <- .readFile(fileName)
-  all_records <- .renameMessages(tmp[[1]], tmp[[2]], merge = mergeMessages)
+  idx <- match(names(tmp[[2]]), names(tmp[[1]]))
+  all_records <- .renameMessages(tmp[[1]][idx], tmp[[2]], merge = mergeMessages)
   
   for(i in names(all_records)) {
     all_records <- .processMessageType(all_records, name = i, drop = dropUnknown)
@@ -51,8 +52,7 @@ readFitFile <- function(fileName, dropUnknown = TRUE, mergeMessages = TRUE) {
     }
     
     message_defs <- list()
-    defs_idx <- 1
-    
+
     plmt <- "-1"
     prev_lmt <- "0"
     defs_count <- list()
@@ -86,8 +86,7 @@ readFitFile <- function(fileName, dropUnknown = TRUE, mergeMessages = TRUE) {
             ## read the message definition just to get through the bytes
             message_res <- .readMessage.definition(con, devFields = record_header$developer_data)
             message_defs[[ plmt ]] <- message_res$message
-            defs_idx <- defs_idx + 1
-            
+
             defs_count[[ plmt ]] <- 1
             
         } else if(record_header$message_type == "data") {
