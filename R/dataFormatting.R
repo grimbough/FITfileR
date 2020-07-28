@@ -5,11 +5,6 @@
 #' @importFrom utils data
 .renameMessages <- function(scaffold, defs, merge = TRUE) {
   
-  ## load the appropriate key/value table
-  #data("fit_data_types", 
-  #     package = "fitFileR", 
-  #     envir = environment())
-  
   globalMessageNum <- sapply(defs, function(x) { x$global_message_num } )
   
   ## we are going to remove any entries that have a global message number
@@ -21,20 +16,20 @@
   }
   
   if(merge) {
-  ## Merge entries with the same global message number, but are separate.
-  ## This arises when a few records are written with different columns 
-  ## e.g. before a cadence or hr sensor is detected. We NA missing values.
-  result <- vector("list", length = length(unique(globalMessageNum)))
-  for(i in seq_along(result)) {
-    gmn <- unique(globalMessageNum)[i]
-    idx <- which(globalMessageNum == gmn)
-    result[[ i ]] <- bind_rows(scaffold[idx])
-    value_name <- filter(fit_data_types$mesg_num, key == gmn) %>% 
-      select(value) %>% 
-      as.character()
-    names(result)[i] <- value_name
-  }
-  return(result)
+    ## Merge entries with the same global message number, but are separate.
+    ## This arises when a few records are written with different columns 
+    ## e.g. before a cadence or hr sensor is detected. We NA missing values.
+    result <- vector("list", length = length(unique(globalMessageNum)))
+    for(i in seq_along(result)) {
+      gmn <- unique(globalMessageNum)[i]
+      idx <- which(globalMessageNum == gmn)
+      result[[ i ]] <- bind_rows(scaffold[idx])
+      value_name <- filter(fit_data_types$mesg_num, key == gmn) %>% 
+        select(value) %>% 
+        as.character()
+      names(result)[i] <- value_name
+    }
+    return(result)
   } else {
     for(gmn in unique(globalMessageNum)) {
       idx <- which(globalMessageNum == gmn)
@@ -48,11 +43,6 @@
 }
 
 .processMessageType <- function(obj, name, drop = TRUE) {
-  
-  ## load the appropriate key/value table
-  #data("fit_message_types", 
-  #     package = "fitFileR", 
-  #     envir = environment())
   
   ## strip any numbering from the message name
   name_short <- gsub(x = name, pattern = "-[0-9]*", replacement = "")
@@ -76,10 +66,6 @@
     } else { ## TODO:  come back and tidy this logic up later
       names(current)[which(!is.na(idx))] <- message.table[['value']][idx[which(!is.na(idx))]]
     }
-    
-    #data("fit_data_types", 
-    #     package = "fitFileR", 
-    #     envir = environment())
     
     for(i in seq_along(current)) {
       current[[i]] <- .fixDataType(values = current[[i]],
@@ -130,10 +116,6 @@
   
   ## for 'non-standard' units, see if we have them stored and 
   ## replace if we can
-  # data("fit_data_types", 
-  #      package = "fitFileR", 
-  #      envir = environment())
-  # 
   enum <- fit_data_types[[ as.character(type) ]]
   if(!is.null(enum) && is.integer(values)) {
     idx <- match(values, enum[['key']])
