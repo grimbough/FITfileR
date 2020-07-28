@@ -6,6 +6,30 @@ setClass("FitMessage",
              messages = "data.frame"
          ))
 
+setClass(Class = "FitMessageHeader",
+         representation(
+             is_definition = "logical",
+             is_developer_data = "logical",
+             local_message_number = "integer",
+             time_offset = "numeric"
+         ))
+
+setClass("FitDefinitionMessage",
+         representation(
+             header = "FitMessageHeader",
+             is_little_endian = "logical",
+             global_message_number = "integer",
+             field_defs = "list",
+             dev_field_defs = "list"
+         ))
+
+setClass("FitDataMessage",
+         representation(
+             header = "FitMessageHeader",
+             definition = "FitDefinitionMessage",
+             fields = "list"
+         ))
+
 
 #' @exportClass FitFile 
 setClass("FitFile", 
