@@ -162,3 +162,52 @@
   return(message)
 }
 
+
+
+
+
+## convert message number into text version of its name
+.translateGlobalMessageNumber <- function(global_message_number) {
+  dplyr::filter(fit_data_types$mesg_num, 
+                key == global_message_number) %>%
+    magrittr::extract2('value')
+}
+
+
+## return details of a field number for a specific message type
+.translateField <- function(field_definition_number, global_message_number) {
+  
+  global_message_name <- .translateGlobalMessageNumber(global_message_number)
+  dplyr::filter( fit_message_types[[ global_message_name ]],
+                 key == field_definition_number)
+  
+}
+
+
+## only returns the field name
+.translateField2 <- function(field_definition_number, global_message_number) {
+  
+  global_message_name <- .translateGlobalMessageNumber(global_message_number)
+  dplyr::filter( fit_message_types[[ global_message_name ]],
+                 key == field_definition_number) %>%
+    magrittr::extract2('value')
+  
+}
+
+
+.applyScaleAndOffset <- function(input, field_definition_number, global_message_number) {
+  
+  global_message_name <- .translateGlobalMessageNumber(global_message_number)
+  details <- dplyr::filter( fit_message_types[[ global_message_name ]],
+                            key == field_definition_number)
+  
+  if(!is.na(details$scale[1])) {
+    input <- input / as.integer(details$scale[1])
+  }
+  
+  #if(!is.na(details$offset[1])) {
+  #    input <- input - details$offset[1]
+  #}
+  
+  return( input )
+}
