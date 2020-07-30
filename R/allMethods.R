@@ -27,7 +27,7 @@ setMethod("getMessagesByType",
                   
                   messages3 <- lapply(messages2, FUN = function(x) {
                       message_table <- lapply(x, function(y) {
-                          y@fields 
+                          as_tibble(y@fields) 
                           } 
                         ) %>% dplyr::bind_rows( ) %>%
                           mutate(across(everything(), 
