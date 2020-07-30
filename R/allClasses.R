@@ -9,7 +9,7 @@ setClass("FitMessage",
 setClass(Class = "FitMessageHeader",
          representation(
              is_definition = "logical",
-             is_developer_data = "logical",
+             has_developer_data = "logical",
              local_message_number = "integer",
              time_offset = "numeric"
          ))
@@ -19,8 +19,8 @@ setClass("FitDefinitionMessage",
              header = "FitMessageHeader",
              is_little_endian = "logical",
              global_message_number = "integer",
-             field_defs = "list",
-             dev_field_defs = "list"
+             field_defs = "data.frame",
+             dev_field_defs = "ANY"
          ))
 
 setClass("FitDataMessage",
@@ -31,23 +31,14 @@ setClass("FitDataMessage",
          ))
 
 
-#' @exportClass FitFile 
-setClass("FitFile", 
+#' @exportClass RawFitFile 
+setClass("RawFitFile", 
          representation(
            header = "list", 
-           file_id = "FitMessage",
-           events = "FitMessage",
-           records = "FitMessage",
-           laps = "FitMessage"
+           messages = "list"
          )
 )
 
-setMethod("show", signature = "FitFile", function(object) {
-  
-  cat("Fit File Data\n")
-  cat("Device: ", object@file_id@messages$manufacturer, " ", object@file_id@messages$product, "\n")
-  cat("Date: ", as.character(object@file_id@messages$time_created), "\n")
 
-})
 
 

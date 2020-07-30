@@ -6,11 +6,6 @@
 #' @importFrom utils data
 .renameMessages <- function(scaffold, defs, merge = TRUE) {
   
-  ## load the appropriate key/value table
-  #data("fit_data_types", 
-  #     package = "fitFileR", 
-  #     envir = environment())
-  
   globalMessageNum <- sapply(defs, function(x) { x$global_message_num } )
   
   ## we are going to remove any entries that have a global message number
