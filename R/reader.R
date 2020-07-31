@@ -31,23 +31,44 @@
 readFitFile <- function(fileName, dropUnknown = TRUE, mergeMessages = TRUE) {
   
   tmp <- .readFile(fileName)
-  all_records <- .renameMessages(tmp[[1]], tmp[[2]], merge = mergeMessages)
-  
-  for(i in names(all_records)) {
-    all_records[[i]] <- .processMessageType(all_records[[i]], name = i, drop = dropUnknown)
-  }
-  
-  fitFile <- new("FitFile", 
-                 header = tmp[[3]],
-                 file_id = all_records$file_id, 
-                 events = all_records$event, 
-                 records = all_records$record, 
-                 laps = all_records$lap)
-  
-  return(fitFile)
+  return(tmp)
 }
 
 .readFile <- function(fileName) {
+  
+  con <- file(fileName, "rb")
+  on.exit(close(con))
+  file_header <- fitFileR:::.readFileHeader(con)
+  
+  messages <- list()
+  msgDefs <- list()
+  count <- 1
+  msg_count <- 1
+  
+  while(seek(con, where = NA) < (file_header$data_size + file_header$size)) {
+    
+    record_header <- fitFileR:::.readRecordHeader(con)
+    
+    if(record_header@is_definition) {
+      msgDefs[[ count ]] <- fitFileR:::.readMessage_definition(con = con, message_header = record_header)
+      count <- count + 1
+    } else {
+      definition <- .matchDefinition(msgDefs, local_message_number = record_header@local_message_number)
+      messages[[ msg_count ]] <- fitFileR:::.readMessage_data(con = con, 
+                                                              header = record_header, 
+                                                              definition = definition)
+      msg_count <- msg_count + 1
+    }
+    
+  }
+  
+  close(con)
+  
+  fit <- new("RawFitFile", header = file_header, messages = messages)
+  return(fit)
+}
+
+.readFile_orig <- function(fileName) {
     
     con <- file(fileName, "rb")
     on.exit(close(con))
