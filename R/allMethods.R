@@ -3,13 +3,9 @@ setGeneric("getMessagesByType", function(object, global_message_number) {
     standardGeneric("getMessagesByType")
 })
 
-.definitionSignature <- function(message) {
-    paste(message@definition@field_defs$field_def_num, 
-          message@definition@field_defs$size, 
-          sep = "x",
-          collapse = "_")
-}
 
+#' @import dplyr
+#' @importFrom magrittr %>%
 setMethod("getMessagesByType", 
           signature = c("RawFitFile", "integer"),
           function(object, global_message_number) {
@@ -20,30 +16,19 @@ setMethod("getMessagesByType",
               if(length(idx)) {
                   messages <- object@messages[ idx ]
                   
-                  signatures <- vapply(messages, .definitionSignature, 
+                  signatures <- vapply(messages, 
+                                       function(x) { x@definition@.signature }, 
                                        FUN.VALUE = character(1))
                   
                   messages2 <- split(messages, signatures)
                   
-                  messages3 <- lapply(messages2, FUN = function(x) {
-                      message_table <- lapply(x, function(y) {
-                          as_tibble(y@fields) 
-                          } 
-                        ) %>% dplyr::bind_rows( ) %>%
-                          mutate(across(everything(), 
-                                        ~ .applyScaleAndOffset(input = ., 
-                                                               as.integer(cur_column()), 
-                                                               global_message_number) 
-                                        ))
-                     names(message_table) <- vapply( as.integer(names(message_table)),
-                                                     FUN = .translateField2, 
-                                                     FUN.VALUE = character(1),
-                                                      global_message_number )
-                      return(message_table)
-                  })
+                  messages3 <- lapply(messages2, FUN = .processFieldsList, global_message_number)
                   
                   if(length(messages3) == 1) {
                       messages3 <- messages3[[1]]
+                  } else {
+                      gm_name <- fitFileR:::.translateGlobalMessageNumber( global_message_number )
+                      names(messages3) <- paste(gm_name, seq_along(messages3), sep = "_")
                   }
                   return(messages3)
               } else {
@@ -121,12 +106,17 @@ setMethod("show", signature = "FitDataMessage", function(object) {
     
     for(field in object@definition@field_defs$field_def_num) {
         translated <- .translateField(field, object@definition@global_message_number)
-        cat("\n ", translated$value, " (", translated$key, ", ", translated$type, ")", sep = "")
+        cat("\n ", translated$value, " (", translated$key, ", ", translated$type, "):", sep = "")
         
-        original <- object@fields[[ paste(field) ]]
-        adjusted <- .applyScaleAndOffset( original, field, object@definition@global_message_number )
+        original <- object@fields[[ paste(field) ]] %>% unlist()
+        adjusted <- .applyScaleAndOffset( original, field, object@definition@global_message_number ) 
+        units <- ifelse(is.na(translated$units), "", paste0(" ", translated$units))
         
-        cat(" ", adjusted, " (", original, ")", sep = "")
+        if(length(original) > 1) { cat(" {") }
+        for(i in seq_along(original)) {
+            cat(" ", adjusted[i], units, " (", original[i], ")", sep = "")
+        }
+        if(length(original) > 1) { cat(" }") }
         
     }
 })
