@@ -20,7 +20,8 @@ setClass("FitDefinitionMessage",
              is_little_endian = "logical",
              global_message_number = "integer",
              field_defs = "data.frame",
-             dev_field_defs = "ANY"
+             dev_field_defs = "ANY",
+             .signature = "character"
          ))
 
 setClass("FitDataMessage",
