@@ -20,9 +20,9 @@
 
 ## create a signature for each definition message
 ## so we can easily separate message of the same type 
-.definitionSignature <- function(message) {
-  paste(message@definition@field_defs$field_def_num, 
-        message@definition@field_defs$size, 
+.definitionSignature <- function(field_defs) {
+  paste(field_defs$field_def_num, 
+        field_defs$size, 
         sep = "x",
         collapse = "_")
 }

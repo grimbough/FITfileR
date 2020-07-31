@@ -170,7 +170,7 @@
 .translateGlobalMessageNumber <- function(global_message_number) {
   dplyr::filter(fit_data_types$mesg_num, 
                 key == global_message_number) %>%
-    magrittr::extract2('value')
+    magrittr::extract2('value') 
 }
 
 
@@ -202,12 +202,43 @@
                             key == field_definition_number)
   
   if(!is.na(details$scale[1])) {
-    input <- input / as.integer(details$scale[1])
+    if(is.list(input)) {
+      input[[1]] <- input[[1]] / as.numeric(details$scale[1])
+    } else {
+      input <- input / as.numeric(details$scale[1])
+    }
   }
   
-  #if(!is.na(details$offset[1])) {
-  #    input <- input - details$offset[1]
-  #}
+  if(!is.na(details$offset[1])) {
+      input <- input - details$offset[1]
+  }
+  
+  if(!is.na(details$units[1])) {
+      attributes(input) <- list(units = details$units)
+  }
   
   return( input )
+}
+
+
+.processFieldsList <- function(x, global_message_number) {
+  message_table <- lapply(x, 
+                          FUN = function(y) {
+    as_tibble(y@fields) 
+  } 
+  ) %>% 
+    dplyr::bind_rows( ) %>%
+    mutate(across(everything(), 
+                  ~ .applyScaleAndOffset(input = ., 
+                                         as.integer(cur_column()), 
+                                         global_message_number) 
+    ))
+  
+  
+  
+  names(message_table) <- vapply( as.integer(names(message_table)),
+                                  FUN = .translateField2, 
+                                  FUN.VALUE = character(1),
+                                  global_message_number )
+  return(message_table)
 }
