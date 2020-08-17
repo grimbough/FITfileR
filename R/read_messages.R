@@ -58,8 +58,9 @@
             
             n_values <- sizes[i] %/% single_size
             if(fieldTypes[i] == "07") {
-                raw_bytes <- readBin(con = con, what = "raw", n = n_values, size = 1)
-                message[[i]] <- rawToChar(raw_bytes)
+                #raw_bytes <- readBin(con = con, what = "raw", n = n_values, size = 1)
+                #message[[i]] <- rawToChar(raw_bytes)
+                message[[i]] <- readChar(con = con, nchars = n_values, useBytes = TRUE)
             } else {
                 for(j in seq_len( n_values ) ) {
                     
