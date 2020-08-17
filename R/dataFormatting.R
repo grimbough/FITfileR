@@ -138,10 +138,6 @@
   
   ## for 'non-standard' units, see if we have them stored and 
   ## replace if we can
-  # data("fit_data_types", 
-  #      package = "fitFileR", 
-  #      envir = environment())
-  # 
   enum <- fit_data_types[[ as.character(type) ]]
   if(!is.null(enum) && is.integer(values)) {
     idx <- match(values, enum[['key']])
@@ -178,8 +174,13 @@
 .translateField <- function(field_definition_number, global_message_number) {
   
   global_message_name <- .translateGlobalMessageNumber(global_message_number)
-  dplyr::filter( fit_message_types[[ global_message_name ]],
-                 key == field_definition_number)
+  
+  if(length(global_message_name) == 0) {
+    return(list(value = '', key = '', type = '', units = NA))
+  } else {
+    dplyr::filter( fit_message_types[[ global_message_name ]],
+                  key == field_definition_number)
+  }
   
 }
 
@@ -198,8 +199,12 @@
 .applyScaleAndOffset <- function(input, field_definition_number, global_message_number) {
   
   global_message_name <- .translateGlobalMessageNumber(global_message_number)
-  details <- dplyr::filter( fit_message_types[[ global_message_name ]],
+  if(length(global_message_name) == 0) { 
+    details <- list(scale = NA, offset = NA, units = NA)
+  } else {
+    details <- dplyr::filter( fit_message_types[[ global_message_name ]],
                             key == field_definition_number)
+  }
   
   if(!is.na(details$scale[1])) {
     if(is.list(input)) {
@@ -220,6 +225,25 @@
   return( input )
 }
 
+.applyFormatConversions <- function(input, field_definition_number, global_message_number) {
+  
+  global_message_name <- .translateGlobalMessageNumber(global_message_number)
+  details <- dplyr::filter( fit_message_types[[ global_message_name ]],
+                            key == field_definition_number)
+  
+  type <- as.character(details$type)
+  
+  if(type == "date_time") {
+    input <- .adjustTimeStamp(input)
+    attr(input, "units") <- NULL
+  } else if (details$units == "semicircles") {
+    input <- input * (180 / 2^31)
+    attributes(input) <- list(units = "degrees")
+  }
+  
+  return(input)
+}
+
 
 .processFieldsList <- function(x, global_message_number) {
   message_table <- lapply(x, 
@@ -232,9 +256,12 @@
                   ~ .applyScaleAndOffset(input = ., 
                                          as.integer(cur_column()), 
                                          global_message_number) 
+    )) %>%
+    mutate(across(everything(), 
+                  ~ .applyFormatConversions(input = ., 
+                                         as.integer(cur_column()), 
+                                         global_message_number) 
     ))
-  
-  
   
   names(message_table) <- vapply( as.integer(names(message_table)),
                                   FUN = .translateField2, 
