@@ -44,21 +44,23 @@ names(garmin)
 
 # Working with the data
 
-The data most often wanted from a fit file are the values such as location, speed, altitude, etc recorded during an activity.  These can be found in the `record` entry in the list.  Here's the first few rows from our TomTom file:
+The data most often wanted from a fit file are the values such as location, speed, altitude, etc recorded during an activity.  Such data are classed as "records" in the FIT specification and can be retrieved from the FitFile object using using `records()`. 
 
 ```{r print_record}
-garmin$record
+garmin_records <- records(garmin)
+garmin_records
 ```
+
+In this example we actually get a list with three sets of data.  This is because in this particular file there were three distinct definitions of what a "record" contains.  This can happen if data recording begins before a sensor (e.g. a heart rate monitor) has been attached to a device, or GPS position has been acquired.  In this example we are interested in the first entry, which contains the vast majority of the data.
 
 ## Plotting a route
 
-Before we can plot locations need to process the values held in the fit file into longitude and latitude.  First, we remove any entries recorded when satellite reception was lost; these have a value of `NA` in this file, but appear as `2^31-1` in the data from the TomTom so we remove both.  We then convert to longitude and latitude coordinates.
+To plot locations we extract the longitude and latitude from our FIT records.
 
 ```{r process_coords}
-
-coords <- cbind(garmin$record$position_long, garmin$record$position_lat)
-coords <- coords[ apply(coords, 1, function(x) { !any(is.na(x) || x == 2^31-1) }), ]
-coords <- coords * (180 / (2^31))
+library(dplyr)
+coords <- garmin_records$record_1 %>% 
+  select(position_long, position_lat)
 ```
 
 We can now use the **leaflet** package to create an interactive map, with our route overlayed on top.
@@ -66,7 +68,9 @@ We can now use the **leaflet** package to create an interactive map, with our ro
 ```{r mapping}
 library(leaflet)
 
-m <- leaflet( coords ) %>%
+m <- coords %>% 
+  as.matrix() %>%
+  leaflet(  ) %>%
      addTiles() %>%
      addPolylines( )
     
@@ -78,17 +82,19 @@ m
 Here we compare the heart rate recorded during the activity by the two devices.
 
 ```{r plot_hr}
+tomtom_records <- records(tomtom)
+
 library(ggplot2)
 ggplot() + 
-    geom_line(data = garmin$record, aes(x = timestamp, y = heart_rate), col = 1) + 
-    geom_line(data = tomtom$record, aes(x = timestamp, y = heart_rate), col = 2)
+    geom_line(data = garmin_records$record_1, aes(x = timestamp, y = heart_rate), col = 1) + 
+    geom_line(data = tomtom_records$record_2, aes(x = timestamp, y = heart_rate), col = 2)
 ```
 
 That's pretty messy as the TomTom data seem to have lots of 255 values (These are presumably dropouts in the data recording that get assigned the maximum value). We can filter those entries out to compare the two traces more easily.
 
 ```{r plot-hr-2}
 ggplot() + 
-    geom_line(data = garmin$record, aes(x = timestamp, y = heart_rate), col = "blue") + 
-    geom_line(data = dplyr::filter(tomtom$record, heart_rate != 255), 
+    geom_line(data = garmin_records$record_1, aes(x = timestamp, y = heart_rate), col = "blue") + 
+    geom_line(data = dplyr::filter(tomtom_records$record_2, heart_rate != 255), 
               aes(x = timestamp, y = heart_rate), col = "red")
 ```

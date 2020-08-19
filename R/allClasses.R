@@ -31,6 +31,14 @@ setClass("FitDataMessage",
              fields = "list"
          ))
 
+setClass("FitDataMessageWithDevData",
+         representation(
+             dev_fields = "list",
+             dev_field_details = "data.frame"
+         ),
+         contains = "FitDataMessage"
+)
+
 
 #' @exportClass RawFitFile 
 setClass("RawFitFile", 

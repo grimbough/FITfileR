@@ -53,106 +53,20 @@ readFitFile <- function(fileName, dropUnknown = TRUE, mergeMessages = TRUE) {
       msgDefs[[ count ]] <- fitFileR:::.readMessage_definition(con = con, message_header = record_header)
       count <- count + 1
     } else {
-      definition <- .matchDefinition(msgDefs, local_message_number = record_header@local_message_number)
+      definition <- fitFileR:::.matchDefinition(msgDefs, local_message_number = record_header@local_message_number)
       messages[[ msg_count ]] <- fitFileR:::.readMessage_data(con = con, 
                                                               header = record_header, 
                                                               definition = definition)
+      
+      if(is( messages[[ msg_count ]], "FitDataMessageWithDevData")) {
+        messages[[ msg_count ]]@dev_field_details <- fitFileR:::.matchDevDefinition(messages, dev_data_idx = 0)
+      }
+      
       msg_count <- msg_count + 1
     }
     
   }
   
-  close(con)
-  
   fit <- new("RawFitFile", header = file_header, messages = messages)
   return(fit)
 }
-
-.readFile_orig <- function(fileName) {
-    
-    con <- file(fileName, "rb")
-    on.exit(close(con))
-    file_header <- .readFileHeader(con)
-    
-    if(file_header$data_type != ".FIT") {
-      stop("This does not look like a FIT file")
-    }
-    
-    message_defs <- list()
-    defs_idx <- 1
-    
-    plmt <- "-1"
-    prev_lmt <- "0"
-    defs_count <- list()
-    pseudoMessageTab <- NULL
-    
-    scaffold <- list()
-    
-    count <- 1
-     
-    while(seek(con, where = NA) < (file_header$data_size + 14)) {
-        
-      #message(count)
-      count <- count+1
-      warnings()
-      
-        record_header <- .readRecordHeader(con)
-        lmt <- as.character(record_header$local_message_type)
-
-        if(record_header$message_type == "definition") {
-            
-          #message("Def: ", lmt)
-          
-            if(lmt %in% pseudoMessageTab[,2]) {
-                plmt <- as.character(as.integer(plmt) + 1)
-            } else {
-                plmt <- lmt
-            }
-            pseudoMessageTab <- rbind(pseudoMessageTab, c(lmt, plmt))
-            prev_lmt <- lmt
-            
-            ## read the message definition just to get through the bytes
-            message_res <- .readMessage.definition(con, devFields = record_header$developer_data)
-            message_defs[[ plmt ]] <- message_res$message
-            defs_idx <- defs_idx + 1
-            
-            defs_count[[ plmt ]] <- 1
-            
-        } else if(record_header$message_type == "data") {
-          
-         #message("Data: ", lmt)
-            
-            if(record_header$type == "compressed_timestamp") {
-             # message("Compressed")
-              defIdx <- pseudoMessageTab[ max(which(pseudoMessageTab[,1] == lmt)), 2]
-              message <- .readMessage.data(con, message_defs[[ defIdx ]], compressed_timestamp = TRUE)
-              scaffold[[ defIdx ]] <- rbind(scaffold[[ defIdx ]], 
-                                            message)
-            } else {
-          
-              defIdx <- pseudoMessageTab[ max(which(pseudoMessageTab[,1] == lmt)), 2]
-              message <- .readMessage.data(con, message_defs[[ defIdx ]], compressed_timestamp = FALSE)
-              scaffold[[ defIdx ]] <- dplyr::bind_rows(scaffold[[ defIdx ]], 
-                                            message) 
-            }
-          
-            if( !is.null(message_defs[[ defIdx ]]$n_dev_fields) ) {
-                skip <- sum(message_defs[[ defIdx ]]$dev_field_definition$size)
-                #message("Skipping dev data: ", skip, " bytes")
-                readBin(con, what = "integer", n = skip, size = 1)
-            }
-          
-        } else {
-            stop("unknown message type")
-        }
-    }
-    
-    if(length(message_defs) != length(scaffold)) {
-        stop("Unequal lengths")
-    } 
-    
-    scaffold <- lapply(scaffold, as_tibble)
-    
-    return(list(scaffold, message_defs, file_header))
-}
-

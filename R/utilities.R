@@ -37,3 +37,23 @@
     }
   }
 }
+
+.matchDevDefinition <- function(msgs, dev_data_idx) {
+  
+  gmn <- vapply(msgs, globalMessageNumber, FUN.VALUE = integer(1))
+  idx <- which(gmn == 206)
+  if(length(idx) == 0) {
+    stop()
+  } 
+  
+  dev_msgs <- msgs[ idx ]
+  for(i in seq_along(dev_msgs)) {
+    if(dev_msgs[[i]]@fields[['0']] == dev_data_idx) {
+      def <- data.frame(field_def_num = dev_msgs[[i]]@fields[['1']],
+                 field_name = dev_msgs[[i]]@fields[['3']],
+                 units = dev_msgs[[i]]@fields[['8']])
+      break
+    }
+  }
+  return(def)
+}
