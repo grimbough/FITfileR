@@ -1,3 +1,16 @@
+
+setGeneric("hasDeveloperData", function(object) {
+    standardGeneric("hasDeveloperData")
+})
+
+setMethod("hasDeveloperData", 
+          signature = c("FitDataMessage"),
+          function(object) {
+              return(object@definition@header@has_developer_data)
+          }
+)
+
+
 #' @export
 setGeneric("getMessagesByType", function(object, global_message_number) {
     standardGeneric("getMessagesByType")
@@ -22,7 +35,7 @@ setMethod("getMessagesByType",
                   
                   messages2 <- split(messages, signatures)
                   
-                  messages3 <- lapply(messages2, FUN = .processFieldsList, global_message_number)
+                  messages3 <- lapply(messages2, FUN = fitFileR:::.processFieldsList, global_message_number)
                   
                   if(length(messages3) == 1) {
                       messages3 <- messages3[[1]]
@@ -119,6 +132,40 @@ setMethod("show", signature = "FitDataMessage", function(object) {
         if(length(original) > 1) { cat(" }") }
         
     }
+    
+})
+
+setMethod("show", signature = "FitDataMessageWithDevData", function(object) {
+    
+    cat("Local message type: ", localMessageNumber(object),  " ", sep = "")
+    cat("(message name: ", .translateGlobalMessageNumber( globalMessageNumber(object) ), ", ",  sep = "")
+    cat("message type: ", object@definition@global_message_number, ", ", sep = "")
+    cat("fields: ", nrow(object@definition@field_defs), ", bytes: ", sum(object@definition@field_defs$size), ")", sep = "")
+    
+    for(field in object@definition@field_defs$field_def_num) {
+        translated <- .translateField(field, object@definition@global_message_number)
+        cat("\n ", translated$value, " (", translated$key, ", ", translated$type, "):", sep = "")
+        
+        original <- object@fields[[ paste(field) ]] %>% unlist()
+        adjusted <- .applyScaleAndOffset( original, field, object@definition@global_message_number ) 
+        units <- ifelse(is.na(translated$units), "", paste0(" ", translated$units))
+        
+        if(length(original) > 1) { cat(" {") }
+        for(i in seq_along(original)) {
+            cat(" ", adjusted[i], units, " (", original[i], ")", sep = "")
+        }
+        if(length(original) > 1) { cat(" }") }
+        
+    }
+    
+    for(field in object@definition@dev_field_defs$field_def_num) {
+        translated <- filter(object@dev_field_details, field_def_num == field)
+        cat("\n ", translated$field_name, ": ", sep = "")
+        original <- object@dev_fields[[ paste(field) ]] %>% unlist()
+        cat(original, translated$units)
+    }
+    
+    
 })
 
 ## Dump
@@ -133,5 +180,16 @@ setMethod("dump", signature = "RawFitFile",
           }
 )
 
+## records
+#' @export
+setGeneric("records", function(object) {
+    standardGeneric("records")
+})
+
+setMethod("records", signature = "RawFitFile",
+          function(object) {
+              getMessagesByType(object, global_message_number = 20L)
+          }
+)
 
 
