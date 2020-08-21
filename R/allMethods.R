@@ -10,6 +10,9 @@ setMethod("hasDeveloperData",
           }
 )
 
+#########################
+## Extracting messages ##
+#########################
 
 #' @export
 setGeneric("getMessagesByType", function(object, global_message_number) {
@@ -180,6 +183,10 @@ setMethod("dump", signature = "RawFitFile",
           }
 )
 
+#########################################
+## Accessors for common messages types ##
+#########################################
+
 ## records
 #' @export
 setGeneric("records", function(object) {
@@ -192,4 +199,15 @@ setMethod("records", signature = "RawFitFile",
           }
 )
 
+## records
+#' @export
+setGeneric("laps", function(object) {
+    standardGeneric("laps")
+})
+
+setMethod("laps", signature = "RawFitFile",
+          function(object) {
+              getMessagesByType(object, global_message_number = 19L)
+          }
+)
 
