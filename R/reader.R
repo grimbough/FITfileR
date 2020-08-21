@@ -44,10 +44,11 @@ readFitFile <- function(fileName, dropUnknown = TRUE, mergeMessages = TRUE) {
   msgDefs <- list()
   count <- 1
   msg_count <- 1
+  prev_header <- NULL
   
   while(seek(con, where = NA) < (file_header$data_size + file_header$size)) {
     
-    record_header <- fitFileR:::.readRecordHeader(con)
+    record_header <- fitFileR:::.readRecordHeader(con, prev_header)
     
     if(record_header@is_definition) {
       msgDefs[[ count ]] <- fitFileR:::.readMessage_definition(con = con, message_header = record_header)
@@ -64,6 +65,8 @@ readFitFile <- function(fileName, dropUnknown = TRUE, mergeMessages = TRUE) {
       
       msg_count <- msg_count + 1
     }
+    
+    prev_header <- record_header
     
   }
   
