@@ -48,10 +48,13 @@
 
 ## convert message number into text version of its name
 .translateGlobalMessageNumber <- function(global_message_number) {
-  #dplyr::filter(fit_data_types$mesg_num, 
-  #              key == global_message_number) %>%
-  #  magrittr::extract2('value') 
   fit_data_types$mesg_num$value[which(fit_data_types$mesg_num$key == global_message_number)]
+}
+
+## convert message name into numeric form
+.translateGlobalMessageName <- function(global_message_name) {
+  fit_data_types$mesg_num$key[which(fit_data_types$mesg_num$value == global_message_name)] %>%
+    as.integer()
 }
 
 
@@ -63,8 +66,6 @@
   if(length(global_message_name) == 0) {
     return(list(value = '', key = '', type = '', units = NA))
   } else {
-    #dplyr::filter( fit_message_types[[ global_message_name ]],
-    #              key == field_definition_number)
     type <- fit_message_types[[ global_message_name ]]
     type[which(type$key == field_definition_number), ]
   }

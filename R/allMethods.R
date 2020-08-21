@@ -15,7 +15,23 @@ setMethod("hasDeveloperData",
 #########################
 
 #' @export
-setGeneric("getMessagesByType", function(object, global_message_number) {
+setGeneric("getMessageTypes", function(object, global_message_number) {
+    standardGeneric("getMessageTypes")
+})
+
+#' @import dplyr
+#' @importFrom magrittr %>%
+setMethod("getMessageTypes", 
+          signature = c("RawFitFile"),
+          function(object) {
+              all_gmn <- vapply(object@messages, FUN = globalMessageNumber, 
+                            FUN.VALUE = integer(1))
+              filter(fit_data_types$mesg_num, key %in% unique(all_gmn)) %>% 
+                  magrittr::extract2('value')
+          })
+
+#' @export
+setGeneric("getMessagesByType", function(object, message_type) {
     standardGeneric("getMessagesByType")
 })
 
@@ -24,10 +40,10 @@ setGeneric("getMessagesByType", function(object, global_message_number) {
 #' @importFrom magrittr %>%
 setMethod("getMessagesByType", 
           signature = c("RawFitFile", "integer"),
-          function(object, global_message_number) {
+          function(object, message_type) {
               
               idx <- vapply(object@messages, FUN = globalMessageNumber, 
-                            FUN.VALUE = integer(1)) == global_message_number
+                            FUN.VALUE = integer(1)) == message_type
               
               if(length(idx)) {
                   messages <- object@messages[ idx ]
@@ -38,12 +54,12 @@ setMethod("getMessagesByType",
                   
                   messages2 <- split(messages, signatures)
                   
-                  messages3 <- lapply(messages2, FUN = fitFileR:::.processFieldsList, global_message_number)
+                  messages3 <- lapply(messages2, FUN = fitFileR:::.processFieldsList, message_type)
                   
                   if(length(messages3) == 1) {
                       messages3 <- messages3[[1]]
                   } else {
-                      gm_name <- fitFileR:::.translateGlobalMessageNumber( global_message_number )
+                      gm_name <- fitFileR:::.translateGlobalMessageNumber( message_type )
                       names(messages3) <- paste(gm_name, seq_along(messages3), sep = "_")
                   }
                   return(messages3)
@@ -51,6 +67,22 @@ setMethod("getMessagesByType",
                   return(NULL)
               }
               
+          }
+)
+
+#' @import dplyr
+#' @importFrom magrittr %>%
+setMethod("getMessagesByType", 
+          signature = c("RawFitFile", "character"),
+          function(object, message_type) {
+              types_in_file <- getMessageTypes(object)
+              if(!message_type %in% types_in_file) {
+                  stop("Message type ", message_type, " not found in file")
+              }
+              global_message_number <- .translateGlobalMessageName(message_type)
+              
+              getMessagesByType(object, global_message_number)
+          
           }
 )
 
@@ -195,7 +227,7 @@ setGeneric("records", function(object) {
 
 setMethod("records", signature = "RawFitFile",
           function(object) {
-              getMessagesByType(object, global_message_number = 20L)
+              getMessagesByType(object, message_type = 20L)
           }
 )
 
@@ -207,7 +239,7 @@ setGeneric("laps", function(object) {
 
 setMethod("laps", signature = "RawFitFile",
           function(object) {
-              getMessagesByType(object, global_message_number = 19L)
+              getMessagesByType(object, message_type = 19L)
           }
 )
 
