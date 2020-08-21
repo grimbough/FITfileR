@@ -2,6 +2,7 @@
 
 export(getMessagesByType)
 export(globalMessageNumber)
+export(laps)
 export(localMessageNumber)
 export(readFitFile)
 export(records)

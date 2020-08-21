@@ -125,7 +125,7 @@
   if(type == "date_time") {
     input <- .adjustTimeStamp(input)
     attr(input, "units") <- NULL
-  } else if (details$units == "semicircles") {
+  } else if (!is.na(details$units) && details$units == "semicircles") {
     input <- input * (180 / 2^31)
     attributes(input) <- list(units = "degrees")
   }
@@ -133,14 +133,33 @@
   return(input)
 }
 
+.isKnownField <- function(field_definition_number, global_message_number) {
+  
+  global_message_name <- .translateGlobalMessageNumber(global_message_number)
+  field_definition_number %in% fit_message_types[[ global_message_name ]]$key
+
+}
 
 .processFieldsList <- function(x, global_message_number) {
   message_table <- lapply(x, 
                           FUN = function(y) {
-    as_tibble(y@fields) 
+                            structure(y@fields, row.names = c(NA, -1), class = "data.frame") 
   } 
   ) %>% 
-    dplyr::bind_rows( ) %>%
+    dplyr::bind_rows( ) 
+  
+  ## some columns are not defined in the FIT profile.  We remove them here
+  keep_idx <- vapply(as.integer(names(message_table)), 
+                     FUN = .isKnownField, 
+                     FUN.VALUE = logical(1), 
+                     global_message_number = global_message_number)
+  
+  if(all(keep_idx == FALSE)) {
+    stop("We have created an empty data.frame.  This should not happen!")
+  }
+  
+  message_table <- message_table %>%
+    dplyr::select(which(keep_idx)) %>%
     mutate(across(everything(), 
                   ~ .applyScaleAndOffset(input = ., 
                                          as.integer(cur_column()), 
@@ -150,7 +169,8 @@
                   ~ .applyFormatConversions(input = ., 
                                          as.integer(cur_column()), 
                                          global_message_number) 
-    ))
+    )) %>%
+    as_tibble()
   
   names(message_table) <- vapply( as.integer(names(message_table)),
                                   FUN = .translateField2, 
