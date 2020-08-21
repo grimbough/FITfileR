@@ -11,7 +11,8 @@ setClass(Class = "FitMessageHeader",
              is_definition = "logical",
              has_developer_data = "logical",
              local_message_number = "integer",
-             time_offset = "numeric"
+             time_offset = "numeric",
+             raw_rep = "raw"
          ))
 
 setClass("FitDefinitionMessage",

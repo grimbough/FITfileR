@@ -20,10 +20,13 @@
 ## The 8th bit determines if this is a standard or compressed header and 
 ## we dispatch the appropriate function here
 ## 
-.readRecordHeader <- function(con) {
+.readRecordHeader <- function(con, prev_header) {
   
   record_header <- rawToBits(readBin(con = con, what = "raw", n = 1, size = 1))
-  if(record_header[8]) {
+  
+  if(!is.null(prev_header) && identical(prev_header@raw_rep, record_header)) {
+    header <- prev_header
+  } else if(record_header[8]) {
     ## compressed time stamp header
     ## currently not handled
     # stop("Compressed time stamp header not currently supported")
@@ -32,6 +35,8 @@
     ## normal header
     header <- .readMessageHeader_normal(record_header)
   }
+  
+  return(header)
   
 }
 
@@ -47,7 +52,8 @@
       is_definition = as.logical(record_header[7]),
       has_developer_data = as.logical(record_header[6]),
       local_message_number = .binaryToInt(record_header[1:4]),
-      time_offset = 0
+      time_offset = 0,
+      raw_rep = record_header
   )
   
   return(header)
