@@ -3,7 +3,7 @@
 #'     standardGeneric("writeFitFile")
 #' })
 #' 
-#' setMethod("writeFitFile", signature = "RawFitFile", function(object) {
+#' setMethod("writeFitFile", signature = "FitFile", function(object) {
 #'     
 #'     file_name <- "/tmp/test.fit"
 #'     if(file.exists(file_name)) { file.remove(file_name) }

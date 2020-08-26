@@ -1,24 +1,10 @@
-## lots of fields store numeric references to a value in a factor
-## this function takes the name of the appropriate data type
-## and checks whether it is a time stamp, or we should test
-## whether it comes from a factor data type.
-.fixDataType <- function(values, type, fit_data_types) {
-  
-  if(grepl(pattern = "date_time", x = type)) {
-    values <- .adjustTimeStamp(values)
-  } else {
-    values <- .getFromDataTypeFactor(values, type, fit_data_types)
-  }
-  return(values)
-}
-
 ## fit time stamps are from 31st December 1989
 ## this function transforms them into data/times
 .adjustTimeStamp <- function(values) {
   as.POSIXct(values, origin = "1989-12-31")  
 }
 
-.getFromDataTypeFactor <- function(values, type, fit_data_types) {
+.getFromDataTypeFactor <- function(values, type) {
   
   ## for 'non-standard' units, see if we have them stored and 
   ## replace if we can
@@ -30,21 +16,17 @@
   return(values)
 }
 
-.fixGarminProducts <- function(message, fit_data_types) {
-  if(("manufacturer" %in% names(message)) && ("product" %in% names(message))) {
-    garmin_idx <- which(message$manufacturer == "garmin")
+
+.fixGarminProducts <- function(message_table) {
+  if(("manufacturer" %in% names(message_table)) && ("product" %in% names(message_table))) {
+    garmin_idx <- which(message_table$manufacturer == "garmin")
     if(length(garmin_idx)) {
-      message$product[garmin_idx] <- .getFromDataTypeFactor(values = message$product[garmin_idx], 
-                                                            type = "garmin_product",
-                                                            fit_data_types)
+      message_table$product[garmin_idx] <- .getFromDataTypeFactor(values = message_table$product[garmin_idx], 
+                                                            type = "garmin_product")
     }
   }
-  return(message)
+  return(message_table)
 }
-
-
-
-
 
 ## convert message number into text version of its name
 .translateGlobalMessageNumber <- function(global_message_number) {
@@ -126,7 +108,11 @@
   if(type == "date_time") {
     input <- .adjustTimeStamp(input)
     attr(input, "units") <- NULL
-  } else if (!is.na(details$units) && details$units == "semicircles") {
+  } else if(type == "manufacturer") {
+    input <- fit_data_types$manufacturer[match(input, fit_data_types$manufacturer$key), ]$value
+  }
+  
+  else if (!is.na(details$units) && details$units == "semicircles") {
     input <- input * (180 / 2^31)
     attributes(input) <- list(units = "degrees")
   }
@@ -134,6 +120,11 @@
   return(input)
 }
 
+#' Detect whether a given field number is defined for a specified global
+#' message type.  Garmin (and maybe others) include many fields that are not
+#' documented in the FIT Profile
+#' 
+#' @keywords Internal
 .isKnownField <- function(field_definition_number, global_message_number) {
   
   global_message_name <- .translateGlobalMessageNumber(global_message_number)
@@ -142,11 +133,11 @@
 }
 
 .processFieldsList <- function(x, global_message_number) {
-  message_table <- lapply(x, 
-                          FUN = function(y) {
-                            structure(y@fields, row.names = c(NA, -1), class = "data.frame") 
-  } 
-  ) %>% 
+    message_table <- lapply(x, 
+                            FUN = function(y) {
+                                    structure(y@fields, row.names = c(NA, -1), class = "data.frame") 
+                                  } 
+                          ) %>% 
     dplyr::bind_rows( ) 
   
   ## some columns are not defined in the FIT profile.  We remove them here
@@ -177,6 +168,8 @@
                                   FUN = .translateField2, 
                                   FUN.VALUE = character(1),
                                   global_message_number )
+  
+  message_table <- .fixGarminProducts2(message_table)
   
   if(hasDeveloperData(x[[1]])) {
     message_table <- bind_cols(message_table, .processDevFieldsList(x))

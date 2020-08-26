@@ -40,9 +40,13 @@ setClass("FitDataMessageWithDevData",
          contains = "FitDataMessage"
 )
 
-
-#' @exportClass RawFitFile 
-setClass("RawFitFile", 
+#' An S4 class representing a FIT file
+#' 
+#' @slot header A list containing details of the file header
+#' @slot messages A list of [FitDataMessage-class]s
+#' 
+#' @exportClass FitFile 
+setClass("FitFile", 
          representation(
            header = "list", 
            messages = "list"
