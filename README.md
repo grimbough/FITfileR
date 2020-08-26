@@ -9,14 +9,23 @@ in progress, and many features available in the complete SDK are not currently i
 
 # Package installation
 
-```{r installation}
-devtools::install_github("grimbough/fitFileR")
+```r
+if(!requireNamespace("remotes")) {
+    install.packages("remotes")
+}
+remotes::install_github("grimbough/fitFileR", ref = "fit-class")
 ```
 
-# Reading Data
+# Reading A File
 
-```{r readingData}
+```r
 library(fitFileR)
 garmin_file <- system.file("extdata/Garmin.fit", package = "fitFileR")
 garmin <- readFitFile(garmin_file)
+```
+
+# Exploring the FitFile class
+
+```r
+
 ```

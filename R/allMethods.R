@@ -10,138 +10,17 @@ setMethod("hasDeveloperData",
           }
 )
 
-#########################
-## Extracting messages ##
-#########################
-
-#' @export
-setGeneric("getMessageTypes", function(object, global_message_number) {
-    standardGeneric("getMessageTypes")
-})
-
-#' @import dplyr
-#' @importFrom magrittr %>%
-setMethod("getMessageTypes", 
-          signature = c("RawFitFile"),
-          function(object) {
-              all_gmn <- vapply(object@messages, FUN = globalMessageNumber, 
-                            FUN.VALUE = integer(1))
-              filter(fit_data_types$mesg_num, key %in% unique(all_gmn)) %>% 
-                  magrittr::extract2('value')
-          })
-
-#' @export
-setGeneric("getMessagesByType", function(object, message_type) {
-    standardGeneric("getMessagesByType")
-})
-
-
-#' @import dplyr
-#' @importFrom magrittr %>%
-setMethod("getMessagesByType", 
-          signature = c("RawFitFile", "integer"),
-          function(object, message_type) {
-              
-              idx <- vapply(object@messages, FUN = globalMessageNumber, 
-                            FUN.VALUE = integer(1)) == message_type
-              
-              if(length(idx)) {
-                  messages <- object@messages[ idx ]
-                  
-                  signatures <- vapply(messages, 
-                                       function(x) { x@definition@.signature }, 
-                                       FUN.VALUE = character(1))
-                  
-                  messages2 <- split(messages, signatures)
-                  
-                  messages3 <- lapply(messages2, FUN = fitFileR:::.processFieldsList, message_type)
-                  
-                  if(length(messages3) == 1) {
-                      messages3 <- messages3[[1]]
-                  } else {
-                      gm_name <- fitFileR:::.translateGlobalMessageNumber( message_type )
-                      names(messages3) <- paste(gm_name, seq_along(messages3), sep = "_")
-                  }
-                  return(messages3)
-              } else {
-                  return(NULL)
-              }
-              
-          }
-)
-
-#' @import dplyr
-#' @importFrom magrittr %>%
-setMethod("getMessagesByType", 
-          signature = c("RawFitFile", "character"),
-          function(object, message_type) {
-              types_in_file <- getMessageTypes(object)
-              if(!message_type %in% types_in_file) {
-                  stop("Message type ", message_type, " not found in file")
-              }
-              global_message_number <- .translateGlobalMessageName(message_type)
-              
-              getMessagesByType(object, global_message_number)
-          
-          }
-)
-
-
-#' @export
-setGeneric("localMessageNumber", function(object) {
-    standardGeneric("localMessageNumber")
-})
-
-setMethod("localMessageNumber", 
-          signature = "FitMessageHeader",
-          function(object) {
-              object@local_message_number
-          }
-)
-
-setMethod("localMessageNumber", 
-          signature = "FitDefinitionMessage",
-          function(object) {
-              localMessageNumber(object@header)
-          }
-)
-
-setMethod("localMessageNumber", 
-          signature = "FitDataMessage",
-          function(object) {
-              localMessageNumber(object@definition)
-          }
-)
-
-########################
-## Global Message Number
-########################
-
-#' @export
-setGeneric("globalMessageNumber", function(object) {
-    standardGeneric("globalMessageNumber")
-})
-
-setMethod("globalMessageNumber", 
-          signature = "FitDefinitionMessage",
-          function(object) {
-              object@global_message_number
-          }
-)
-
-setMethod("globalMessageNumber", 
-          signature = "FitDataMessage",
-          function(object) {
-              globalMessageNumber(object@definition)
-          }
-)
-
 ## Show
 setMethod("show", 
-          signature = "RawFitFile", 
+          signature = "FitFile", 
           function(object) {
-              cat("Raw Fit File\n")
-              cat("Number of messages: ", length(object@messages), sep = "")
+              cat("Fit File\n")
+              if("file_id" %in% getMessageTypes(object)) {
+                  file_id <- getMessagesByType(object, "file_id") 
+                  cat("  File created: ", as.character(file_id$time_created), "\n", sep = "")
+                  cat("  Device: ", file_id$manufacturer[1], " ", file_id$product[1], "\n", sep = "")
+              }
+              cat("  Number of data messages: ", length(object), sep = "")
           }
 )
 
@@ -209,37 +88,10 @@ setGeneric("dump", function(object) {
     standardGeneric("dump")
 })
 
-setMethod("dump", signature = "RawFitFile",
+setMethod("dump", signature = "FitFile",
           function(object) {
               object@messages
           }
 )
 
-#########################################
-## Accessors for common messages types ##
-#########################################
-
-## records
-#' @export
-setGeneric("records", function(object) {
-    standardGeneric("records")
-})
-
-setMethod("records", signature = "RawFitFile",
-          function(object) {
-              getMessagesByType(object, message_type = 20L)
-          }
-)
-
-## records
-#' @export
-setGeneric("laps", function(object) {
-    standardGeneric("laps")
-})
-
-setMethod("laps", signature = "RawFitFile",
-          function(object) {
-              getMessagesByType(object, message_type = 19L)
-          }
-)
 

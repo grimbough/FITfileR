@@ -17,3 +17,19 @@ License: Artistic-2.0
 LazyLoad: yes
 RoxygenNote: 7.1.1
 Encoding: UTF-8
+Collate: 
+    'allClasses.R'
+    'allMethods.R'
+    'dataFormatting.R'
+    'fitFileR.R'
+    'methods_FitFile_accessors.R'
+    'methods_FitFile_dim.R'
+    'methods_Messages_accessors.R'
+    'methods_accessors.R'
+    'read_headers.R'
+    'read_messages.R'
+    'reader.R'
+    'utilities.R'
+    'write_headers.R'
+    'write_messages.R'
+    'writer.R'
