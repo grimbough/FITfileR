@@ -1,19 +1,38 @@
-#########################
-## Extracting messages ##
-#########################
+#' Extracting messages from Fit Files
+#' 
+#' Methods for retrieving messages from \code{\link{FitFile-class}} objects.
+#' 
+#' The FIT file specification allows for a large number of message types.  
+#' FitFileR provides accessor methods for some of the most common. These 
+#' include `records()` and `laps()`.
+#'
+#' @param fitFile A \code{\link{FitFile-class}} object.
+#' @param global_message_number Integer specifying the message number of 
+#' the message type wanted.
+#' @param message_type Either an integer or character of length 1, specifying 
+#' either a global message number or message type respectively.
+#' @name fitfile_accessors
+#' @include allClasses.R
+NULL
+
+########################################
+## List Message types found in a file ##
+########################################
 
 #' List the names of the messages types found in a FitFile object
+#' @rdname fitfile_accessors
 #' @export
-setGeneric("getMessageTypes", function(object, global_message_number) {
+setGeneric("getMessageTypes", function(fitFile, global_message_number) {
     standardGeneric("getMessageTypes")
 })
 
-#' @import dplyr
-#' @importFrom magrittr %>%
+#' @rdname fitfile_accessors
+#' @importFrom dplyr filter
+#' @importFrom magrittr %>% extract2
 setMethod("getMessageTypes", 
           signature = c("FitFile"),
-          function(object) {
-              all_gmn <- vapply(object@messages, FUN = globalMessageNumber, 
+          function(fitFile) {
+              all_gmn <- vapply(fitFile@messages, FUN = globalMessageNumber, 
                                 FUN.VALUE = integer(1))
               filter(fit_data_types$mesg_num, key %in% unique(all_gmn)) %>% 
                   magrittr::extract2('value')
@@ -23,24 +42,21 @@ setMethod("getMessageTypes",
 ## Extract messages based on global message number / name ##
 ############################################################
 
-#' @include allClasses.R
+#' @rdname fitfile_accessors
 #' @export
-setGeneric("getMessagesByType", function(object, message_type) {
+setGeneric("getMessagesByType", function(fitFile, message_type) {
     standardGeneric("getMessagesByType")
 })
 
-
-#' @import dplyr
-#' @importFrom magrittr %>%
 setMethod("getMessagesByType", 
           signature = c("FitFile", "integer"),
-          function(object, message_type) {
+          function(fitFile, message_type) {
               
-              idx <- vapply(object@messages, FUN = globalMessageNumber, 
+              idx <- vapply(fitFile@messages, FUN = globalMessageNumber, 
                             FUN.VALUE = integer(1)) == message_type
               
               if(length(idx)) {
-                  messages <- object@messages[ idx ]
+                  messages <- fitFile@messages[ idx ]
                   
                   signatures <- vapply(messages, 
                                        function(x) { x@definition@.signature }, 
@@ -64,18 +80,16 @@ setMethod("getMessagesByType",
           }
 )
 
-#' @import dplyr
-#' @importFrom magrittr %>%
 setMethod("getMessagesByType", 
           signature = c("FitFile", "character"),
-          function(object, message_type) {
-              types_in_file <- getMessageTypes(object)
+          function(fitFile, message_type) {
+              types_in_file <- getMessageTypes(fitFile)
               if(!message_type %in% types_in_file) {
                   stop("Message type ", message_type, " not found in file")
               }
               global_message_number <- .translateGlobalMessageName(message_type)
               
-              getMessagesByType(object, global_message_number)
+              getMessagesByType(fitFile, global_message_number)
               
           }
 )
@@ -85,26 +99,26 @@ setMethod("getMessagesByType",
 ## Accessors for common messages types ##
 #########################################
 
-## records
+#' @rdname fitfile_accessors
 #' @export
-setGeneric("records", function(object) {
+setGeneric("records", function(fitFile) {
     standardGeneric("records")
 })
 
 setMethod("records", signature = "FitFile",
-          function(object) {
-              getMessagesByType(object, message_type = 20L)
+          function(fitFile) {
+              getMessagesByType(fitFile, message_type = 20L)
           }
 )
 
-## laps
+#' @rdname fitfile_accessors
 #' @export
-setGeneric("laps", function(object) {
+setGeneric("laps", function(fitFile) {
     standardGeneric("laps")
 })
 
 setMethod("laps", signature = "FitFile",
-          function(object) {
-              getMessagesByType(object, message_type = 19L)
+          function(fitFile) {
+              getMessagesByType(fitFile, message_type = 19L)
           }
 )

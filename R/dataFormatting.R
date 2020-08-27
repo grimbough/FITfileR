@@ -100,8 +100,8 @@
 .applyFormatConversions <- function(input, field_definition_number, global_message_number) {
   
   global_message_name <- .translateGlobalMessageNumber(global_message_number)
-  details <- dplyr::filter( fit_message_types[[ global_message_name ]],
-                            key == field_definition_number)
+  type <- fit_message_types[[ global_message_name ]]
+  details <- type[which(type$key == field_definition_number), ]
   
   type <- as.character(details$type)
   
@@ -123,6 +123,11 @@
 #' Detect whether a given field number is defined for a specified global
 #' message type.  Garmin (and maybe others) include many fields that are not
 #' documented in the FIT Profile
+#' 
+#' @param field_definition_number integer of length 1. This is the field 
+#' number we're checking the existence of in the FIT specification.
+#' @param global_message_number integer of length 1. Specifies the global 
+#' message number for the message type we're looking at.
 #' 
 #' @keywords Internal
 .isKnownField <- function(field_definition_number, global_message_number) {
@@ -169,7 +174,7 @@
                                   FUN.VALUE = character(1),
                                   global_message_number )
   
-  message_table <- .fixGarminProducts2(message_table)
+  message_table <- .fixGarminProducts(message_table)
   
   if(hasDeveloperData(x[[1]])) {
     message_table <- bind_cols(message_table, .processDevFieldsList(x))
