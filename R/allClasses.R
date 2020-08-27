@@ -1,4 +1,8 @@
-
+#' An S4 class representing a single FIT message
+#' 
+#' @slot global_message_number A integer of length 1.
+#' @slot field_definition A data.frame.
+#' @slot messages A data.frame.
 setClass("FitMessage",
          representation(
              global_message_number = "integer",
@@ -25,6 +29,7 @@ setClass("FitDefinitionMessage",
              .signature = "character"
          ))
 
+#' @describeIn FitMessage-class S4 class representing a FIT data message
 setClass("FitDataMessage",
          representation(
              header = "FitMessageHeader",
