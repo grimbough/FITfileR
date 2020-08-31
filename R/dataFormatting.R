@@ -129,7 +129,7 @@
 #' @param global_message_number integer of length 1. Specifies the global 
 #' message number for the message type we're looking at.
 #' 
-#' @keywords Internal
+#' @keywords internal
 .isKnownField <- function(field_definition_number, global_message_number) {
   
   global_message_name <- .translateGlobalMessageNumber(global_message_number)
@@ -137,6 +137,7 @@
 
 }
 
+#' @importFrom dplyr bind_rows select mutate across everything cur_column
 .processFieldsList <- function(x, global_message_number) {
     message_table <- lapply(x, 
                             FUN = function(y) {
