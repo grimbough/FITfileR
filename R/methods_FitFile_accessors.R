@@ -5,13 +5,33 @@
 #' The FIT file specification allows for a large number of message types.  
 #' FitFileR provides accessor methods for some of the most common. These 
 #' include `records()` and `laps()`.
+#' 
+#' If a predefined function doesn't exist for the message type you want to
+#' extract, any message type can be retrieved with \code{getMessagesByType()}.
+#' The second argument can take either the global message number (as specified
+#' in the FIT File definition) of message type you want, or the message name.
+#' A list of names for the message types held in a \code{\link{FitFile-class}} 
+#' object can be retrieved with \code{\link{getMessageTypes}}.
+#' 
+#' The return type is dependant upon whether the \code{\link{FitFile-class}} 
+#' contains multiple message definitions for the same message type.  It is not 
+#' uncommon for this to occur e.g. if a new sensor is added during an activity
+#' the *records* field definition will change.  If there is a single definition
+#' for the message type a `tibble` will be returned, otherwise a `list` of 
+#' `tibble`s is returned.  The length of this `list` reflects the number of 
+#' unique definitions for the message type within the file.  It may be 
+#' straightforward to combine these `tibbles` e.g. via \code{\link{rbind}}, but
+#' this is left to the user.
+#' 
+#' @return Either a `tibble` or a `list` of `tibble`. See `details` for more 
+#' information.
 #'
 #' @param fitFile A \code{\link{FitFile-class}} object.
 #' @param global_message_number Integer specifying the message number of 
 #' the message type wanted.
-#' @param message_type Either an integer or character of length 1, specifying 
-#' either a global message number or message type respectively.
-#' @name fitfile_accessors
+#' @param message_type Either an integer or character vector (length 1), 
+#' specifying either a global message number or message type respectively.
+#' @name FitFile-accessors
 #' @include allClasses.R
 NULL
 
@@ -20,13 +40,13 @@ NULL
 ########################################
 
 #' List the names of the messages types found in a FitFile object
-#' @rdname fitfile_accessors
+#' @rdname FitFile-accessors
 #' @export
-setGeneric("getMessageTypes", function(fitFile, global_message_number) {
+setGeneric("getMessageTypes", function(fitFile) {
     standardGeneric("getMessageTypes")
 })
 
-#' @rdname fitfile_accessors
+#' @rdname FitFile-accessors
 #' @importFrom dplyr filter
 #' @importFrom magrittr %>% extract2
 setMethod("getMessageTypes", 
@@ -42,12 +62,13 @@ setMethod("getMessageTypes",
 ## Extract messages based on global message number / name ##
 ############################################################
 
-#' @rdname fitfile_accessors
+#' @rdname FitFile-accessors
 #' @export
 setGeneric("getMessagesByType", function(fitFile, message_type) {
     standardGeneric("getMessagesByType")
 })
 
+#' @rdname FitFile-accessors
 setMethod("getMessagesByType", 
           signature = c("FitFile", "integer"),
           function(fitFile, message_type) {
@@ -80,6 +101,7 @@ setMethod("getMessagesByType",
           }
 )
 
+#' @rdname FitFile-accessors
 setMethod("getMessagesByType", 
           signature = c("FitFile", "character"),
           function(fitFile, message_type) {
@@ -99,24 +121,26 @@ setMethod("getMessagesByType",
 ## Accessors for common messages types ##
 #########################################
 
-#' @rdname fitfile_accessors
+#' @rdname FitFile-accessors
 #' @export
 setGeneric("records", function(fitFile) {
     standardGeneric("records")
 })
 
+#' @rdname FitFile-accessors
 setMethod("records", signature = "FitFile",
           function(fitFile) {
               getMessagesByType(fitFile, message_type = 20L)
           }
 )
 
-#' @rdname fitfile_accessors
+#' @rdname FitFile-accessors
 #' @export
 setGeneric("laps", function(fitFile) {
     standardGeneric("laps")
 })
 
+#' @rdname FitFile-accessors
 setMethod("laps", signature = "FitFile",
           function(fitFile) {
               getMessagesByType(fitFile, message_type = 19L)

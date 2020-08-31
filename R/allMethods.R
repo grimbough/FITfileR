@@ -17,8 +17,10 @@ setMethod("show",
               cat("Fit File\n")
               if("file_id" %in% getMessageTypes(object)) {
                   file_id <- getMessagesByType(object, "file_id") 
-                  cat("  File created: ", as.character(file_id$time_created), "\n", sep = "")
-                  cat("  Device: ", file_id$manufacturer[1], " ", file_id$product[1], "\n", sep = "")
+                  if("time_created" %in% names(file_id))
+                    cat("  File created: ", as.character(file_id$time_created), "\n", sep = "")
+                  if(all(c("manufacturer", "product") %in% names(file_id)))
+                    cat("  Device: ", file_id$manufacturer[1], " ", file_id$product[1], "\n", sep = "")
               }
               cat("  Number of data messages: ", length(object), sep = "")
           }
@@ -82,16 +84,6 @@ setMethod("show", signature = "FitDataMessageWithDevData", function(object) {
     
 })
 
-## Dump
 
-setGeneric("dump", function(object) {
-    standardGeneric("dump")
-})
-
-setMethod("dump", signature = "FitFile",
-          function(object) {
-              object@messages
-          }
-)
 
 

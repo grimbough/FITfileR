@@ -1,4 +1,7 @@
-#' @export
+########################
+## Local Message Number
+########################
+
 setGeneric("localMessageNumber", function(object) {
     standardGeneric("localMessageNumber")
 })
@@ -28,7 +31,7 @@ setMethod("localMessageNumber",
 ## Global Message Number
 ########################
 
-#' @export
+
 setGeneric("globalMessageNumber", function(object) {
     standardGeneric("globalMessageNumber")
 })
