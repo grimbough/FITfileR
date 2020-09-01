@@ -1,7 +1,7 @@
 ## fit time stamps are from 31st December 1989
 ## this function transforms them into data/times
 .adjustTimeStamp <- function(values) {
-  as.POSIXct(values, origin = "1989-12-31")  
+  as.POSIXct(values, origin = "1989-12-31", tz = "UTC")  
 }
 
 .getFromDataTypeFactor <- function(values, type) {
@@ -184,6 +184,7 @@
   return(message_table)
 }
 
+
 .processDevFieldsList <- function(x) {
   message_table <- lapply(x, 
                           FUN = function(y) {
@@ -191,6 +192,7 @@
                           } 
   ) %>% 
     dplyr::bind_rows( ) 
+  
   names(message_table) <- x[[1]]@dev_field_details$field_name
   
   return(message_table)
