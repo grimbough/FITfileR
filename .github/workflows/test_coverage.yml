@@ -1,16 +1,16 @@
 on:
-    push:
+  push:
     branches:
-    - master
-    - fit-class
-pull_request:
+      - master
+      - fit-class
+  pull_request:
     branches:
-    - master
+      - master
 
 name: test-coverage
 
 jobs:
-    test-coverage:
+  test-coverage:
     runs-on: macOS-latest
     steps:
         - uses: actions/checkout@v2
