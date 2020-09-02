@@ -15,14 +15,14 @@ setMethod("show",
           signature = "FitFile", 
           function(object) {
               cat("Fit File\n")
-              if("file_id" %in% getMessageTypes(object)) {
+              if("file_id" %in% listMessageTypes(object)) {
                   file_id <- getMessagesByType(object, "file_id") 
                   if("time_created" %in% names(file_id))
-                    cat("  File created: ", as.character(file_id$time_created), "\n", sep = "")
+                    cat("├ File created: ", as.character(file_id$time_created), "\n", sep = "")
                   if(all(c("manufacturer", "product") %in% names(file_id)))
-                    cat("  Device: ", file_id$manufacturer[1], " ", file_id$product[1], "\n", sep = "")
+                    cat("├ Device: ", file_id$manufacturer[1], " ", file_id$product[1], "\n", sep = "")
               }
-              cat("  Number of data messages: ", length(object), sep = "")
+              cat("└ Number of data messages: ", length(object), sep = "")
           }
 )
 
@@ -30,15 +30,15 @@ setMethod("show", signature = "FitDataMessage", function(object) {
     
     cat("Local message type: ", localMessageNumber(object),  " ", sep = "")
     cat("(message name: ", .translateGlobalMessageNumber( globalMessageNumber(object) ), ", ",  sep = "")
-    cat("message type: ", object@definition@global_message_number, ", ", sep = "")
+    cat("message type: ", globalMessageNumber( object ), ", ", sep = "")
     cat("fields: ", nrow(object@definition@field_defs), ", bytes: ", sum(object@definition@field_defs$size), ")", sep = "")
     
     for(field in object@definition@field_defs$field_def_num) {
-        translated <- .translateField(field, object@definition@global_message_number)
+        translated <- .translateField(field, globalMessageNumber( object ))
         cat("\n ", translated$value, " (", translated$key, ", ", translated$type, "):", sep = "")
         
         original <- object@fields[[ paste(field) ]] %>% unlist()
-        adjusted <- .applyScaleAndOffset( original, field, object@definition@global_message_number ) 
+        adjusted <- .applyScaleAndOffset( original, field, globalMessageNumber( object ) ) 
         units <- ifelse(is.na(translated$units), "", paste0(" ", translated$units))
         
         if(length(original) > 1) { cat(" {") }
@@ -55,15 +55,15 @@ setMethod("show", signature = "FitDataMessageWithDevData", function(object) {
     
     cat("Local message type: ", localMessageNumber(object),  " ", sep = "")
     cat("(message name: ", .translateGlobalMessageNumber( globalMessageNumber(object) ), ", ",  sep = "")
-    cat("message type: ", object@definition@global_message_number, ", ", sep = "")
+    cat("message type: ", globalMessageNumber( object ), ", ", sep = "")
     cat("fields: ", nrow(object@definition@field_defs), ", bytes: ", sum(object@definition@field_defs$size), ")", sep = "")
     
     for(field in object@definition@field_defs$field_def_num) {
-        translated <- .translateField(field, object@definition@global_message_number)
+        translated <- .translateField(field, globalMessageNumber( object ))
         cat("\n ", translated$value, " (", translated$key, ", ", translated$type, "):", sep = "")
         
         original <- object@fields[[ paste(field) ]] %>% unlist()
-        adjusted <- .applyScaleAndOffset( original, field, object@definition@global_message_number ) 
+        adjusted <- .applyScaleAndOffset( original, field, globalMessageNumber( object ) ) 
         units <- ifelse(is.na(translated$units), "", paste0(" ", translated$units))
         
         if(length(original) > 1) { cat(" {") }

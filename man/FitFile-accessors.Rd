@@ -2,26 +2,37 @@
 % Please edit documentation in R/methods_FitFile_accessors.R
 \name{FitFile-accessors}
 \alias{FitFile-accessors}
-\alias{getMessageTypes}
-\alias{getMessageTypes,FitFile-method}
+\alias{listMessageTypes}
+\alias{listMessageTypes,FitFile-method}
 \alias{getMessagesByType}
 \alias{getMessagesByType,FitFile,integer-method}
 \alias{getMessagesByType,FitFile,character-method}
+\alias{messages,FitFile-method}
+\alias{file_id}
+\alias{file_id,FitFile-method}
 \alias{records}
 \alias{records,FitFile-method}
 \alias{laps}
 \alias{laps,FitFile-method}
+\alias{events}
+\alias{events,FitFile-method}
 \title{Extracting messages from Fit Files}
 \usage{
-getMessageTypes(fitFile)
+listMessageTypes(fitFile)
 
-\S4method{getMessageTypes}{FitFile}(fitFile)
+\S4method{listMessageTypes}{FitFile}(fitFile)
 
 getMessagesByType(fitFile, message_type)
 
 \S4method{getMessagesByType}{FitFile,integer}(fitFile, message_type)
 
 \S4method{getMessagesByType}{FitFile,character}(fitFile, message_type)
+
+\S4method{messages}{FitFile}(fitFile)
+
+file_id(fitFile)
+
+\S4method{file_id}{FitFile}(fitFile)
 
 records(fitFile)
 
@@ -30,15 +41,16 @@ records(fitFile)
 laps(fitFile)
 
 \S4method{laps}{FitFile}(fitFile)
+
+events(fitFile)
+
+\S4method{events}{FitFile}(fitFile)
 }
 \arguments{
 \item{fitFile}{A \code{\link{FitFile-class}} object.}
 
 \item{message_type}{Either an integer or character vector (length 1),
 specifying either a global message number or message type respectively.}
-
-\item{global_message_number}{Integer specifying the message number of
-the message type wanted.}
 }
 \value{
 Either a \code{tibble} or a \code{list} of \code{tibble}. See \code{details} for more
@@ -53,11 +65,11 @@ FitFileR provides accessor methods for some of the most common. These
 include \code{records()} and \code{laps()}.
 
 If a predefined function doesn't exist for the message type you want to
-extract, any message type can be retrieved with \code{getMessagesByType()}.
+extract, any message type can be retrieved with \code{getMessagesByType}.
 The second argument can take either the global message number (as specified
 in the FIT File definition) of message type you want, or the message name.
 A list of names for the message types held in a \code{\link{FitFile-class}}
-object can be retrieved with \code{\link{getMessageTypes}}.
+object can be retrieved with \code{listMessageTypes}.
 
 The return type is dependant upon whether the \code{\link{FitFile-class}}
 contains multiple message definitions for the same message type.  It is not
