@@ -20,8 +20,8 @@ remotes::install_github("grimbough/fitFileR", ref = "fit-class")
 
 ```r
 library(fitFileR)
-garmin_file <- system.file("extdata/Garmin.fit", package = "fitFileR")
-garmin <- readFitFile(garmin_file)
+edge530_file <- system.file("extdata", "Activities", "garmin-edge530-ride.fit", package = "fitFileR")
+edge530 <- readFitFile(edge530_file)
 ```
 
 # Exploring the FitFile class

@@ -1,15 +1,15 @@
 ---
 title: "Reading FIT files"
 author: "Mike Smith"
-output: html_document
+output: github_document
 vignette: |
   %\VignetteIndexEntry{Reading FIT files}
-  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, fig.path = "figures")
 ```
 
 ```{r load_lib}
@@ -20,11 +20,12 @@ library(fitFileR)
 
 ## Example fit files
 
-The package comes with two example fit files, recorded during a ride in early 2017.  They are of the same ride and record the same rider, but the data logging was carried out on two different devices: a Garmin Edge 500 and a TomTom Runner 3.  The files can be found in the `extdata` folder of the package, and identified on your system using the following code. 
+The files can be found in the `extdata` folder of the package, and identified on your system using the following code. 
 
 ```{r data_files}
-garmin_file <- system.file("extdata/Garmin.fit", package = "fitFileR")
-tomtom_file <- system.file("extdata/TomTom.fit", package = "fitFileR")
+library(fitFileR)
+fenix6_file <- system.file("extdata", "Activities", "garmin-fenix6-swim.fit", 
+                            package = "fitFileR")
 ```
 
 ## Reading
@@ -32,34 +33,91 @@ tomtom_file <- system.file("extdata/TomTom.fit", package = "fitFileR")
 We read files using the function `readFitFile()`.
 
 ```{r reading_files}
-garmin <- readFitFile(garmin_file)
-tomtom <- readFitFile(tomtom_file)
+fenix6 <- readFitFile(fenix6_file)
 ```
 
-The resulting object is a `list` of `tibbles` containing all the data stored in the fit file.
+The resulting object is an object of type `FitFile` containing all the data stored in the fit file.  Typing the name of the object will print some details about the original file e.g. the time it was created, the manufacturer and name of the device it was recorded on, and the number of data 'messages' held within the file.
 
-```{r exploring_list}
-names(garmin)
+```{r show}
+fenix6
 ```
 
 # Working with the data
 
-The data most often wanted from a fit file are the values such as location, speed, altitude, etc recorded during an activity.  Such data are classed as "records" in the FIT specification and can be retrieved from the FitFile object using using `records()`. 
+If we want to do more than just print a summary of the FIT file to screen we need to use some accessor function to extract the data from our FitFile object.  There are several ways to achieve this depending on the datatype you're interested in.
+
+## Records - GPS, speed, altitude, etc
+
+The data most often wanted from a fit file are the values such as location, speed, altitude, etc recorded during an activity.  Such data are classed as 'records' in the FIT specification and can be retrieved from the FitFile object using using `records()`. 
 
 ```{r print_record}
-garmin_records <- records(garmin)
-garmin_records
+fenix6_records <- records(fenix6)
+fenix6_records
 ```
 
-In this example we actually get a list with three sets of data.  This is because in this particular file there were three distinct definitions of what a "record" contains.  This can happen if data recording begins before a sensor (e.g. a heart rate monitor) has been attached to a device, or GPS position has been acquired.  In this example we are interested in the first entry, which contains the vast majority of the data.
+In this example we actually get a list with three sets of data.  This is because in this particular file there were three distinct definitions of what a "record" contains.  This normally happens if data recording begins before a sensor (e.g. a heart rate monitor) has been attached to a device, or GPS position has been acquired, although sometimes the reason can be more opaque.  In this example we are interested in the second entry, which contains the vast majority of the data.  *Note: sometimes the bulk of your data may be spread across multiple `tibbles` in the list rather than a single entry.  See the "Plotting a route" section below for an example of how to handle this.*
+
+## Extracting common data types
+
+In addition to the `records()` function, fitFileR provides an number of other methods for accessing commonly found message types.  Currently, these include:
+
+  - `laps()`
+  - `events()`
+  - `file_id()`
+
+## Accessing all data types
+
+A complete list of the message types stored within a file can be accessed via the function `listMessageTypes()`.
+
+```{r listMessageTypes}
+listMessageTypes(fenix6)
+```
+
+We can see there are `r length(listMessageTypes(fenix6))` different message types in the file above.
+
+If a specific accessor method doesn't exist for the message type you're interested in, you can use the function `getMessagesByType()` and provide the message type name to the `message_type` argument.  The code below will extract all "zones_target" messages from our file.  
+
+```{r devicesettings}
+getMessagesByType(fenix6, message_type = "zones_target")
+```
+
+In this case this is a single message that reports power and heart rate thresholds that were set on the device.  These could then be used in conjunction with the "records" to measure how well the rider performed relative to the pre-set threshold for this particular activity.
+
+# Common use cases
 
 ## Plotting a route
 
-To plot locations we extract the longitude and latitude from our FIT records.
+```{r}
+edge530_file <- system.file("extdata", "Activities", "garmin-edge530-ride.fit", 
+                            package = "fitFileR")
+edge530 <- readFitFile(edge530_file)
+```
+
+To plot locations we extract the longitude and latitude from our FIT records.  These data are found in 'record' messages, and we use `records()` to extract them.  However, unlike the previous example, there are two different definitions for 'record' messages with over one thousand data points.  
+
+```{r process_coords}
+edge530_records <- records(edge530)
+
+## report the number of rows for each set of record messages
+vapply(edge530_records, FUN = nrow, FUN.VALUE = integer(1))
+```
+
+We probably don't want to discard either of these, as even the smaller one represents over 20 minutes of data recording.  We can use **dplyr** to try and merge all the messages together into a single `tibble` regardless of their definition.  Any entries that are missing in certain messages will be filled with `NA`.  *Note: this approach of binding rows does not always work, as sometimes the data types within a column may change between messages, but it is more often successful.*
 
 ```{r process_coords}
 library(dplyr)
-coords <- garmin_records$record_1 %>% 
+
+edge530_allrecords <- records(edge530) %>% 
+  bind_rows() %>% 
+  arrange(timestamp) 
+
+edge530_allrecords
+```
+
+We can then use `dplyr::select()` to extract the latitude and longitude columns from our `tibble`, so we can pass them easily to a plotting function.
+
+```{r}
+coords <- edge530_allrecords %>% 
   select(position_long, position_lat)
 ```
 
@@ -71,30 +129,73 @@ library(leaflet)
 m <- coords %>% 
   as.matrix() %>%
   leaflet(  ) %>%
-     addTiles() %>%
-     addPolylines( )
+  addTiles() %>%
+  addPolylines( )
     
 m
 ```
 
-## Comparing heart rates
+```{r plot-map, echo = FALSE}
 
-Here we compare the heart rate recorded during the activity by the two devices.
+```
+
+## Comparing heart rate measurments between devices
+
+The package comes with two example fit files, recorded during a ride in early 2017.  They are of the same ride and record the same rider, but the data logging was carried out on two different devices: a Garmin Edge 500 and a TomTom Runner 3.  These in turn used a chest strap and wrist based heart rate monitor respectively.  Here we compare the heart rates recorded with two devices, to see how consistent they are with each other.
+
+First we need to locate the two files and read them into R:
+
+
+```{r read-both}
+garmin_file <- system.file("extdata", "Activities", "garmin-edge500-ride.fit", 
+                            package = "fitFileR")
+tomtom_file <- system.file("extdata", "Activities", "tomtom-runner3-ride.fit", 
+                            package = "fitFileR")
+
+garmin <- readFitFile(garmin_file)
+tomtom <- readFitFile(tomtom_file)
+```
+
+We then use `records()` to extract the appropriate messages from the two files.
+
+```{r read-hr, eval = TRUE}
+garmin_records <- records(garmin)
+tomtom_records <- records(tomtom)
+```
 
 ```{r plot_hr}
-tomtom_records <- records(tomtom)
-
 library(ggplot2)
 ggplot() + 
     geom_line(data = garmin_records$record_1, aes(x = timestamp, y = heart_rate), col = 1) + 
     geom_line(data = tomtom_records$record_2, aes(x = timestamp, y = heart_rate), col = 2)
 ```
 
-That's pretty messy as the TomTom data seem to have lots of 255 values (These are presumably dropouts in the data recording that get assigned the maximum value). We can filter those entries out to compare the two traces more easily.
+That's pretty messy as the TomTom data seem to have lots of 255 values (these are presumably dropouts in the data recording that get assigned the maximum value). We can filter those entries out to compare the two traces more easily.
 
-```{r plot-hr-2}
+```{r plot-hr-2, eval = TRUE}
 ggplot() + 
-    geom_line(data = garmin_records$record_1, aes(x = timestamp, y = heart_rate), col = "blue") + 
+    geom_line(data = garmin_records$record_1, aes(x = timestamp, y = heart_rate), col = 1) + 
     geom_line(data = dplyr::filter(tomtom_records$record_2, heart_rate != 255), 
-              aes(x = timestamp, y = heart_rate), col = "red")
+              aes(x = timestamp, y = heart_rate), col = 2)
+```
+
+We can also consider the difference between the two measurements at each common time point.
+
+```{r}
+library(zoo)
+hr_differences <- inner_join(garmin_records$record_1, tomtom_records$record_2, by = c("timestamp")) %>%
+  select(timestamp, heart_rate.x, heart_rate.y) %>% 
+  filter(heart_rate.y != 255) %>%
+  mutate(hr_diff = heart_rate.x - heart_rate.y) %>%
+  mutate(hr_30 = zoo::rollmean(hr_diff, k = 30, fill = NA))
+
+ggplot(hr_differences, aes(x = timestamp, y = hr_diff)) + 
+  geom_point(col = 2) +
+  geom_line(aes(y = hr_30))
+```
+
+# Session Info
+
+```{r}
+sessionInfo()
 ```
