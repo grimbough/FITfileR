@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">fitFileR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0</span>
       </span>
     </div>
 
@@ -63,19 +63,30 @@
 
       </header><div class="row">
   <div class="contents col-md-9">
-<div id="fitfiler--codecov" class="section level1">
+
+<div id="fitfiler--r-cmd-check-codecov" class="section level1">
 <div class="page-header"><h1 class="hasAnchor">
-<a href="#fitfiler--codecov" class="anchor"></a>fitFileR <a href="https://github.com/grimbough/fitFileR"><img src="https://img.shields.io/badge/dev%20version-0.0.5-blue.svg"></a> <a href="https://codecov.io/github/grimbough/fitFileR"><img src="https://codecov.io/github/grimbough/fitFileR/branch/fit-class/graphs/badge.svg" alt="codecov"></a>
+<a href="#fitfiler--r-cmd-check-codecov" class="anchor"></a>fitFileR <a href="https://github.com/grimbough/fitFileR"><img src="https://img.shields.io/badge/dev%20version-0.1.0-blue.svg"></a> <img src="https://github.com/grimbough/fitFileR/workflows/R-CMD-check/badge.svg" alt="R CMD check"><a href="https://codecov.io/github/grimbough/fitFileR"><img src="https://codecov.io/github/grimbough/fitFileR/branch/fit-class/graphs/badge.svg" alt="codecov"></a>
 </h1></div>
-<div id="installing-from-github-with-devtools" class="section level2">
-<h2 class="hasAnchor">
-<a href="#installing-from-github-with-devtools" class="anchor"></a>Installing from GitHub with devtools</h2>
+<p><strong>fitFileR</strong> is an R package to read FIT files produced by fitness tracking devices like Garmin Edge cycle computers or sports watches. The intention for <strong>fitFileR</strong> is to use native R code to read the files directly, with no reliance on the FIT SDK or other FIT parsing tools. As such it should be platform independent, and not require any additional software outside of a working version of R.</p>
+<p><strong>fitFileR</strong> should be considered a work in progress, and many features available in the complete SDK are not currently implemented.</p>
+<p>Feel free to open an <a href="https://github.com/grimbough/fitFileR/issues">issue</a> if something doesn’t work or you notice a feature you’d like adding.</p>
+</div>
+<div id="installing-from-github" class="section level1">
+<h1 class="hasAnchor">
+<a href="#installing-from-github" class="anchor"></a>Installing from GitHub</h1>
+<p>Currently <strong>fitFileR</strong> is only available on Github, and can be installed using the <strong><a href="https://cran.r-project.org/package=remotes">remotes</a> package.</strong></p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="cf">if</span>(<span class="op">!</span><span class="kw">requireNamespace</span>(<span class="st">"remotes"</span>)) {</span>
 <span id="cb1-2"><a href="#cb1-2"></a>    <span class="kw">install.packages</span>(<span class="st">"remotes"</span>)</span>
 <span id="cb1-3"><a href="#cb1-3"></a>}</span>
-<span id="cb1-4"><a href="#cb1-4"></a>remotes<span class="op">::</span><span class="kw">install_github</span>(<span class="st">"grimbough/fitFileR"</span>, <span class="dt">ref =</span> <span class="st">"fit-class"</span>)</span></code></pre></div>
+<span id="cb1-4"><a href="#cb1-4"></a>remotes<span class="op">::</span><span class="kw">install_github</span>(<span class="st">"grimbough/fitFileR"</span>)</span></code></pre></div>
 </div>
+<div id="usage" class="section level1">
+<h1 class="hasAnchor">
+<a href="#usage" class="anchor"></a>Usage</h1>
+<p>You can find a vignette with examples of how to use the code at <a href="https://msmith.de/fitFileR/articles/fitFileR.html" class="uri">https://msmith.de/fitFileR/articles/fitFileR.html</a></p>
 </div>
+
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
