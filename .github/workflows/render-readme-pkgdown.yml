@@ -1,0 +1,71 @@
+
+
+name: render readme and pkgdown
+
+# Controls when the action will run
+on:
+  push:
+    branches: 
+      - master
+      - fit-class
+
+jobs:
+  render:
+    # The type of runner that the job will run on
+    runs-on: macOS-latest
+
+    steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - uses: actions/checkout@master
+    - uses: r-lib/actions/setup-r@master
+    - uses: r-lib/actions/setup-pandoc@master
+
+    - name: Query dependencies
+      run: |
+        install.packages(c('remotes', 'devtools'))
+        saveRDS(remotes::dev_package_deps(dependencies = TRUE), ".github/depends.Rds", version = 2)
+      shell: Rscript {0}
+
+    - name: Cache R packages
+      uses: actions/cache@v1
+      with:
+        path: ${{ env.R_LIBS_USER }}
+        key: macOS-r-4.0-1-${{ hashFiles('.github/depends.Rds') }}
+        restore-keys: macOS-r-4.0-1-
+
+    - name: Install dependencies
+      run: |
+        install.packages("remotes")
+        remotes::install_deps(dependencies = TRUE)
+        remotes::install_dev("pkgdown")
+        devtools::document()
+      shell: Rscript {0}
+
+    - name: commit newly made helpfiles
+      run: |
+        git add man/* || echo "No changes to commit"
+        git commit -m "Re-build docs" || echo "No changes to commit"
+        git push origin master || echo "No changes to commit"
+
+    - name: Install package
+      run: R CMD INSTALL .
+
+    # install packages needed
+    - name: install required packages
+      run: Rscript -e 'install.packages(c("rmarkdown", "knitr", "badger", "pkgdown"))'
+
+    # Render READEME.md using rmarkdown
+    - name: render README
+      run: Rscript -e 'rmarkdown::render("README.Rmd", output_format = "md_document")'
+
+    - name: commit rendered README
+      run: |
+        git config --global user.email "render-action@github.com"
+        git config --global user.name "Render action"
+        git add README.md
+        git commit -m "Re-build README.md" || echo "No changes to commit"
+        git push origin master || echo "No changes to commit"
+
+    - name: Deploy package
+      run: pkgdown::deploy_to_branch(new_process = FALSE)
+      shell: Rscript {0}
