@@ -1,118 +1,10 @@
-## Given the populated list of data, and the list of message definitions,
-## looks up the plain text name of each message type associated with the
-## global message number. Drops any that can't be identified.
-## Also merges entries with the same message number but different defintions.
-#' @importFrom utils data
-.renameMessages <- function(scaffold, defs, merge = TRUE) {
-  
-  globalMessageNum <- sapply(defs, function(x) { x$global_message_num } )
-  
-  ## we are going to remove any entries that have a global message number
-  ## we can't identify from the SDK.  (Edge 500 has message 22 a lot).
-  rm_idx <- which(!globalMessageNum %in% fit_data_types$mesg_num[['key']])
-  if(length(rm_idx)) {
-    scaffold <- scaffold[ -rm_idx ]
-    globalMessageNum <- globalMessageNum[ -rm_idx ]
-  }
-  
-  if(merge) {
-    ## Merge entries with the same global message number, but are separate.
-    ## This arises when a few records are written with different columns 
-    ## e.g. before a cadence or hr sensor is detected. We NA missing values.
-    result <- vector("list", length = length(unique(globalMessageNum)))
-    for(i in seq_along(result)) {
-      gmn <- unique(globalMessageNum)[i]
-      idx <- which(globalMessageNum == gmn)
-      result[[ i ]] <- bind_rows(scaffold[idx])
-      value_name <- filter(fit_data_types$mesg_num, key == gmn) %>% 
-        select(value) %>% 
-        as.character()
-      names(result)[i] <- value_name
-    }
-    return(result)
-  } else {
-    for(gmn in unique(globalMessageNum)) {
-      idx <- which(globalMessageNum == gmn)
-      value_names <- filter(fit_data_types$mesg_num, key == gmn) %>% 
-        select(value) %>% 
-        paste(seq_along(idx), sep = "-")
-      names(scaffold)[idx] <- value_names
-      }
-  return(scaffold)
-  }
-}
-
-.processMessageType <- function(obj, name, drop = TRUE) {
-  
-  ## strip any numbering from the message name
-  name_short <- gsub(x = name, pattern = "-[0-9]*", replacement = "")
-  
-  if(!name_short %in% names(fit_message_types)) {
-    warning("Renaming variables for message type '", name, "' is not currently supported")
-  } else {
-    
-    message.table <- fit_message_types[[ name_short ]]
-    current <- obj[[ name ]]
-    
-    idx <- match(names(current), message.table[['key']])
-    if(any(is.na(idx))) {
-      if(drop) {
-        current <- current[,-which(is.na(idx))]
-        idx <- idx[-which(is.na(idx))]
-        names(current) <- message.table[['value']][idx]
-      } else {
-        names(current)[which(!is.na(idx))] <- message.table[['value']][idx[which(!is.na(idx))]]
-      }
-    } else { ## TODO:  come back and tidy this logic up later
-      names(current)[which(!is.na(idx))] <- message.table[['value']][idx[which(!is.na(idx))]]
-    }
-    
-    for(i in seq_along(current)) {
-      current[[i]] <- .fixDataType(values = current[[i]],
-                                   type = message.table[['type']][ idx[i] ],
-                                   fit_data_types)
-    }
-    
-    ## some values need to be divided by a scaling factor
-    scale_table <- filter(message.table, value %in% names(current), !is.na(scale))
-    for(i in seq_len(nrow(scale_table))) {
-       idx <- match(scale_table$value[i], names(current))
-       if(is.list(current[[ idx ]])) {
-         current[[ idx ]] <- lapply(current[[idx]], function(x, scale) { x / scale }, 
-                                    scale = as.numeric(scale_table$scale[i]))
-       } else {
-         current[[ idx ]] <- current[[ idx ]] / as.numeric(scale_table$scale[i])
-       }
-    }
-    
-    current <- .fixGarminProducts(current, fit_data_types)
-    obj[[ name ]] <- current
-  }
-
-  return(obj)
-}
-
-## lots of fields store numeric references to a value in a factor
-## this function takes the name of the appropriate data type
-## and checks whether it is a time stamp, or we should test
-## whether it comes from a factor data type.
-.fixDataType <- function(values, type, fit_data_types) {
-  
-  if(grepl(pattern = "date_time", x = type)) {
-    values <- .adjustTimeStamp(values)
-  } else {
-    values <- .getFromDataTypeFactor(values, type, fit_data_types)
-  }
-  return(values)
-}
-
 ## fit time stamps are from 31st December 1989
 ## this function transforms them into data/times
 .adjustTimeStamp <- function(values) {
-  as.POSIXct(values, origin = "1989-12-31")  
+  as.POSIXct(values, origin = "1989-12-31", tz = "UTC")  
 }
 
-.getFromDataTypeFactor <- function(values, type, fit_data_types) {
+.getFromDataTypeFactor <- function(values, type) {
   
   ## for 'non-standard' units, see if we have them stored and 
   ## replace if we can
@@ -124,15 +16,184 @@
   return(values)
 }
 
-.fixGarminProducts <- function(message, fit_data_types) {
-  if(("manufacturer" %in% names(message)) && ("product" %in% names(message))) {
-    garmin_idx <- which(message$manufacturer == "garmin")
+
+.fixGarminProducts <- function(message_table) {
+  if(("manufacturer" %in% names(message_table)) && ("product" %in% names(message_table))) {
+    garmin_idx <- which(message_table$manufacturer == "garmin")
     if(length(garmin_idx)) {
-      message$product[garmin_idx] <- .getFromDataTypeFactor(values = message$product[garmin_idx], 
-                                                            type = "garmin_product",
-                                                            fit_data_types)
+      message_table$product[garmin_idx] <- .getFromDataTypeFactor(values = message_table$product[garmin_idx], 
+                                                            type = "garmin_product")
     }
   }
-  return(message)
+  return(message_table)
 }
 
+## convert message number into text version of its name
+.translateGlobalMessageNumber <- function(global_message_number) {
+  fit_data_types$mesg_num$value[which(fit_data_types$mesg_num$key == global_message_number)]
+}
+
+## convert message name into numeric form
+.translateGlobalMessageName <- function(global_message_name) {
+  fit_data_types$mesg_num$key[which(fit_data_types$mesg_num$value == global_message_name)] %>%
+    as.integer()
+}
+
+
+## return details of a field number for a specific message type
+.translateField <- function(field_definition_number, global_message_number) {
+  
+  global_message_name <- .translateGlobalMessageNumber(global_message_number)
+
+  if(length(global_message_name) == 0) {
+    return(list(value = '', key = '', type = '', units = NA))
+  } else {
+    type <- fit_message_types[[ global_message_name ]]
+    type[which(type$key == field_definition_number), ]
+  }
+  
+}
+
+
+## only returns the field name
+.translateField2 <- function(field_definition_number, global_message_number) {
+  
+  global_message_name <- .translateGlobalMessageNumber(global_message_number)
+  type <- fit_message_types[[ global_message_name ]]
+  type[which(type$key == field_definition_number), ]$value
+  
+}
+
+
+.applyScaleAndOffset <- function(input, field_definition_number, global_message_number) {
+  
+  global_message_name <- .translateGlobalMessageNumber(global_message_number)
+  if(length(global_message_name) == 0) { 
+    details <- list(scale = NA, offset = NA, units = NA)
+  } else {
+    type <- fit_message_types[[ global_message_name ]]
+    details <- type[which(type$key == field_definition_number), ]
+  }
+  
+  ## divide by scaling factor if it exists
+  if(!is.na(details$scale[1])) {
+    if(is.list(input)) {
+      input[[1]] <- input[[1]] / as.numeric(details$scale[1])
+    } else {
+      input <- input / as.numeric(details$scale[1])
+    }
+  }
+  
+  ## subtract offset if it exists
+  if(!is.na(details$offset[1])) {
+      input <- input - details$offset[1]
+  }
+  
+  ## add units as attribute
+  if(!is.na(details$units[1])) {
+      attributes(input) <- list(units = details$units)
+  }
+  
+  return( input )
+}
+
+.applyFormatConversions <- function(input, field_definition_number, global_message_number) {
+  
+  global_message_name <- .translateGlobalMessageNumber(global_message_number)
+  type <- fit_message_types[[ global_message_name ]]
+  details <- type[which(type$key == field_definition_number), ]
+  
+  type <- as.character(details$type)
+  
+  if(type == "date_time") {
+    input <- .adjustTimeStamp(input)
+    attr(input, "units") <- NULL
+  } else if(type == "manufacturer") {
+    input <- fit_data_types$manufacturer[match(input, fit_data_types$manufacturer$key), ]$value
+  }
+  
+  else if (!is.na(details$units) && details$units == "semicircles") {
+    input <- input * (180 / 2^31)
+    attributes(input) <- list(units = "degrees")
+  }
+  
+  return(input)
+}
+
+#' Detect whether a given field number is defined for a specified global
+#' message type.  Garmin (and maybe others) include many fields that are not
+#' documented in the FIT Profile
+#' 
+#' @param field_definition_number integer of length 1. This is the field 
+#' number we're checking the existence of in the FIT specification.
+#' @param global_message_number integer of length 1. Specifies the global 
+#' message number for the message type we're looking at.
+#' 
+#' @keywords internal
+.isKnownField <- function(field_definition_number, global_message_number) {
+  
+  global_message_name <- .translateGlobalMessageNumber(global_message_number)
+  field_definition_number %in% fit_message_types[[ global_message_name ]]$key
+
+}
+
+#' @importFrom dplyr bind_rows select mutate across everything cur_column
+.processFieldsList <- function(x, global_message_number) {
+    message_table <- lapply(x, 
+                            FUN = function(y) {
+                                    structure(y@fields, row.names = c(NA, -1), class = "data.frame") 
+                                  } 
+                          ) %>% 
+    dplyr::bind_rows( ) 
+  
+  ## some columns are not defined in the FIT profile.  We remove them here
+  keep_idx <- vapply(as.integer(names(message_table)), 
+                     FUN = .isKnownField, 
+                     FUN.VALUE = logical(1), 
+                     global_message_number = global_message_number)
+  
+  if(all(keep_idx == FALSE)) {
+    stop("We have created an empty data.frame.  This should not happen!")
+  }
+  
+  message_table <- message_table %>%
+    dplyr::select(which(keep_idx)) %>%
+    mutate(across(everything(), 
+                  ~ .applyScaleAndOffset(input = ., 
+                                         as.integer(cur_column()), 
+                                         global_message_number) 
+    )) %>%
+    mutate(across(everything(), 
+                  ~ .applyFormatConversions(input = ., 
+                                         as.integer(cur_column()), 
+                                         global_message_number) 
+    )) %>%
+    as_tibble()
+  
+  names(message_table) <- vapply( as.integer(names(message_table)),
+                                  FUN = .translateField2, 
+                                  FUN.VALUE = character(1),
+                                  global_message_number )
+  
+  message_table <- .fixGarminProducts(message_table)
+  
+  if(hasDeveloperData(x[[1]])) {
+    message_table <- bind_cols(message_table, .processDevFieldsList(x))
+  }
+  
+  return(message_table)
+}
+
+
+.processDevFieldsList <- function(x) {
+  message_table <- lapply(x, 
+                          FUN = function(y) {
+                            as_tibble(y@dev_fields) 
+                          } 
+  ) %>% 
+    dplyr::bind_rows( ) 
+  
+  names(message_table) <- x[[1]]@dev_field_details$field_name
+  
+  return(message_table)
+}

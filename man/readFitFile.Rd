@@ -10,32 +10,27 @@ readFitFile(fileName, dropUnknown = TRUE, mergeMessages = TRUE)
 \item{fileName}{A character specifying the FIT file to be read.}
 
 \item{dropUnknown}{Many FIT files contain data that is not defined in the FIT
-file specification.  This may be used by the device manufacturer for 
+file specification.  This may be used by the device manufacturer for
 debugging purposes, but is typically not useful to an end user.  The default
-value of this argument will exclude these fields from the returned data 
+value of this argument will exclude these fields from the returned data
 structure.  Setting a value of \code{FALSE} will retain them.}
 
-\item{mergeMessages}{FIT files may contain similar 'messages' with varying 
-numbers of fields e.g. if a new sensor is added during an activity the 
+\item{mergeMessages}{FIT files may contain similar 'messages' with varying
+numbers of fields e.g. if a new sensor is added during an activity the
 'records' messages recorded after this will contain an extra data column.
 The default value of this argument will merge all messages of the same type,
 and insert \code{NA} to pad missing fields.  Setting this to \code{FALSE}
 will return a separate \code{data.frame} for each distinct message type.}
 }
 \value{
-A \code{list} of \code{tibbles}.  Each \code{tibble} holds a 
-message type defined in the input file.  The list entries are named 
-according to the message type.
+An object of class \code{[FitFile-class]}
 }
 \description{
-Reads a given FIT file and returns a list of data.frames, one for each
-message type stored in the input file.
+Reads a specified FIT file and returns an object of class \code{FitFile}
 }
 \examples{
-garmin_file <- system.file("extdata/Garmin.fit", package = "fitFileR")
+garmin_file <- system.file("extdata", "Activities", "garmin-edge500-ride.fit",
+                           package = "fitFileR")
 garmin <- readFitFile(garmin_file)
-
-## examine the 'file ID' messages
-garmin$file_id
 
 }
