@@ -18,11 +18,11 @@ setMethod("show",
               if("file_id" %in% listMessageTypes(object)) {
                   file_id <- getMessagesByType(object, "file_id") 
                   if("time_created" %in% names(file_id))
-                    cat("├ File created: ", as.character(file_id$time_created), "\n", sep = "")
+                    cat("\u251C\u2574File created: ", as.character(file_id$time_created), "\n", sep = "")
                   if(all(c("manufacturer", "product") %in% names(file_id)))
-                    cat("├ Device: ", file_id$manufacturer[1], " ", file_id$product[1], "\n", sep = "")
+                    cat("\u251C\u2574Device: ", file_id$manufacturer[1], " ", file_id$product[1], "\n", sep = "")
               }
-              cat("└ Number of data messages: ", length(object), sep = "")
+              cat("\u2514\u2574Number of data messages: ", length(object), sep = "")
           }
 )
 
