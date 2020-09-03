@@ -2,7 +2,10 @@
 title: "Reading FIT files"
 author: "Mike L. Smith"
 date: "`r Sys.Date()`"
-output: html_document
+output: 
+  html_document: 
+    fig_width: 8
+    fig_height: 4
 vignette: |
   %\VignetteIndexEntry{Reading FIT files}
   %\VignetteEncoding{UTF-8}
@@ -10,10 +13,12 @@ vignette: |
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, out.width="100%")
 ```
 
 # Introduction
+
+**fitFileR** is an R package to read FIT files produced by fitness tracking devices like Garmin Edge cycle computers or sports watches. The intention for **fitFileR** is to use native R code to read the files directly, with no reliance on the FIT SDK or other FIT parsing tools. As such it should be platform independent, and not require any additional software outside of a working version of R.
 
 ## Installing and loading the library
 
@@ -23,7 +28,7 @@ Currently **fitFileR** is only available on Github, and can be installed using t
 if(!requireNamespace("remotes")) {
     install.packages("remotes")
 }
-remotes::install_github("grimbough/fitFileR", ref = "fit-class")
+remotes::install_github("grimbough/fitFileR")
 ```
 
 Once the package is installed, you then need to load the library in your R session before it can be used.
@@ -40,6 +45,7 @@ library(fitFileR)
 list.files(system.file("extdata", "Activities", package = "fitFileR"))
 ```
 
+The names of these files indicate the manufacture and model name of the device it was recorded on, as well as the activity type.  There are many other differences (e.g. sensors connected, recording frequency, software versions) that are not encapsulated in the file names.
 
 # Reading files
 
@@ -96,17 +102,15 @@ A complete list of the message types stored within a file can be accessed via th
 listMessageTypes(fenix6)
 ```
 
-We can see there are `r length(listMessageTypes(fenix6))` different message types in the file above.
-
-If a specific accessor method doesn't exist for the message type you're interested in, you can use the function `getMessagesByType()` and provide the message type name to the `message_type` argument.  The code below will extract all "zones_target" messages from our file.  
+We can see there are `r length(listMessageTypes(fenix6))` different message types in the file above.  If a specific accessor method doesn't exist for the message type you're interested in, you can use the function `getMessagesByType()` and provide the message type name to the `message_type` argument.  The code below will extract all "zones_target" messages from our file.  
 
 ```{r devicesettings}
 getMessagesByType(fenix6, message_type = "zones_target")
 ```
 
-In this case this is a single message that reports power and heart rate thresholds that were set on the device.  These could then be used in conjunction with the "records" to measure how well the rider performed relative to the pre-set threshold for this particular activity.
+In this case this is a single message that reports power and heart rate thresholds that were set on the device.  One could imagine using these in conjunction with the "records" to measure how well the rider performed relative to the pre-set threshold for this particular activity.
 
-# Common use cases
+# Example use cases
 
 ## Plotting a route
 
@@ -162,6 +166,12 @@ m
 
 The package comes with two example fit files, recorded during a ride in early 2017.  They are of the same ride and record the same rider, but the data logging was carried out on two different devices: a Garmin Edge 500 and a TomTom Runner 3.  These in turn used a chest strap and wrist based heart rate monitor respectively.  Here we compare the heart rates recorded with two devices, to see how consistent they are with each other.
 
+```{r, heart-rate-packages}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+```
+
 First we need to locate the two files and read them into R:
 
 
@@ -175,46 +185,55 @@ garmin <- readFitFile(garmin_file)
 tomtom <- readFitFile(tomtom_file)
 ```
 
-We then use `records()` to extract the appropriate messages from the two files.
+We then use `records()` to extract the appropriate messages from the two files.  Since there's a lot of data in addition to the heart rate readings we're interested in, we use functions from **dplyr** and **tidyr** to combine the heart rate data into a single data frame, and make it into a 'long' format suitable for plotting with **ggplot2**.
 
 ```{r read-hr, eval = TRUE}
 garmin_records <- records(garmin)
 tomtom_records <- records(tomtom)
+
+hr_table <- inner_join(garmin_records$record_1, tomtom_records$record_2, by = "timestamp") %>%
+  select(timestamp, Garmin = heart_rate.x, TomTom=heart_rate.y) %>%
+  tidyr::pivot_longer(cols = Garmin:TomTom, names_to = "device", values_to = "heart_rate")
 ```
 
 ```{r plot_hr}
-library(ggplot2)
-ggplot() + 
-    geom_line(data = garmin_records$record_1, aes(x = timestamp, y = heart_rate), col = 1) + 
-    geom_line(data = tomtom_records$record_2, aes(x = timestamp, y = heart_rate), col = 2)
+ggplot(hr_table) + 
+    geom_line(aes(x = timestamp, y = heart_rate, col = device)) +
+    theme_bw()
 ```
 
 That's pretty messy as the TomTom data seem to have lots of 255 values (these are presumably dropouts in the data recording that get assigned the maximum value). We can filter those entries out to compare the two traces more easily.
 
 ```{r plot-hr-2, eval = TRUE}
-ggplot() + 
-    geom_line(data = garmin_records$record_1, aes(x = timestamp, y = heart_rate), col = 1) + 
-    geom_line(data = dplyr::filter(tomtom_records$record_2, heart_rate != 255), 
-              aes(x = timestamp, y = heart_rate), col = 2)
+hr_table %>% 
+  filter(heart_rate != 255) %>%
+  ggplot() + 
+    geom_line(aes(x = timestamp, y = heart_rate, col = device)) + 
+    theme_bw()
 ```
 
-We can also consider the difference between the two measurements at each common time point.
+We can also consider the difference between the two measurements both at each common time point and also as a rolling mean over a 60 second window.
 
-```{r, message = FALSE}
+```{r, message = FALSE, out.width="100%", warning = FALSE}
 library(zoo)
-hr_differences <- inner_join(garmin_records$record_1, tomtom_records$record_2, by = c("timestamp")) %>%
-  select(timestamp, heart_rate.x, heart_rate.y) %>% 
-  filter(heart_rate.y != 255) %>%
-  mutate(hr_diff = heart_rate.x - heart_rate.y) %>%
-  mutate(hr_30 = zoo::rollmean(hr_diff, k = 60, fill = NA))
+
+hr_differences <- hr_table %>% 
+  pivot_wider(id_cols = timestamp, names_from = device, values_from = heart_rate) %>% 
+  filter(TomTom != 255) %>%
+  mutate(hr_diff = Garmin - TomTom,
+         Garmin_hr_zone = cut(Garmin, breaks = seq(0,200,20))) %>%
+  mutate(hr_60 = zoo::rollmean(hr_diff, k = 60, fill = NA))
 
 ggplot(hr_differences, aes(x = timestamp, y = hr_diff)) + 
-  geom_point(col = 2) +
-  geom_line(aes(y = hr_30), col = "grey20") + 
+  geom_point(aes(col = Garmin_hr_zone)) +
+  geom_line(aes(y = hr_60), col = "grey40", lwd = 1.6, alpha = 0.7) + 
   geom_abline(intercept = 0, slope = 0) + 
   theme_bw() +
-  ylab("Heart Rate Difference\n+ve Garmin Greater / -ve TomTom Greater")
+  ylab("Heart Rate Difference\n+ve Garmin Greater / -ve TomTom Greater") +
+  scale_colour_brewer(palette = "PRGn")
 ```
+
+For the most part the readings are quite similar between the two devices.  However it's not uncommon to see instances where the wrist-based TomTom heart rate reading drops significantly compared to the chest strap readings recorded by the Garmin.  Based on the colouring this seems to happen more frequently at high heart rates, although there are many periods where high heart rates are reported by both devices.
 
 # Session Info
 
