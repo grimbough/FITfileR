@@ -1,7 +1,9 @@
 library(fitFileR)
 
-garmin_file <- system.file("extdata/Garmin.fit", package = "fitFileR")
-tomtom_file <- system.file("extdata/TomTom.fit", package = "fitFileR")
+garmin_file <- system.file("extdata", "Activities", "garmin-edge500-ride.fit", 
+                           package = "fitFileR")
+tomtom_file <- system.file("extdata", "Activities", "tomtom-runner3-ride.fit", 
+                           package = "fitFileR")
 
 ## test we can read our two example files
 expect_silent(

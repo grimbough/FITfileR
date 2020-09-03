@@ -11,7 +11,8 @@ Suggests: knitr,
     rmarkdown,
     leaflet, 
     ggplot2,
-    tinytest
+    tinytest,
+    zoo
 VignetteBuilder: knitr
 License: Artistic-2.0
 LazyLoad: yes
