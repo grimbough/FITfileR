@@ -9,7 +9,7 @@ vignette: |
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, fig.path = "figures")
+knitr::opts_chunk$set(echo = TRUE, fig.path = "figures/")
 ```
 
 ```{r load_lib}
@@ -95,7 +95,7 @@ edge530 <- readFitFile(edge530_file)
 
 To plot locations we extract the longitude and latitude from our FIT records.  These data are found in 'record' messages, and we use `records()` to extract them.  However, unlike the previous example, there are two different definitions for 'record' messages with over one thousand data points.  
 
-```{r process_coords}
+```{r process_records}
 edge530_records <- records(edge530)
 
 ## report the number of rows for each set of record messages

@@ -1,0 +1,12 @@
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+# fitFileR `r badger::badge_custom("dev version", as.character(packageVersion("fitFileR")), "blue", "https://github.com/grimbough/fitFileR")`  [![codecov](https://codecov.io/github/grimbough/fitFileR/branch/fit-class/graphs/badge.svg)](https://codecov.io/github/grimbough/fitFileR)
+
+## Installing from GitHub with devtools
+
+```{r, eval = FALSE}
+if(!requireNamespace("remotes")) {
+    install.packages("remotes")
+}
+remotes::install_github("grimbough/fitFileR", ref = "fit-class")
+```
