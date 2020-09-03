@@ -1,19 +1,37 @@
 Package: fitFileR
-Version: 0.0.5
+Version: 0.1.0
 Title: Reading FIT files using only native R code
 Author: Mike Smith <grimbough@gmail.com>
 Maintainer: Mike Smith <grimbough@gmail.com>
 Description: Allows reading FIT (Flexible and Interoperable Data Transfer) 
     files without any dependence on external software or SDKs.
 Depends: R (>= 3.5.0)
-Imports: dplyr, tibble, magrittr
+Imports: dplyr, tibble, magrittr, methods
 Suggests: knitr,
     rmarkdown,
     leaflet, 
     ggplot2,
-    tinytest
+    tinytest,
+    zoo,
+    tidyr
 VignetteBuilder: knitr
 License: Artistic-2.0
 LazyLoad: yes
+Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
 Encoding: UTF-8
+Collate: 
+    'allClasses.R'
+    'allMethods.R'
+    'dataFormatting.R'
+    'fitFileR.R'
+    'methods_FitFile_accessors.R'
+    'methods_FitFile_dim.R'
+    'methods_Messages_accessors.R'
+    'read_headers.R'
+    'read_messages.R'
+    'reader.R'
+    'utilities.R'
+    'write_headers.R'
+    'write_messages.R'
+    'writer.R'
