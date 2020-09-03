@@ -1,7 +1,8 @@
 ---
 title: "Reading FIT files"
-author: "Mike Smith"
-output: github_document
+author: "Mike L. Smith"
+date: "`r Sys.Date()`"
+output: html_document
 vignette: |
   %\VignetteIndexEntry{Reading FIT files}
   %\VignetteEncoding{UTF-8}
@@ -9,18 +10,40 @@ vignette: |
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, fig.path = "figures/")
+knitr::opts_chunk$set(echo = TRUE)
 ```
+
+# Introduction
+
+## Installing and loading the library
+
+Currently **fitFileR** is only available on Github, and can be installed using the **[remotes](https://cran.r-project.org/package=remotes) package.**
+
+```{r, eval = FALSE}
+if(!requireNamespace("remotes")) {
+    install.packages("remotes")
+}
+remotes::install_github("grimbough/fitFileR", ref = "fit-class")
+```
+
+Once the package is installed, you then need to load the library in your R session before it can be used.
 
 ```{r load_lib}
 library(fitFileR)
 ```
 
-# Reading files
-
 ## Example fit files
 
-The files can be found in the `extdata` folder of the package, and identified on your system using the following code. 
+**fitFileR** is distributed with several example FIT files to test its functionality.  These files can be found in the `extdata\Activities` folder of the package, and you can see the names of all the example files with:
+
+```{r}
+list.files(system.file("extdata", "Activities", package = "fitFileR"))
+```
+
+
+# Reading files
+
+To demonstrate reading a FIT file we're going to use the `garmin-fenix6-swim.fit` file distributed with **fitFileR**.
 
 ```{r data_files}
 library(fitFileR)
@@ -36,7 +59,7 @@ We read files using the function `readFitFile()`.
 fenix6 <- readFitFile(fenix6_file)
 ```
 
-The resulting object is an object of type `FitFile` containing all the data stored in the fit file.  Typing the name of the object will print some details about the original file e.g. the time it was created, the manufacturer and name of the device it was recorded on, and the number of data 'messages' held within the file.
+The resulting object is an object of type `FitFile` containing all the data stored in the original FIT file.  Typing the name of the object will print some details about the file e.g. the time it was created, the manufacturer and name of the device it was recorded on, and the number of data 'messages' held within the file.
 
 ```{r show}
 fenix6
@@ -59,13 +82,13 @@ In this example we actually get a list with three sets of data.  This is because
 
 ## Extracting common data types
 
-In addition to the `records()` function, fitFileR provides an number of other methods for accessing commonly found message types.  Currently, these include:
+In addition to the `records()` function, **fitFileR** provides an number of other methods for accessing commonly found message types.  Currently, these include:
 
   - `laps()`
   - `events()`
   - `file_id()`
 
-## Accessing all data types
+## Accessing any data type
 
 A complete list of the message types stored within a file can be accessed via the function `listMessageTypes()`.
 
@@ -104,7 +127,7 @@ vapply(edge530_records, FUN = nrow, FUN.VALUE = integer(1))
 
 We probably don't want to discard either of these, as even the smaller one represents over 20 minutes of data recording.  We can use **dplyr** to try and merge all the messages together into a single `tibble` regardless of their definition.  Any entries that are missing in certain messages will be filled with `NA`.  *Note: this approach of binding rows does not always work, as sometimes the data types within a column may change between messages, but it is more often successful.*
 
-```{r process_coords}
+```{r process_coords, message=FALSE}
 library(dplyr)
 
 edge530_allrecords <- records(edge530) %>% 
@@ -123,7 +146,7 @@ coords <- edge530_allrecords %>%
 
 We can now use the **leaflet** package to create an interactive map, with our route overlayed on top.
 
-```{r mapping}
+```{r mapping, message=FALSE}
 library(leaflet)
 
 m <- coords %>% 
@@ -133,10 +156,6 @@ m <- coords %>%
   addPolylines( )
     
 m
-```
-
-```{r plot-map, echo = FALSE}
-
 ```
 
 ## Comparing heart rate measurments between devices
@@ -181,17 +200,20 @@ ggplot() +
 
 We can also consider the difference between the two measurements at each common time point.
 
-```{r}
+```{r, message = FALSE}
 library(zoo)
 hr_differences <- inner_join(garmin_records$record_1, tomtom_records$record_2, by = c("timestamp")) %>%
   select(timestamp, heart_rate.x, heart_rate.y) %>% 
   filter(heart_rate.y != 255) %>%
   mutate(hr_diff = heart_rate.x - heart_rate.y) %>%
-  mutate(hr_30 = zoo::rollmean(hr_diff, k = 30, fill = NA))
+  mutate(hr_30 = zoo::rollmean(hr_diff, k = 60, fill = NA))
 
 ggplot(hr_differences, aes(x = timestamp, y = hr_diff)) + 
   geom_point(col = 2) +
-  geom_line(aes(y = hr_30))
+  geom_line(aes(y = hr_30), col = "grey20") + 
+  geom_abline(intercept = 0, slope = 0) + 
+  theme_bw() +
+  ylab("Heart Rate Difference\n+ve Garmin Greater / -ve TomTom Greater")
 ```
 
 # Session Info
