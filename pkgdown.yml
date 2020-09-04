@@ -2,6 +2,6 @@ pandoc: 2.7.3
 pkgdown: 1.5.1
 pkgdown_sha: ~
 articles:
-  fitFileR: fitFileR.html
-last_built: 2020-09-04T11:47Z
+  FITfileR: FITfileR.html
+last_built: 2020-09-04T12:04Z
 
