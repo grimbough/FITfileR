@@ -108,13 +108,12 @@
   if(type == "date_time") {
     input <- .adjustTimeStamp(input)
     attr(input, "units") <- NULL
-  } else if(type == "manufacturer") {
-    input <- fit_data_types$manufacturer[match(input, fit_data_types$manufacturer$key), ]$value
-  }
-  
-  else if (!is.na(details$units) && details$units == "semicircles") {
+  } else if (!is.na(details$units) && details$units == "semicircles") {
     input <- input * (180 / 2^31)
     attributes(input) <- list(units = "degrees")
+  } else if(type %in% names(fit_data_types)) {
+    data_type <- fit_data_types[[ type ]]
+    input <- data_type[ match(input, data_type$key),  ]$value
   }
   
   return(input)
