@@ -1,11 +1,11 @@
-library(fitFileR)
+library(FITfileR)
 
 ## Reading files distributed with the FIT SDK
 
 ##########################
 ## settings.fit
 #########################
-settings_file <- system.file("extdata", "FIT_SDK", "Settings.fit", package = "fitFileR")
+settings_file <- system.file("extdata", "FIT_SDK", "Settings.fit", package = "FITfileR")
 
 expect_silent(
     settings <- readFitFile(settings_file)
@@ -21,7 +21,7 @@ expect_equivalent( user_profile$age, 28L )
 ##########################
 ## DeveloperData.fit
 #########################
-devdata_file <- system.file("extdata", "FIT_SDK", "DeveloperData.fit", package = "fitFileR")
+devdata_file <- system.file("extdata", "FIT_SDK", "DeveloperData.fit", package = "FITfileR")
 expect_silent(
     devdata <- readFitFile(devdata_file)
 )

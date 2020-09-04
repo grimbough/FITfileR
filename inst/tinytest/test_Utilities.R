@@ -4,15 +4,15 @@
 ############################################################
 
 ## Should fail with negative or too large values
-expect_error(fitFileR:::.uintToBits(-1))
-expect_error(fitFileR:::.uintToBits(2^32))
+expect_error(FITfileR:::.uintToBits(-1))
+expect_error(FITfileR:::.uintToBits(2^32))
 
 expect_true(
-    is(fitFileR:::.uintToBits(10), "raw")
+    is(FITfileR:::.uintToBits(10), "raw")
 )
 
 expect_equal(
-    fitFileR:::.binaryToInt(fitFileR:::.uintToBits(10)), 
+    FITfileR:::.binaryToInt(FITfileR:::.uintToBits(10)), 
     10
 )
 

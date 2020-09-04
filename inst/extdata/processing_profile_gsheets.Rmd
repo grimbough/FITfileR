@@ -14,7 +14,7 @@ library(openxlsx)
 Here we read the message definitions:
 
 ```{r, eval = FALSE}
-messages <- read.xlsx(system.file("extdata/Profile_gsheets_July20.xlsx", package = "fitFileR"), 
+messages <- read.xlsx(system.file("extdata/Profile_gsheets_July20.xlsx", package = "FITfileR"), 
                       sheet = 2)
 rm.idx <- which(is.na(messages[,1]) & is.na(messages[,2]) & is.na(messages[,3]))
 messages <- messages[-rm.idx,c(1:4,7:9)]

@@ -17,43 +17,43 @@ knitr::opts_chunk$set(echo = TRUE, out.width="100%")
 
 # Introduction
 
-**fitFileR** is an R package to read FIT files produced by fitness tracking devices like Garmin Edge cycle computers or sports watches. The intention for **fitFileR** is to use native R code to read the files directly, with no reliance on the FIT SDK or other FIT parsing tools. As such it should be platform independent, and not require any additional software outside of a working version of R.
+**FITfileR** is an R package to read FIT files produced by fitness tracking devices like Garmin Edge cycle computers or sports watches. The intention for **FITfileR** is to use native R code to read the files directly, with no reliance on the FIT SDK or other FIT parsing tools. As such it should be platform independent, and not require any additional software outside of a working version of R.
 
 ## Installing and loading the library
 
-Currently **fitFileR** is only available on Github, and can be installed using the **[remotes](https://cran.r-project.org/package=remotes) package.**
+Currently **FITfileR** is only available on Github, and can be installed using the **[remotes](https://cran.r-project.org/package=remotes) package.**
 
 ```{r, eval = FALSE}
 if(!requireNamespace("remotes")) {
     install.packages("remotes")
 }
-remotes::install_github("grimbough/fitFileR")
+remotes::install_github("grimbough/FITfileR")
 ```
 
 Once the package is installed, you then need to load the library in your R session before it can be used.
 
 ```{r load_lib}
-library(fitFileR)
+library(FITfileR)
 ```
 
 ## Example fit files
 
-**fitFileR** is distributed with several example FIT files to test its functionality.  These files can be found in the `extdata\Activities` folder of the package, and you can see the names of all the example files with:
+**FITfileR** is distributed with several example FIT files to test its functionality.  These files can be found in the `extdata\Activities` folder of the package, and you can see the names of all the example files with:
 
 ```{r}
-list.files(system.file("extdata", "Activities", package = "fitFileR"))
+list.files(system.file("extdata", "Activities", package = "FITfileR"))
 ```
 
 The names of these files indicate the manufacture and model name of the device it was recorded on, as well as the activity type.  There are many other differences (e.g. connected sensors, recording frequency, software versions) that are not encapsulated in the file names.
 
 # Reading files
 
-To demonstrate reading a FIT file we're going to use the `garmin-fenix6-swim.fit` file distributed with **fitFileR**.
+To demonstrate reading a FIT file we're going to use the `garmin-fenix6-swim.fit` file distributed with **FITfileR**.
 
 ```{r data_files, cache = TRUE}
-library(fitFileR)
+library(FITfileR)
 fenix6_file <- system.file("extdata", "Activities", "garmin-fenix6-swim.fit", 
-                            package = "fitFileR")
+                            package = "FITfileR")
 ```
 
 We read files using the function `readFitFile()`.
@@ -85,7 +85,7 @@ In this example we actually get a list with three `tibbles`.  This is because in
 
 ## Extracting common data types
 
-In addition to the `records()` function, **fitFileR** provides an number of other methods for accessing commonly found message types.  Currently, these include:
+In addition to the `records()` function, **FITfileR** provides an number of other methods for accessing commonly found message types.  Currently, these include:
 
   - `laps()`
   - `events()`
@@ -93,7 +93,7 @@ In addition to the `records()` function, **fitFileR** provides an number of othe
 
 ## Accessing any data type
 
-The FIT specification allows for `r nrow(fitFileR:::fit_data_types$mesg_num)` distinct message types, and **fitFileR** does not include specific accessor functions for each of these.  To view a complete list of the message types stored within a file you can use the function `listMessageTypes()`.
+The FIT specification allows for `r nrow(FITfileR:::fit_data_types$mesg_num)` distinct message types, and **FITfileR** does not include specific accessor functions for each of these.  To view a complete list of the message types stored within a file you can use the function `listMessageTypes()`.
 
 ```{r listMessageTypes}
 listMessageTypes(fenix6)
@@ -113,7 +113,7 @@ In this case *zones_target* is a single message that reports power and heart rat
 
 ```{r, read-edge530, cache = TRUE}
 edge530_file <- system.file("extdata", "Activities", "garmin-edge530-ride.fit", 
-                            package = "fitFileR")
+                            package = "FITfileR")
 edge530 <- readFitFile(edge530_file)
 ```
 
@@ -174,9 +174,9 @@ First we need to locate the two files and read them into R:
 
 ```{r read-both, cache = TRUE}
 garmin_file <- system.file("extdata", "Activities", "garmin-edge500-ride.fit", 
-                            package = "fitFileR")
+                            package = "FITfileR")
 tomtom_file <- system.file("extdata", "Activities", "tomtom-runner3-ride.fit", 
-                            package = "fitFileR")
+                            package = "FITfileR")
 
 garmin <- readFitFile(garmin_file)
 tomtom <- readFitFile(tomtom_file)

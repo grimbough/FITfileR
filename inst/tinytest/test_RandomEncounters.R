@@ -1,9 +1,9 @@
 ## testing files that have been sent via github issues
 ## this should only be run locally, and not uploaded
 
-library(fitFileR)
+library(FITfileR)
 
-files <- list.files( "~/Projects/personal/fitFileR/inst/extdata/RandomEncounters",
+files <- list.files( "~/Projects/personal/FITfileR/inst/extdata/RandomEncounters",
                      full.names = TRUE)
 
 for(f in files) {
