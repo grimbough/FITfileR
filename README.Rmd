@@ -1,6 +1,10 @@
-# FITfileR `r badger::badge_custom("dev version", as.character(packageVersion("FITfileR")), "blue", "https://github.com/grimbough/FITfileR")` ![R CMD check](https://github.com/grimbough/FITfileR/workflows/R-CMD-check/badge.svg)  [![codecov](https://codecov.io/github/grimbough/FITfileR/branch/fit-class/graphs/badge.svg)](https://codecov.io/github/grimbough/FITfileR)
+# FITfileR 
 
-**FITfileR** is an R package to read FIT files produced by fitness tracking devices like Garmin Edge cycle computers or sports watches. The intention for **FITfileR** is to use native R code to read the files directly, with no reliance on the FIT SDK or other FIT parsing tools. As such it should be platform independent, and not require any additional software outside of a working version of R.
+`r badger::badge_custom("dev version", as.character(packageVersion("FITfileR")), "blue", "https://github.com/grimbough/FITfileR")`
+[![R CMD check](https://github.com/grimbough/FITfileR/workflows/R-CMD-check/badge.svg)](https://github.com/grimbough/FITfileR/actions) 
+[![codecov](https://codecov.io/github/grimbough/FITfileR/branch/fit-class/graphs/badge.svg)](https://codecov.io/github/grimbough/FITfileR)
+
+**FITfileR** is an R package to read FIT files produced by fitness tracking devices like cycling computers or sports watches. The intention for **FITfileR** is to use native R code to read the files directly, with no reliance on the FIT SDK or other FIT parsing tools. As such it should be platform independent, and not require any additional software outside of a working version of R.
 
 **FITfileR** should be considered a work in progress, and many features available in the complete SDK are not currently implemented.  
 
