@@ -2,10 +2,9 @@
 title: "Reading FIT files"
 author: "Mike L. Smith"
 date: "`r Sys.Date()`"
-output: 
-  html_document: 
-    fig_width: 8
-    fig_height: 4
+output: html_document
+pkgdown:
+  as_is: true
 vignette: |
   %\VignetteIndexEntry{Reading FIT files}
   %\VignetteEncoding{UTF-8}
@@ -45,19 +44,17 @@ library(fitFileR)
 list.files(system.file("extdata", "Activities", package = "fitFileR"))
 ```
 
-The names of these files indicate the manufacture and model name of the device it was recorded on, as well as the activity type.  There are many other differences (e.g. sensors connected, recording frequency, software versions) that are not encapsulated in the file names.
+The names of these files indicate the manufacture and model name of the device it was recorded on, as well as the activity type.  There are many other differences (e.g. connected sensors, recording frequency, software versions) that are not encapsulated in the file names.
 
 # Reading files
 
 To demonstrate reading a FIT file we're going to use the `garmin-fenix6-swim.fit` file distributed with **fitFileR**.
 
-```{r data_files}
+```{r data_files, cache = TRUE}
 library(fitFileR)
 fenix6_file <- system.file("extdata", "Activities", "garmin-fenix6-swim.fit", 
                             package = "fitFileR")
 ```
-
-## Reading
 
 We read files using the function `readFitFile()`.
 
@@ -65,7 +62,7 @@ We read files using the function `readFitFile()`.
 fenix6 <- readFitFile(fenix6_file)
 ```
 
-The resulting object is an object of type `FitFile` containing all the data stored in the original FIT file.  Typing the name of the object will print some details about the file e.g. the time it was created, the manufacturer and name of the device it was recorded on, and the number of data 'messages' held within the file.
+The resulting object is an object of type `FitFile` containing all the data stored in the original FIT file.  Typing the name of the object will print some details about the file e.g. the time it was created, the manufacturer and name of the device it was recorded on, and the number of data 'messages' held within the file.  *Exactly what is shown here will depend on the information available in the file, so it may look slightly different for you*.
 
 ```{r show}
 fenix6
@@ -77,14 +74,14 @@ If we want to do more than just print a summary of the FIT file to screen we nee
 
 ## Records - GPS, speed, altitude, etc
 
-The data most often wanted from a fit file are the values such as location, speed, altitude, etc recorded during an activity.  Such data are classed as 'records' in the FIT specification and can be retrieved from the FitFile object using using `records()`. 
+The data most often wanted from a fit file are the values such as location, speed, altitude, etc recorded during an activity.  Such data are classed as *records* in the FIT specification and can be retrieved from the FitFile object using using `records()`. 
 
 ```{r print_record}
 fenix6_records <- records(fenix6)
 fenix6_records
 ```
 
-In this example we actually get a list with three sets of data.  This is because in this particular file there were three distinct definitions of what a "record" contains.  This normally happens if data recording begins before a sensor (e.g. a heart rate monitor) has been attached to a device, or GPS position has been acquired, although sometimes the reason can be more opaque.  In this example we are interested in the second entry, which contains the vast majority of the data.  *Note: sometimes the bulk of your data may be spread across multiple `tibbles` in the list rather than a single entry.  See the "Plotting a route" section below for an example of how to handle this.*
+In this example we actually get a list with three `tibbles`.  This is because in this particular file there are three distinct definitions of what a *record* contains.  This normally happens if data recording begins before a sensor (e.g. a heart rate monitor) has been attached to a device, or GPS position has been acquired, although sometimes the reason can be more opaque.  In this example it seems clear that we can use the second entry, which contains the vast majority of the data.  *Note: sometimes the bulk of your data may be spread across multiple `tibbles` in the list rather than a single entry.  See the "Plotting a route" section below for an example of how to handle this.*
 
 ## Extracting common data types
 
@@ -96,7 +93,7 @@ In addition to the `records()` function, **fitFileR** provides an number of othe
 
 ## Accessing any data type
 
-A complete list of the message types stored within a file can be accessed via the function `listMessageTypes()`.
+The FIT specification allows for `r nrow(fitFileR:::fit_data_types$mesg_num)` distinct message types, and **fitFileR** does not include specific accessor functions for each of these.  To view a complete list of the message types stored within a file you can use the function `listMessageTypes()`.
 
 ```{r listMessageTypes}
 listMessageTypes(fenix6)
@@ -108,21 +105,21 @@ We can see there are `r length(listMessageTypes(fenix6))` different message type
 getMessagesByType(fenix6, message_type = "zones_target")
 ```
 
-In this case this is a single message that reports power and heart rate thresholds that were set on the device.  One could imagine using these in conjunction with the "records" to measure how well the rider performed relative to the pre-set threshold for this particular activity.
+In this case *zones_target* is a single message that reports power and heart rate thresholds that were set on the device.  One could imagine using these in conjunction with the *records* to measure how well the rider performed relative to the pre-set threshold for this particular activity.
 
 # Example use cases
 
 ## Plotting a route
 
-```{r}
+```{r, read-edge530, cache = TRUE}
 edge530_file <- system.file("extdata", "Activities", "garmin-edge530-ride.fit", 
                             package = "fitFileR")
 edge530 <- readFitFile(edge530_file)
 ```
 
-To plot locations we extract the longitude and latitude from our FIT records.  These data are found in 'record' messages, and we use `records()` to extract them.  However, unlike the previous example, there are two different definitions for 'record' messages with over one thousand data points.  
+To plot locations we extract the longitude and latitude from our FIT records.  These data are found in *record* messages, and we use `records()` to extract them.  As before, we are returned a list of tibbles.  However, unlike the previous example there is no entry that clearly holds almost all the data; there are two different definitions for *record* messages with over one thousand data points.  
 
-```{r process_records}
+```{r process-records}
 edge530_records <- records(edge530)
 
 ## report the number of rows for each set of record messages
@@ -131,7 +128,7 @@ vapply(edge530_records, FUN = nrow, FUN.VALUE = integer(1))
 
 We probably don't want to discard either of these, as even the smaller one represents over 20 minutes of data recording.  We can use **dplyr** to try and merge all the messages together into a single `tibble` regardless of their definition.  Any entries that are missing in certain messages will be filled with `NA`.  *Note: this approach of binding rows does not always work, as sometimes the data types within a column may change between messages, but it is more often successful.*
 
-```{r process_coords, message=FALSE}
+```{r merge-records, message=FALSE}
 library(dplyr)
 
 edge530_allrecords <- records(edge530) %>% 
@@ -143,7 +140,7 @@ edge530_allrecords
 
 We can then use `dplyr::select()` to extract the latitude and longitude columns from our `tibble`, so we can pass them easily to a plotting function.
 
-```{r}
+```{r, extract-coords}
 coords <- edge530_allrecords %>% 
   select(position_long, position_lat)
 ```
@@ -175,7 +172,7 @@ library(ggplot2)
 First we need to locate the two files and read them into R:
 
 
-```{r read-both}
+```{r read-both, cache = TRUE}
 garmin_file <- system.file("extdata", "Activities", "garmin-edge500-ride.fit", 
                             package = "fitFileR")
 tomtom_file <- system.file("extdata", "Activities", "tomtom-runner3-ride.fit", 
@@ -196,7 +193,7 @@ hr_table <- inner_join(garmin_records$record_1, tomtom_records$record_2, by = "t
   tidyr::pivot_longer(cols = Garmin:TomTom, names_to = "device", values_to = "heart_rate")
 ```
 
-```{r plot_hr}
+```{r plot-hr, fig.width=8, fig.height=3}
 ggplot(hr_table) + 
     geom_line(aes(x = timestamp, y = heart_rate, col = device)) +
     theme_bw()
@@ -204,7 +201,7 @@ ggplot(hr_table) +
 
 That's pretty messy as the TomTom data seem to have lots of 255 values (these are presumably dropouts in the data recording that get assigned the maximum value). We can filter those entries out to compare the two traces more easily.
 
-```{r plot-hr-2, eval = TRUE}
+```{r plot-hr-2, fig.width=8, fig.height=3}
 hr_table %>% 
   filter(heart_rate != 255) %>%
   ggplot() + 
@@ -214,7 +211,7 @@ hr_table %>%
 
 We can also consider the difference between the two measurements both at each common time point and also as a rolling mean over a 60 second window.
 
-```{r, message = FALSE, out.width="100%", warning = FALSE}
+```{r, message = FALSE, warning = FALSE, fig.width=8, fig.height=3}
 library(zoo)
 
 hr_differences <- hr_table %>% 
