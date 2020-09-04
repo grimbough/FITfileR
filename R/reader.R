@@ -19,7 +19,7 @@
 #' 
 #' @examples
 #' garmin_file <- system.file("extdata", "Activities", "garmin-edge500-ride.fit",
-#'                            package = "fitFileR")
+#'                            package = "FITfileR")
 #' garmin <- readFitFile(garmin_file)
 #' 
 #' @export

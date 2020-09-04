@@ -16,7 +16,7 @@
 \alias{laps,FitFile-method}
 \alias{events}
 \alias{events,FitFile-method}
-\title{Extracting messages from Fit Files}
+\title{Extracting messages from FIT Files}
 \usage{
 listMessageTypes(fitFile)
 
@@ -61,7 +61,7 @@ Methods for retrieving messages from \code{\link{FitFile-class}} objects.
 }
 \details{
 The FIT file specification allows for a large number of message types.
-FitFileR provides accessor methods for some of the most common. These
+FITfileR provides accessor methods for some of the most common. These
 include \code{records()} and \code{laps()}.
 
 If a predefined function doesn't exist for the message type you want to

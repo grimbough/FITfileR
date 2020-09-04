@@ -1,9 +1,9 @@
-#' Extracting messages from Fit Files
+#' Extracting messages from FIT Files
 #' 
 #' Methods for retrieving messages from \code{\link{FitFile-class}} objects.
 #' 
 #' The FIT file specification allows for a large number of message types.  
-#' FitFileR provides accessor methods for some of the most common. These 
+#' FITfileR provides accessor methods for some of the most common. These 
 #' include `records()` and `laps()`.
 #' 
 #' If a predefined function doesn't exist for the message type you want to
