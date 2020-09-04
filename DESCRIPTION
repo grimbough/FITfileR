@@ -5,6 +5,7 @@ Author: Mike Smith <grimbough@gmail.com>
 Maintainer: Mike Smith <grimbough@gmail.com>
 Description: Allows reading FIT (Flexible and Interoperable Data Transfer) 
     files without any dependence on external software or SDKs.
+URL: https://github.com/grimbough/fitFileR
 Depends: R (>= 3.5.0)
 Imports: dplyr, tibble, magrittr, methods
 Suggests: knitr,
