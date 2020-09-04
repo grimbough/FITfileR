@@ -1,0 +1,13 @@
+template:
+  params:
+    bootswatch: united
+    ganalytics: UA-93076445-1
+    
+figures:
+  dev: grDevices::png
+  dpi: 96
+  dev.args: []
+  fig.ext: png
+  fig.width: 8
+  fig.height: 3
+  fig.retina: 2
