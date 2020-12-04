@@ -38,8 +38,10 @@ readFitFile <- function(fileName, dropUnknown = TRUE, mergeMessages = TRUE) {
   
   messages <- list()
   msgDefs <- list()
+  devMessages <- list()
   count <- 1
   msg_count <- 1
+  dev_msg_count <- 1
   prev_header <- NULL
   
   while(seek(con, where = NA) < (file_header$data_size + file_header$size)) {
@@ -51,15 +53,25 @@ readFitFile <- function(fileName, dropUnknown = TRUE, mergeMessages = TRUE) {
       count <- count + 1
     } else {
       definition <- .matchDefinition(msgDefs, local_message_number = record_header@local_message_number)
-      messages[[ msg_count ]] <- .readMessage_data(con = con, 
-                                                              header = record_header, 
-                                                              definition = definition)
       
-      if(is( messages[[ msg_count ]], "FitDataMessageWithDevData")) {
-        messages[[ msg_count ]]@dev_field_details <- .matchDevDefinition(messages, dev_data_idx = 0)
+      ## is this a developer data definition message?
+      if(globalMessageNumber(definition) == 206) {
+         tmp <- .readMessage_data(con = con, header = record_header, definition = definition)
+         dev_data_idx <- as.integer(tmp@fields[['0']]) + 1
+         devMessages[[ dev_data_idx ]] <- tmp
+      } else {
+        messages[[ msg_count ]] <- .readMessage_data(con = con, 
+                                                   header = record_header, 
+                                                   definition = definition)
+
+        if(is( messages[[ msg_count ]], "FitDataMessageWithDevData")) {
+          dev_data_idx <- names(messages[[ msg_count ]]@dev_fields)
+          messages[[ msg_count ]]@dev_field_details <- .matchDevDefinition(devMessages, 
+                                                                           dev_data_idx = as.integer(dev_data_idx) + 1)
+        }
+      
+        msg_count <- msg_count + 1
       }
-      
-      msg_count <- msg_count + 1
     }
     
     prev_header <- record_header
