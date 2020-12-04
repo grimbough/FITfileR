@@ -28,8 +28,6 @@
     header <- prev_header
   } else if(record_header[8]) {
     ## compressed time stamp header
-    ## currently not handled
-    # stop("Compressed time stamp header not currently supported")
     header <- .readMessageHeader_compressed(record_header)
   } else {
     ## normal header

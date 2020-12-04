@@ -64,7 +64,7 @@ setClass("FitDataMessage",
 setClass("FitDataMessageWithDevData",
          slots = c(
              dev_fields = "list",
-             dev_field_details = "data.frame"
+             dev_field_details = "list"
          ),
          contains = "FitDataMessage"
 )
