@@ -187,12 +187,16 @@
 .processDevFieldsList <- function(x) {
   message_table <- lapply(x, 
                           FUN = function(y) {
-                            as_tibble(y@dev_fields) 
+                            y@dev_fields
                           } 
   ) %>% 
     dplyr::bind_rows( ) 
   
   names(message_table) <- x[[1]]@dev_field_details$field_name
+  
+  for(i in ncol(message_table)) {
+    attributes(message_table[[i]]) <- list(units = x[[1]]@dev_field_details$units)
+  }
   
   return(message_table)
 }
