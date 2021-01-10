@@ -41,11 +41,14 @@
 .matchDevDefinition <- function(msgs, dev_data_idx) {
   
   dev_msgs <- msgs
-  i <- dev_data_idx
-  #def <- field_def_num = dev_msgs[[i]]@fields['1']],
-  #                  field_name = dev_msgs[[i]]@fields[['3']],
-  #                  units = dev_msgs[[i]]@fields[['8']])
+  i <- dev_data_idx[1]
   def <- dev_msgs[[i]]@fields[ c('1','3','8') ]
+  if(length(dev_data_idx) > 1) {
+    for(j in seq_along(dev_data_idx[-1])) {
+      i <- dev_data_idx[j+1]
+      def <- Map(c, def, dev_msgs[[i]]@fields[ c('1','3','8') ])
+    } 
+  }
   names(def) <- c("field_def_num", "field_name", "units")
   return(def)
 }

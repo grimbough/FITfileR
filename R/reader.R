@@ -57,7 +57,7 @@ readFitFile <- function(fileName, dropUnknown = TRUE, mergeMessages = TRUE) {
       ## is this a developer data definition message?
       if(globalMessageNumber(definition) == 206) {
          tmp <- .readMessage_data(con = con, header = record_header, definition = definition)
-         dev_data_idx <- as.integer(tmp@fields[['0']]) + 1
+         dev_data_idx <- as.integer(tmp@fields[['1']]) + 1
          devMessages[[ dev_data_idx ]] <- tmp
       } else {
         messages[[ msg_count ]] <- .readMessage_data(con = con, 
