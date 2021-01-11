@@ -23,12 +23,15 @@ RoxygenNote: 7.1.1
 Encoding: UTF-8
 Collate: 
     'FITfileR.R'
+    'class_validity.R'
     'allClasses.R'
+    'allGenerics.R'
     'allMethods.R'
     'dataFormatting.R'
     'methods_FitFile_accessors.R'
     'methods_FitFile_dim.R'
     'methods_Messages_accessors.R'
+    'methods_Messages_header.R'
     'read_headers.R'
     'read_messages.R'
     'reader.R'

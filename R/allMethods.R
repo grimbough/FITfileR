@@ -1,15 +1,4 @@
 
-setGeneric("hasDeveloperData", function(object) {
-    standardGeneric("hasDeveloperData")
-})
-
-setMethod("hasDeveloperData", 
-          signature = c("FitDataMessage"),
-          function(object) {
-              return(object@definition@header@has_developer_data)
-          }
-)
-
 ## Show
 setMethod("show", 
           signature = "FitFile", 
@@ -24,6 +13,11 @@ setMethod("show",
               }
               cat("\u2514\u2574Number of data messages: ", length(object), sep = "")
           }
+)
+
+setMethod("show", signature = "FitMessageHeader", function(object) {
+    cat("Definition: ", isDefinition(object))
+} 
 )
 
 setMethod("show", signature = "FitDataMessage", function(object) {
@@ -85,6 +79,7 @@ setMethod("show", signature = "FitDataMessageWithDevData", function(object) {
     
     
 })
+
 
 
 
