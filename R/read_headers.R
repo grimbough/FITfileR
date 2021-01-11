@@ -47,11 +47,8 @@
 .readMessageHeader_normal <- function(record_header) {
   
   header <- new("FitMessageHeader",
-      is_definition = as.logical(record_header[7]),
-      has_developer_data = as.logical(record_header[6]),
-      local_message_number = .binaryToInt(record_header[1:4]),
-      time_offset = 0,
-      raw_rep = record_header
+      raw_rep = record_header,
+      is_compressed = FALSE
   )
   
   return(header)
@@ -63,10 +60,8 @@
 .readMessageHeader_compressed <- function(record_header) {
   
   header <- new("FitMessageHeader",
-                is_definition = FALSE,
-                has_developer_data = FALSE,
-                local_message_number =  .binaryToInt(record_header[6:7]),
-                time_offset = .binaryToInt(record_header[1:5])
+                raw_rep = record_header,
+                is_compressed = FALSE
   )
   
   return(header)

@@ -19,7 +19,7 @@
     field_definition <- .processFieldDefs(
         readBin(con = con, what = "raw", n = 3 * n_fields, size = 1, signed = FALSE)
     )
-    if(message_header@has_developer_data){
+    if(hasDeveloperData(message_header)){
         ## do something with the developer fields
         n_dev_fields <- readBin(con = con, what = "int", n = 1, size = 1, signed = FALSE)
         dev_field_definition <- .processFieldDefs(
@@ -131,7 +131,8 @@
                                    endian = ifelse(definition@is_little_endian, "little", "big"))
                     
                     ## if we have unsigned ints, turn the bits into a numeric
-                    if(fieldTypes[i] %in% c('86', '8c')) {
+                    #if(fieldTypes[i] %in% c('86', '8c')) {
+                    if(fieldTypes[i] == '86' || fieldTypes[i] == '8c') {
                         if(definition@is_little_endian) {
                             bits <- as.logical(rawToBits(dat[1:4]))
                         } else {
@@ -163,8 +164,7 @@
     
     names(message) <- definition@field_defs$field_def_num
     
-    if(definition@header@has_developer_data) {
-        #message("Developer fields")
+    if(hasDeveloperData(definition)) {
         dev_data <- .readMessage_devdata(con, definition@dev_field_defs, definition@is_little_endian)
         names(dev_data) <- definition@dev_field_defs$field_def_num
         
@@ -175,8 +175,6 @@
                    dev_fields = dev_data
         )
     } else {
-        
-        
         res <- new("FitDataMessage",
                    header = header,
                    definition = definition,
