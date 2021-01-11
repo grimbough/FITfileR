@@ -32,7 +32,7 @@
 .matchDefinition <- function(msgDefs, local_message_number) {
   for(i in rev(seq_along(msgDefs))) {
     def <- msgDefs[[i]]
-    if(def@header@local_message_number == local_message_number) {
+    if(localMessageNumber(def) == local_message_number) {
       return(def)
     }
   }

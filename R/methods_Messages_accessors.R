@@ -2,14 +2,13 @@
 ## Local Message Number
 ########################
 
-setGeneric("localMessageNumber", function(object) {
-    standardGeneric("localMessageNumber")
-})
-
 setMethod("localMessageNumber", 
           signature = "FitMessageHeader",
           function(object) {
-              object@local_message_number
+              if(object@is_compressed)
+                  .binaryToInt(object@raw_rep[6:7])
+              else
+                  .binaryToInt(object@raw_rep[1:4])
           }
 )
 
@@ -31,10 +30,6 @@ setMethod("localMessageNumber",
 ## Global Message Number
 ########################
 
-
-setGeneric("globalMessageNumber", function(object) {
-    standardGeneric("globalMessageNumber")
-})
 
 setMethod("globalMessageNumber", 
           signature = "FitDefinitionMessage",
