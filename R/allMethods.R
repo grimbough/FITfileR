@@ -69,8 +69,6 @@ setMethod("show", signature = "FitDataMessageWithDevData", function(object) {
     }
     
     for(field in object@definition@dev_field_defs$field_def_num) {
-       ##translated <- filter(object@dev_field_details, field_def_num == field)
-        
         idx <- which(object@dev_field_details$field_def_num == field)
         cat("\n ", object@dev_field_details$field_name[idx], ": ", sep = "")
         original <- object@dev_fields[[ paste(field) ]] %>% unlist()

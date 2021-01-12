@@ -156,13 +156,12 @@
             }
         } else {
             ## we end up here if the datatype is not defined in the FIT spec
-            #message("unknown data type")
             readBin(con, what = "integer", size = 1, n = sizes[i])
             message[[i]] <- 0
         }
     }
     
-    names(message) <- definition@field_defs$field_def_num
+    #names(message) <- definition@field_defs$field_def_num
     
     if(hasDeveloperData(definition)) {
         dev_data <- .readMessage_devdata(con, definition@dev_field_defs, definition@is_little_endian)
