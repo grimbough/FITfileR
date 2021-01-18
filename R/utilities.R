@@ -40,16 +40,17 @@
 
 .matchDevDefinition <- function(msgs, dev_data_idx) {
   
-  dev_msgs <- msgs
   i <- dev_data_idx[1]
   ## which elements in the definition relate to definition number, name, and units?
-  idx <- match(c(1, 3, 8), dev_msgs[[i]]@definition@field_defs$field_def_num)
-  def <- dev_msgs[[i]]@fields[ idx ]
+  field_defs <- fieldDefinition(msgs[[i]])
+  idx <- match(c(1, 3, 8), field_defs$field_def_num)
+  def <- msgs[[i]]@fields[ idx ]
   if(length(dev_data_idx) > 1) {
     for(j in seq_along(dev_data_idx[-1])) {
       i <- dev_data_idx[j+1]
-      idx <- match(c(1, 3, 8), dev_msgs[[i]]@definition@field_defs$field_def_num)
-      def <- Map(c, def, dev_msgs[[i]]@fields[ idx ])
+      field_defs <- fieldDefinition(msgs[[i]])
+      idx <- match(c(1, 3, 8), field_defs$field_def_num)
+      def <- Map(c, def, msgs[[i]]@fields[ idx ])
     } 
   }
   names(def) <- c("field_def_num", "field_name", "units")
