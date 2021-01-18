@@ -30,7 +30,6 @@ setMethod("localMessageNumber",
 ## Global Message Number
 ########################
 
-
 setMethod("globalMessageNumber", 
           signature = "FitDefinitionMessage",
           function(object) {
@@ -44,3 +43,36 @@ setMethod("globalMessageNumber",
               globalMessageNumber(object@definition)
           }
 )
+
+########################
+## Definition
+########################
+
+setMethod("fieldDefinition", 
+          signature = "FitDefinitionMessage",
+          function(object) {
+              object@field_defs
+          }
+)
+
+setMethod("fieldDefinition", 
+          signature = "FitDataMessage",
+          function(object) {
+              fieldDefinition(object@definition)
+          }
+)
+
+setMethod("devFieldDefinition", 
+          signature = "FitDefinitionMessage",
+          function(object) {
+            object@dev_field_defs
+          }
+)
+
+setMethod("devFieldDefinition", 
+          signature = "FitDataMessage",
+          function(object) {
+            devFieldDefinition(object@definition)
+          }
+)
+

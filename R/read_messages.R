@@ -105,8 +105,9 @@
 
 .readMessage_data <- function(con, header, definition) {
     
-    fieldTypes <- definition@field_defs$base_type
-    sizes <- definition@field_defs$size
+    fieldDefs <- fieldDefinition(definition)
+    fieldTypes <- fieldDefs$base_type
+    sizes <- fieldDefs$size
     
     message <- vector(mode = "list", length = length(fieldTypes))
     for(i in seq_along(fieldTypes)) {
@@ -131,7 +132,6 @@
                                    endian = ifelse(definition@is_little_endian, "little", "big"))
                     
                     ## if we have unsigned ints, turn the bits into a numeric
-                    #if(fieldTypes[i] %in% c('86', '8c')) {
                     if(fieldTypes[i] == '86' || fieldTypes[i] == '8c') {
                         if(definition@is_little_endian) {
                             bits <- as.logical(rawToBits(dat[1:4]))
@@ -161,11 +161,9 @@
         }
     }
     
-    #names(message) <- definition@field_defs$field_def_num
-    
     if(hasDeveloperData(definition)) {
         dev_data <- .readMessage_devdata(con, definition@dev_field_defs, definition@is_little_endian)
-        names(dev_data) <- definition@dev_field_defs$field_def_num
+        names(dev_data) <- devFieldDefinition(definition)$field_def_num
         
         res <- new("FitDataMessageWithDevData",
                    header = header,

@@ -147,7 +147,7 @@
     #                       ) %>% 
     # dplyr::bind_rows( ) 
     
-    names <- x[[1]]@definition@field_defs$field_def_num
+    names <- fieldDefinition(x[[1]])$field_def_num
     message_table <- lapply(x, 
                             FUN = function(y, names) {
                               attributes(y@fields) <- list(names = names) 
