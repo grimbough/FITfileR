@@ -22,11 +22,8 @@ NULL
 #' same header as the previous message to speed up file reading.
 setClass(Class = "FitMessageHeader",
          slots = c(
-             is_definition = "logical",
-             has_developer_data = "logical",
-             local_message_number = "integer",
-             time_offset = "numeric",
-             raw_rep = "raw"
+             raw_rep = "raw",
+             is_compressed = "logical"
          ))
 
 #' The \code{FitDefinitionMessage} class represents definition messages.
@@ -61,13 +58,15 @@ setClass("FitDataMessage",
 #' are not defined in the standard FIT file specification.
 #' 
 #' @rdname FitMessages
+#' @include class_validity.R
 setClass("FitDataMessageWithDevData",
          slots = c(
              dev_fields = "list",
              dev_field_details = "list"
          ),
-         contains = "FitDataMessage"
+         contains = "FitDataMessage", 
 )
+setValidity("FitDataMessageWithDevData", validDevData)
 
 #' An S4 class representing a FIT file
 #' 

@@ -138,12 +138,23 @@
 
 #' @importFrom dplyr bind_rows select mutate across everything cur_column
 .processFieldsList <- function(x, global_message_number) {
+    # message_table <- lapply(x, 
+    #                         FUN = function(y) {
+    #                                 structure(y@fields, 
+    #                                           row.names = c(NA, -1), 
+    #                                           class = "data.frame") 
+    #                               } 
+    #                       ) %>% 
+    # dplyr::bind_rows( ) 
+    
+    names <- fieldDefinition(x[[1]])$field_def_num
     message_table <- lapply(x, 
-                            FUN = function(y) {
-                                    structure(y@fields, row.names = c(NA, -1), class = "data.frame") 
-                                  } 
-                          ) %>% 
-    dplyr::bind_rows( ) 
+                            FUN = function(y, names) {
+                              attributes(y@fields) <- list(names = names) 
+                              y@fields
+                            }, names = names 
+    ) %>% 
+      dplyr::bind_rows( )
   
   ## some columns are not defined in the FIT profile.  We remove them here
   keep_idx <- vapply(as.integer(names(message_table)), 

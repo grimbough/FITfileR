@@ -41,23 +41,23 @@ readFitFile <- function(fileName, dropUnknown = TRUE, mergeMessages = TRUE) {
   devMessages <- list()
   count <- 1
   msg_count <- 1
-  dev_msg_count <- 1
   prev_header <- NULL
   
   while(seek(con, where = NA) < (file_header$data_size + file_header$size)) {
     
     record_header <- .readRecordHeader(con, prev_header)
     
-    if(record_header@is_definition) {
+    if(isDefinition(record_header)) {
       msgDefs[[ count ]] <- .readMessage_definition(con = con, message_header = record_header)
       count <- count + 1
     } else {
-      definition <- .matchDefinition(msgDefs, local_message_number = record_header@local_message_number)
+      definition <- .matchDefinition(msgDefs, local_message_number = localMessageNumber(record_header))
       
       ## is this a developer data definition message?
       if(globalMessageNumber(definition) == 206) {
          tmp <- .readMessage_data(con = con, header = record_header, definition = definition)
-         dev_data_idx <- as.integer(tmp@fields[['0']]) + 1
+         idx <- which(tmp@definition@field_defs$field_def_num == 1)
+         dev_data_idx <- as.integer(tmp@fields[[ idx ]]) + 1
          devMessages[[ dev_data_idx ]] <- tmp
       } else {
         messages[[ msg_count ]] <- .readMessage_data(con = con, 

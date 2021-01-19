@@ -1,15 +1,4 @@
 
-setGeneric("hasDeveloperData", function(object) {
-    standardGeneric("hasDeveloperData")
-})
-
-setMethod("hasDeveloperData", 
-          signature = c("FitDataMessage"),
-          function(object) {
-              return(object@definition@header@has_developer_data)
-          }
-)
-
 ## Show
 setMethod("show", 
           signature = "FitFile", 
@@ -26,14 +15,21 @@ setMethod("show",
           }
 )
 
+setMethod("show", signature = "FitMessageHeader", function(object) {
+    cat("Definition: ", isDefinition(object))
+} 
+)
+
 setMethod("show", signature = "FitDataMessage", function(object) {
     
     cat("Local message type: ", localMessageNumber(object),  " ", sep = "")
     cat("(message name: ", .translateGlobalMessageNumber( globalMessageNumber(object) ), ", ",  sep = "")
     cat("message type: ", globalMessageNumber( object ), ", ", sep = "")
-    cat("fields: ", nrow(object@definition@field_defs), ", bytes: ", sum(object@definition@field_defs$size), ")", sep = "")
     
-    for(field in object@definition@field_defs$field_def_num) {
+    field_defs <- fieldDefinition(object)
+    cat("fields: ", nrow(field_defs), ", bytes: ", sum(field_defs$size), ")", sep = "")
+    
+    for(field in field_defs$field_def_num) {
         translated <- .translateField(field, globalMessageNumber( object ))
         cat("\n ", translated$value, " (", translated$key, ", ", translated$type, "):", sep = "")
         
@@ -56,9 +52,11 @@ setMethod("show", signature = "FitDataMessageWithDevData", function(object) {
     cat("Local message type: ", localMessageNumber(object),  " ", sep = "")
     cat("(message name: ", .translateGlobalMessageNumber( globalMessageNumber(object) ), ", ",  sep = "")
     cat("message type: ", globalMessageNumber( object ), ", ", sep = "")
-    cat("fields: ", nrow(object@definition@field_defs), ", bytes: ", sum(object@definition@field_defs$size), ")", sep = "")
     
-    for(field in object@definition@field_defs$field_def_num) {
+    field_defs <- fieldDefinition(object)
+    cat("fields: ", nrow(field_defs), ", bytes: ", sum(field_defs$size), ")", sep = "")
+    
+    for(field in field_defs$field_def_num) {
         translated <- .translateField(field, globalMessageNumber( object ))
         cat("\n ", translated$value, " (", translated$key, ", ", translated$type, "):", sep = "")
         
@@ -75,8 +73,6 @@ setMethod("show", signature = "FitDataMessageWithDevData", function(object) {
     }
     
     for(field in object@definition@dev_field_defs$field_def_num) {
-       ##translated <- filter(object@dev_field_details, field_def_num == field)
-        
         idx <- which(object@dev_field_details$field_def_num == field)
         cat("\n ", object@dev_field_details$field_name[idx], ": ", sep = "")
         original <- object@dev_fields[[ paste(field) ]] %>% unlist()
@@ -85,6 +81,7 @@ setMethod("show", signature = "FitDataMessageWithDevData", function(object) {
     
     
 })
+
 
 
 

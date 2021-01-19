@@ -32,7 +32,7 @@
 .matchDefinition <- function(msgDefs, local_message_number) {
   for(i in rev(seq_along(msgDefs))) {
     def <- msgDefs[[i]]
-    if(def@header@local_message_number == local_message_number) {
+    if(localMessageNumber(def) == local_message_number) {
       return(def)
     }
   }
@@ -40,12 +40,19 @@
 
 .matchDevDefinition <- function(msgs, dev_data_idx) {
   
-  dev_msgs <- msgs
-  i <- dev_data_idx
-  #def <- field_def_num = dev_msgs[[i]]@fields['1']],
-  #                  field_name = dev_msgs[[i]]@fields[['3']],
-  #                  units = dev_msgs[[i]]@fields[['8']])
-  def <- dev_msgs[[i]]@fields[ c('1','3','8') ]
+  i <- dev_data_idx[1]
+  ## which elements in the definition relate to definition number, name, and units?
+  field_defs <- fieldDefinition(msgs[[i]])
+  idx <- match(c(1, 3, 8), field_defs$field_def_num)
+  def <- msgs[[i]]@fields[ idx ]
+  if(length(dev_data_idx) > 1) {
+    for(j in seq_along(dev_data_idx[-1])) {
+      i <- dev_data_idx[j+1]
+      field_defs <- fieldDefinition(msgs[[i]])
+      idx <- match(c(1, 3, 8), field_defs$field_def_num)
+      def <- Map(c, def, msgs[[i]]@fields[ idx ])
+    } 
+  }
   names(def) <- c("field_def_num", "field_name", "units")
   return(def)
 }
