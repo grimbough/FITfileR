@@ -16,6 +16,8 @@
 \alias{laps,FitFile-method}
 \alias{events}
 \alias{events,FitFile-method}
+\alias{hrv}
+\alias{hrv,FitFile-method}
 \title{Extracting messages from FIT Files}
 \usage{
 listMessageTypes(fitFile)
@@ -45,6 +47,10 @@ laps(fitFile)
 events(fitFile)
 
 \S4method{events}{FitFile}(fitFile)
+
+hrv(fitFile)
+
+\S4method{hrv}{FitFile}(fitFile)
 }
 \arguments{
 \item{fitFile}{A \code{\link{FitFile-class}} object.}
