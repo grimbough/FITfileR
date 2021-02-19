@@ -1,6 +1,7 @@
 ## fit time stamps are from 31st December 1989
 ## this function transforms them into data/times
 .adjustTimeStamp <- function(values) {
+  values <- as.integer(values)
   as.POSIXct(values, origin = "1989-12-31", tz = "UTC")  
 }
 
@@ -138,23 +139,29 @@
 
 #' @importFrom dplyr bind_rows select mutate across everything cur_column
 .processFieldsList <- function(x, global_message_number) {
-    # message_table <- lapply(x, 
-    #                         FUN = function(y) {
-    #                                 structure(y@fields, 
-    #                                           row.names = c(NA, -1), 
-    #                                           class = "data.frame") 
-    #                               } 
-    #                       ) %>% 
-    # dplyr::bind_rows( ) 
-    
+
+    ## Message number 78 is 'hrv' which is special.  It contains only a single
+    ## array of integers, but the length of the array is varable.
+    ## We want to concatenate these, rather than grouping by message signature
+    unlist <- global_message_number == 78
+  
     names <- fieldDefinition(x[[1]])$field_def_num
     message_table <- lapply(x, 
-                            FUN = function(y, names) {
+                            FUN = function(y, names, unlist) {
                               attributes(y@fields) <- list(names = names) 
-                              y@fields
-                            }, names = names 
-    ) %>% 
-      dplyr::bind_rows( )
+                              if(unlist)
+                                return(y@fields)
+                              else
+                                return(unlist(y@fields))
+                            }, names = names, unlist = unlist 
+    ) 
+    
+    if(unlist) {
+      message_table <- tibble(unlist( message_table) )
+      colnames(message_table) <- names
+    } else {
+      message_table <- dplyr::bind_rows( message_table )
+    }
   
   ## some columns are not defined in the FIT profile.  We remove them here
   keep_idx <- vapply(as.integer(names(message_table)), 

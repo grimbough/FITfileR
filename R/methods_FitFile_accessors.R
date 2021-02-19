@@ -82,7 +82,12 @@ setMethod("getMessagesByType",
                                        function(x) { x@definition@.signature }, 
                                        FUN.VALUE = character(1))
                   
-                  messages2 <- split(messages, signatures)
+                  ## this 
+                  if(message_type != 78) {
+                      messages2 <- split(messages, signatures)
+                  } else {
+                      messages2 <- list(messages)
+                  }
                   
                   messages3 <- lapply(messages2, FUN = .processFieldsList, message_type)
                   
@@ -188,6 +193,19 @@ setMethod("events", signature = "FitFile",
           }
 )
 
+
+#' @rdname FitFile-accessors
+#' @export
+setGeneric("hrv", function(fitFile) {
+    standardGeneric("hrv")
+})
+
+#' @rdname FitFile-accessors
+setMethod("hrv", signature = "FitFile",
+          function(fitFile) {
+              getMessagesByType(fitFile, message_type = 78L)
+          }
+)
 
 
 
