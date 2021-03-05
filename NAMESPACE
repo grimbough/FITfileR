@@ -3,6 +3,7 @@
 export(events)
 export(file_id)
 export(getMessagesByType)
+export(hrv)
 export(laps)
 export(listMessageTypes)
 export(readFitFile)

@@ -1,5 +1,5 @@
 Package: FITfileR
-Version: 0.1.1
+Version: 0.1.2
 Title: Reading FIT files using only native R code
 Author: Mike Smith <grimbough@gmail.com>
 Maintainer: Mike Smith <grimbough@gmail.com>
