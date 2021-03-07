@@ -79,15 +79,15 @@
   ## divide by scaling factor if it exists
   if(!is.na(details$scale[1])) {
     if(is.list(input)) {
-      input[[1]] <- input[[1]] / as.numeric(details$scale[1])
+      input[[1]] <- as.numeric(input[[1]]) / as.numeric(details$scale[1])
     } else {
-      input <- input / as.numeric(details$scale[1])
+      input <- as.numeric(input) / as.numeric(details$scale[1])
     }
   }
   
   ## subtract offset if it exists
   if(!is.na(details$offset[1])) {
-      input <- input - details$offset[1]
+      input <- as.numeric(input) - details$offset[1]
   }
   
   ## add units as attribute
@@ -110,7 +110,7 @@
     input <- .adjustTimeStamp(input)
     attr(input, "units") <- NULL
   } else if (!is.na(details$units) && details$units == "semicircles") {
-    input <- input * (180 / 2^31)
+    input <- as.integer(input) * (180 / 2^31)
     attributes(input) <- list(units = "degrees")
   } else if(type %in% names(fit_data_types)) {
     data_type <- fit_data_types[[ type ]]

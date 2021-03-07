@@ -75,7 +75,7 @@ setMethod("getMessagesByType",
               idx <- vapply(messages(fitFile), FUN = globalMessageNumber, 
                             FUN.VALUE = integer(1)) == message_type
               
-              if(length(idx)) {
+              if(any(idx)) {
                   messages <- messages(fitFile)[ idx ]
                   
                   signatures <- vapply(messages, 
