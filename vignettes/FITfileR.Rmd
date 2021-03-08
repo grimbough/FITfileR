@@ -2,7 +2,6 @@
 title: "Reading FIT files"
 author: "Mike L. Smith"
 date: "`r Sys.Date()`"
-output: html_document
 pkgdown:
   as_is: true
 vignette: |
@@ -239,9 +238,9 @@ For the most part the readings are quite similar between the two devices.  Howev
 
 Much of the data contained in FIT files is not stored in the formats that you might instinctively expect or that see on the display of the device the file was recorded on.  For example, the elapsed time of an activity isn't stored in seconds, but rather milliseconds, and this value needs to be scaled to get the time in seconds.  Other data types require more complex processing.  The latitude and longitude positional information, which is not stored as decimal degrees (e.g. `42.87342`) but rather as a signed 32-bit integer (e.g. `511512370`) representing "semicircles", needs to be converted with the scaling factor $180 / 2^{31}$.  Similarly, text information such as the activity type or device manufacturer isn't stored directly as the string "run" or "Garmin" but as an integer that maps to an entry in a table of sports or manufacturers respectively.
 
-More details of the data types can be found in the **Profile.xlsx** file that is provided as part of the [FIT SDK](https://developer.garmin.com/fit/download/).  **FITfileR** has it's own internal representation of this file, and will try to convert many data types automatically.  In most cases it is possible to find the units for the values **FITfileR** is displaying via the `units` attribute.  This will either be printed to screen alongside the contents of a data column, or you can extract the `units` attribute directly.
+More details of the data types can be found in the *Profile.xlsx* file that is provided as part of the [FIT SDK](https://developer.garmin.com/fit/download/).  **FITfileR** has it's own internal representation of this file, and will try to convert many data types automatically.  In most cases it is possible to find the units for the values **FITfileR** is displaying via the `units` attribute.  This will either be printed to screen alongside the contents of a data column, or you can extract the `units` attribute directly.
 
-```r
+```{r, eval = TRUE, echo = TRUE}
 garmin_session <- getMessagesByType(garmin, "session")
 ## show the latitude of the start position
 garmin_session$start_position_lat
