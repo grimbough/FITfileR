@@ -103,7 +103,7 @@ We can see there are `r length(listMessageTypes(fenix6))` different message type
 getMessagesByType(fenix6, message_type = "zones_target")
 ```
 
-In this case *zones_target* is a single message that reports power and heart rate thresholds that were set on the device.  One could imagine using these in conjunction with the *records* to measure how well the rider performed relative to the pre-set threshold for this particular activity.
+In this case *zones_target* is a single message that reports power and heart rate thresholds that were set on the device.  One could imagine using these in conjunction with the *records* to measure how well the athlete performed relative to the pre-set threshold for this particular activity.
 
 # Example use cases
 
@@ -232,11 +232,13 @@ For the most part the readings are quite similar between the two devices.  Howev
 
 # More details
 
+In this section we describe a few more of the implementation details of **FITfileR** and some of the choices made in presenting the data in an R session.
+
 ## Data types and units
 
-Much of the data contained in FIT files is not stored in the formats that you might instinctively expect or that see on the display of the device the file was recorded on.  For example, the elapsed time of an activity isn't stored in seconds, but rather milliseconds, and this value needs to be scaled to get the time in seconds.  Other data types require more complex processing.  The latitude and longitude positional information, which is not stored as decimal degrees (e.g. `42.87342`) but rather as a signed 32-bit integer (e.g. `511512370`) representing "semicircles", needs to be converted with the scaling factor $180 / 2^{31}$.  Similarly, text information such as the activity type or device manufacturer isn't stored directly as the string "run" or "Garmin" but as an integer that maps to an entry in a table of sports or manufacturers respectively.
+Much of the data contained in FIT files is not stored in the formats that you might instinctively expect or that see on the display of the device the file was recorded on.  For example, the elapsed time of an activity isn't stored in seconds, but rather milliseconds, and this value needs to be scaled to get the time in seconds.  Other data types require more complex processing.  The latitude and longitude positional information, which is not stored as decimal degrees (e.g. `42.87342`) but rather as a signed 32-bit integer (e.g. `511512370`) representing "semicircles", needs to be converted by multiplying by the scaling factor $180 / 2^{31}$.  Similarly, text information such as the activity type or device manufacturer isn't stored directly as the string "run" or "Garmin" but as an integer that maps to an entry in a table of sports or manufacturers respectively.
 
-More details of the data types can be found in the *Profile.xlsx* file that is provided as part of the [FIT SDK](https://developer.garmin.com/fit/download/).  **FITfileR** has it's own internal representation of this file, and will try to convert many data types automatically.  In most cases it is possible to find the units for the values **FITfileR** is displaying via the `units` attribute.  This will either be printed to screen alongside the contents of a data column, or you can extract the `units` attribute directly.
+More details of the data types can be found in the *Profile.xlsx* file that is provided as part of the [FIT SDK](https://developer.garmin.com/fit/download/).  **FITfileR** has its own internal representation of this file, and will try to convert many data types automatically.  In most cases it is possible to find the units for the values **FITfileR** is displaying via the `units` attribute.  This will either be printed to screen alongside the contents of a data column, or you can extract the `units` attribute directly.
 
 ```{r, eval = TRUE, echo = TRUE}
 garmin_session <- getMessagesByType(garmin, "session")
