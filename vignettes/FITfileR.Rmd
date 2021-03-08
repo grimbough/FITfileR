@@ -2,8 +2,6 @@
 title: "Reading FIT files"
 author: "Mike L. Smith"
 date: "`r Sys.Date()`"
-pkgdown:
-  as_is: true
 vignette: |
   %\VignetteIndexEntry{Reading FIT files}
   %\VignetteEncoding{UTF-8}
