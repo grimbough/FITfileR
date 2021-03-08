@@ -17,5 +17,4 @@ expect_silent(
     tomtom <- readFitFile(tomtom_file)
 )
 
-
 expect_true( class(tomtom) == "FitFile" )

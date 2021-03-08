@@ -32,3 +32,22 @@ expect_equal(
     as.POSIXct("1989-12-31", tz = "UTC")
 )
 
+########################################
+## Handling left/right balance fields ##
+########################################
+
+## single value like in the session information
+expect_equivalent(
+    balance <- FITfileR:::.leftRightAdjustment(37797, type = "left_right_balance_100"),
+    50.29
+)
+expect_equal(attr(balance, "side"), "right")
+
+## vector as in multiple records
+input <- c(53, 100, 35)
+expect_equivalent(
+    balance <- FITfileR:::.leftRightAdjustment(input, type = "left_right_balance"),
+    input
+)
+expect_equal(attr(balance, "side"), "unknown")
+

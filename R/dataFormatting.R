@@ -98,6 +98,33 @@
   return( input )
 }
 
+## expects a vector of 'input' values
+.leftRightAdjustment <- function(input, type) {
+  
+  values <- lapply(as.integer(input), .uintToBits)
+  
+  if(type == "left_right_balance_100") {
+    mask <- .uintToBits(16383)
+    side_known <-  as.logical(values[[1]][16])
+  } else {
+    mask <- .uintToBits(127)
+    side_known <-  as.logical(values[[1]][8])
+  }
+  
+  output <- vapply(values, FUN = function(x,y) { 
+    .binaryToInt(x & y) 
+  }, mask, FUN.VALUE = integer(1))
+  
+  if(type == "left_right_balance_100")
+    output <- output / 100
+  
+  attr(output, "units") <- "percentage"
+  attr(output, "side") <- ifelse(side_known, 
+                                yes = "right",
+                                no = "unknown")
+  output
+}
+
 .applyFormatConversions <- function(input, field_definition_number, global_message_number) {
   
   global_message_name <- .translateGlobalMessageNumber(global_message_number)
@@ -112,7 +139,10 @@
   } else if (!is.na(details$units) && details$units == "semicircles") {
     input <- as.integer(input) * (180 / 2^31)
     attributes(input) <- list(units = "degrees")
+  } else if (grepl("left_right_balance", x = type)) {
+    input <- .leftRightAdjustment(input, type)
   } else if(type %in% names(fit_data_types)) {
+    ## here we catch all enum types.
     data_type <- fit_data_types[[ type ]]
     input <- data_type[ match(input, data_type$key),  ]$value
   }
