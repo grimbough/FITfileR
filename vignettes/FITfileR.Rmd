@@ -90,6 +90,7 @@ In addition to the `records()` function, **FITfileR** provides an number of othe
   - `laps()`
   - `events()`
   - `file_id()`
+  - `hrv()`
 
 ## Accessing any data type
 
@@ -231,6 +232,24 @@ ggplot(hr_differences, aes(x = timestamp, y = hr_diff)) +
 ```
 
 For the most part the readings are quite similar between the two devices.  However it's not uncommon to see instances where the wrist-based TomTom heart rate reading drops significantly compared to the chest strap readings recorded by the Garmin.  Based on the colouring this seems to happen more frequently at high heart rates, although there are many periods where high heart rates are reported by both devices.
+
+# More details
+
+## Data types and units
+
+Much of the data contained in FIT files is not stored in the formats that you might instinctively expect or that see on the display of the device the file was recorded on.  For example, the elapsed time of an activity isn't stored in seconds, but rather milliseconds, and this value needs to be scaled to get the time in seconds.  Other data types require more complex processing.  The latitude and longitude positional information, which is not stored as decimal degrees (e.g. `42.87342`) but rather as a signed 32-bit integer (e.g. `511512370`) representing "semicircles", needs to be converted with the scaling factor $180 / 2^{31}$.  Similarly, text information such as the activity type or device manufacturer isn't stored directly as the string "run" or "Garmin" but as an integer that maps to an entry in a table of sports or manufacturers respectively.
+
+More details of the data types can be found in the **Profile.xlsx** file that is provided as part of the [FIT SDK](https://developer.garmin.com/fit/download/).  **FITfileR** has it's own internal representation of this file, and will try to convert many data types automatically.  In most cases it is possible to find the units for the values **FITfileR** is displaying via the `units` attribute.  This will either be printed to screen alongside the contents of a data column, or you can extract the `units` attribute directly.
+
+```r
+garmin_session <- getMessagesByType(garmin, "session")
+## show the latitude of the start position
+garmin_session$start_position_lat
+## extract the units for the total ascent value
+attr(garmin_session$total_ascent, "units")
+```
+
+This automatic conversion works for many of the more common fields based around timestamps, GPS positions, distances, speeds, and probably many more.  However the FIT specification is large and it is likely there are common data types that I have not encountered in one of my own FIT files.  If you come across a field that is entirely `NA` then it is likely that your file includes a data type that **FITfileR** does not currently support.  Please open an issue at [GitHub](https://github.com/grimbough/FITfileR/issues) and I will try to add the required functionality.
 
 # Session Info
 
