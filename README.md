@@ -1,7 +1,7 @@
 FITfileR
 ========
 
-[![](https://img.shields.io/badge/dev%20version-0.1.2-blue.svg)](https://github.com/grimbough/FITfileR)
+[![](https://img.shields.io/badge/dev%20version-0.1.3-blue.svg)](https://github.com/grimbough/FITfileR)
 [![R CMD
 check](https://github.com/grimbough/FITfileR/workflows/R-CMD-check/badge.svg)](https://github.com/grimbough/FITfileR/actions)
 [![codecov](https://codecov.io/github/grimbough/FITfileR/branch/fit-class/graphs/badge.svg)](https://codecov.io/github/grimbough/FITfileR)
