@@ -99,6 +99,8 @@ setMethod("getMessagesByType",
                   }
                   return(messages3)
               } else {
+                  message("No messages of this type found in the file.\n",
+                          "You can use listMessageTypes() to identify the message types present.")
                   return(NULL)
               }
               
