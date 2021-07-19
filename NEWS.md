@@ -1,3 +1,10 @@
+# FITfileR 0.1.4
+
+## NEW FEATURES
+
+* Added `monitoring()` accessor function to provide a direct interface to
+that message type. Response to (#16).
+
 # FITfileR 0.1.3
 
 ## BUG FIXES
@@ -5,7 +12,7 @@
 * Left/right balance fields are now reported correctly, rather than as `NA`.
 There are many additional data types that will still be returned as `NA`.
 Currently only `date_time`, `left_right_balance`, `left_right_balance_100`,
-and all enum data types are dealt with correctly. Reported in (#14)
+and all enum data types are dealt with correctly. Reported in (#14).
 
 # FITfileR 0.1.2
 

@@ -88,6 +88,7 @@ In addition to the `records()` function, **FITfileR** provides an number of othe
   - `events()`
   - `file_id()`
   - `hrv()`
+  - `monitoring()`
 
 ## Accessing any data type
 

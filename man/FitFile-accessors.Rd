@@ -18,6 +18,8 @@
 \alias{events,FitFile-method}
 \alias{hrv}
 \alias{hrv,FitFile-method}
+\alias{monitoring}
+\alias{monitoring,FitFile-method}
 \title{Extracting messages from FIT Files}
 \usage{
 listMessageTypes(fitFile)
@@ -51,6 +53,10 @@ events(fitFile)
 hrv(fitFile)
 
 \S4method{hrv}{FitFile}(fitFile)
+
+monitoring(fitFile)
+
+\S4method{monitoring}{FitFile}(fitFile)
 }
 \arguments{
 \item{fitFile}{A \code{\link{FitFile-class}} object.}

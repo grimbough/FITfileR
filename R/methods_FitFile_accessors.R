@@ -193,7 +193,6 @@ setMethod("events", signature = "FitFile",
           }
 )
 
-
 #' @rdname FitFile-accessors
 #' @export
 setGeneric("hrv", function(fitFile) {
@@ -204,6 +203,19 @@ setGeneric("hrv", function(fitFile) {
 setMethod("hrv", signature = "FitFile",
           function(fitFile) {
               getMessagesByType(fitFile, message_type = 78L)
+          }
+)
+
+#' @rdname FitFile-accessors
+#' @export
+setGeneric("monitoring", function(fitFile) {
+    standardGeneric("monitoring")
+})
+
+#' @rdname FitFile-accessors
+setMethod("monitoring", signature = "FitFile",
+          function(fitFile) {
+              getMessagesByType(fitFile, message_type = 55L)
           }
 )
 
