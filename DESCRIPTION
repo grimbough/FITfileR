@@ -1,10 +1,17 @@
 Package: FITfileR
-Version: 0.1.3
-Title: Reading FIT files using only native R code
-Author: Mike Smith <grimbough@gmail.com>
-Maintainer: Mike Smith <grimbough@gmail.com>
-Description: Allows reading FIT (Flexible and Interoperable Data Transfer) 
-    files without any dependence on external software or SDKs.
+Version: 0.1.4
+Title: Read FIT files using only native R code
+Authors@R: c(person(
+                    "Mike", "Smith", 
+                    role = c("aut", "cre"), 
+                    email = "grimbough@gmail.com",
+                    comment = c(ORCID = "0000-0002-7800-3848")
+                    )
+            )
+Description: The 'FIT' (Flexible and Interoperable Data Transfer)
+    protocol is designed specifically for sharing data from fitness and health
+    devices.  This package allows reading 'FIT' files in pure R without any 
+    dependence on external software or SDKs. 
 URL: https://github.com/grimbough/FITfileR
 Depends: R (>= 3.5.0)
 Imports: dplyr, tibble, magrittr, methods
