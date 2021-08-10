@@ -18,7 +18,7 @@
 #' @return An object of class \code{[FitFile-class]}
 #' 
 #' @examples
-#' garmin_file <- system.file("extdata", "Activities", "garmin-edge500-ride.fit",
+#' garmin_file <- system.file("extdata", "Activities", "garmin-edge530-ride.fit",
 #'                            package = "FITfileR")
 #' garmin <- readFitFile(garmin_file)
 #' 

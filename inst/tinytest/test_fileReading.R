@@ -1,6 +1,6 @@
 library(FITfileR)
 
-garmin_file <- system.file("extdata", "Activities", "garmin-edge500-ride.fit", 
+garmin_file <- system.file("extdata", "Activities", "garmin-edge530-ride.fit", 
                            package = "FITfileR")
 tomtom_file <- system.file("extdata", "Activities", "tomtom-runner3-ride.fit", 
                            package = "FITfileR")
