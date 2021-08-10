@@ -18,9 +18,9 @@ jobs:
       fail-fast: false
       matrix:
         config:
-        - { os: windows-latest, r: '4.1'}
-        - { os: macOS-latest, r: '4.0'}
-        - { os: ubuntu-20.04, r: '4.1', rspm: "https://packagemanager.rstudio.com/all/__linux__/focal/latest"}
+        - { os: windows-latest, r: 'release'}
+        - { os: macOS-latest, r: 'release'}
+        - { os: ubuntu-20.04, r: 'release', rspm: "https://packagemanager.rstudio.com/all/__linux__/focal/latest"}
 
     env:
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
@@ -57,14 +57,14 @@ jobs:
           key: ${{ runner.os }}-r-${{ matrix.config.r }}-1-${{ hashFiles('.github/depends.Rds') }}
           restore-keys: ${{ runner.os }}-r-${{ matrix.config.r }}-1-
 
-      - name: Install system dependencies
-        if: runner.os == 'Linux'
-        env:
-          RHUB_PLATFORM: linux-x86_64-ubuntu-gcc
-        run: |
-          Rscript -e "remotes::install_github('r-hub/sysreqs')"
-          sysreqs=$(Rscript -e "cat(sysreqs::sysreq_commands('DESCRIPTION'))")
-          sudo -s eval "$sysreqs"
+      # - name: Install system dependencies
+      #   if: runner.os == 'Linux'
+      #   env:
+      #     RHUB_PLATFORM: linux-x86_64-ubuntu-gcc
+      #   run: |
+      #     Rscript -e "remotes::install_github('r-hub/sysreqs')"
+      #     sysreqs=$(Rscript -e "cat(sysreqs::sysreq_commands('DESCRIPTION'))")
+      #     sudo -s eval "$sysreqs"
           
       - name: Install dependencies
         run: |

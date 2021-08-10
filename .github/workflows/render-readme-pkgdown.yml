@@ -34,6 +34,8 @@ jobs:
         restore-keys: macOS-r-4.0-1-
 
     - name: Install dependencies
+      env:
+        GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       run: |
         install.packages("remotes")
         remotes::install_deps(dependencies = TRUE)
