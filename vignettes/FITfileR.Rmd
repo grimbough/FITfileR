@@ -160,7 +160,9 @@ m
 
 ## Comparing heart rate measurments between devices
 
-The package comes with two example fit files, recorded during a ride in early 2017.  They are of the same ride and record the same rider, but the data logging was carried out on two different devices: a Garmin Edge 500 and a TomTom Runner 3.  These in turn used a chest strap and wrist based heart rate monitor respectively.  Here we compare the heart rates recorded with two devices, to see how consistent they are with each other.
+The package comes with two example fit files, recorded during a Zwift activity in 2021.   They are of the same ride and record the same rider, but some of the data recording was carried out on two different devices so they could be compared. Specifically, a Garmin heart rate strap and and Elite Direto trainer were linked to Zwift for recording heart rate and power, alongside a Garmin Fenix 6 wrist based heart rate monitor and Assioma Duo pedals measuring the same properties.  
+
+Here we compare the heart rates recorded with two devices, to see how consistent they are with each other.
 
 ```{r, heart-rate-packages}
 library(dplyr)
@@ -172,24 +174,26 @@ First we need to locate the two files and read them into R:
 
 
 ```{r read-both, cache = TRUE}
-garmin_file <- system.file("extdata", "Activities", "garmin-edge500-ride.fit", 
+garmin_file <- system.file("extdata", "Activities", "garmin-fenix6-turbo.fit", 
                             package = "FITfileR")
-tomtom_file <- system.file("extdata", "Activities", "tomtom-runner3-ride.fit", 
+zwift_file <- system.file("extdata", "Activities", "zwift-turbo.fit", 
                             package = "FITfileR")
 
 garmin <- readFitFile(garmin_file)
-tomtom <- readFitFile(tomtom_file)
+zwift <- readFitFile(zwift_file)
 ```
 
 We then use `records()` to extract the appropriate messages from the two files.  Since there's a lot of data in addition to the heart rate readings we're interested in, we use functions from **dplyr** and **tidyr** to combine the heart rate data into a single data frame, and make it into a 'long' format suitable for plotting with **ggplot2**.
 
 ```{r read-hr, eval = TRUE}
-garmin_records <- records(garmin)
-tomtom_records <- records(tomtom)
+garmin_records <- records(garmin) %>%
+    bind_rows() %>% 
+    arrange(timestamp) 
+zwift_records <- records(zwift)
 
-hr_table <- inner_join(garmin_records$record_1, tomtom_records$record_2, by = "timestamp") %>%
-  select(timestamp, Garmin = heart_rate.x, TomTom=heart_rate.y) %>%
-  tidyr::pivot_longer(cols = Garmin:TomTom, names_to = "device", values_to = "heart_rate")
+hr_table <- inner_join(garmin_records, zwift_records, by = "timestamp") %>%
+  select(timestamp, Garmin = heart_rate.x, Zwift=heart_rate.y) %>%
+  tidyr::pivot_longer(cols = Garmin:Zwift, names_to = "device", values_to = "heart_rate")
 ```
 
 ```{r plot-hr, fig.width=8, fig.height=3}
@@ -198,15 +202,7 @@ ggplot(hr_table) +
     theme_bw()
 ```
 
-That's pretty messy as the TomTom data seem to have lots of 255 values (these are presumably dropouts in the data recording that get assigned the maximum value). We can filter those entries out to compare the two traces more easily.
-
-```{r plot-hr-2, fig.width=8, fig.height=3}
-hr_table %>% 
-  filter(heart_rate != 255) %>%
-  ggplot() + 
-    geom_line(aes(x = timestamp, y = heart_rate, col = device)) + 
-    theme_bw()
-```
+The two heart rate monitors correspond well over the duration of the workout.  There seems to be a 1-2 second lag in the wrist-based monitor (Garmin), but the high and low values track really well.  Based on this I'd have no issue relying on the Fenix 6 heart-rate monitor for my training.
 
 We can also consider the difference between the two measurements both at each common time point and also as a rolling mean over a 60 second window.
 
@@ -215,8 +211,7 @@ library(zoo)
 
 hr_differences <- hr_table %>% 
   pivot_wider(id_cols = timestamp, names_from = device, values_from = heart_rate) %>% 
-  filter(TomTom != 255) %>%
-  mutate(hr_diff = Garmin - TomTom,
+  mutate(hr_diff = Garmin - Zwift,
          Garmin_hr_zone = cut(Garmin, breaks = seq(0,200,20))) %>%
   mutate(hr_60 = zoo::rollmean(hr_diff, k = 60, fill = NA))
 
@@ -225,11 +220,11 @@ ggplot(hr_differences, aes(x = timestamp, y = hr_diff)) +
   geom_line(aes(y = hr_60), col = "grey40", lwd = 1.6, alpha = 0.7) + 
   geom_abline(intercept = 0, slope = 0) + 
   theme_bw() +
-  ylab("Heart Rate Difference\n+ve Garmin Greater / -ve TomTom Greater") +
+  ylab("Heart Rate Difference\n+ve Chest Strap Greater / -ve Wrist Watch Greater") +
   scale_colour_brewer(palette = "PRGn")
 ```
 
-For the most part the readings are quite similar between the two devices.  However it's not uncommon to see instances where the wrist-based TomTom heart rate reading drops significantly compared to the chest strap readings recorded by the Garmin.  Based on the colouring this seems to happen more frequently at high heart rates, although there are many periods where high heart rates are reported by both devices.
+For the most part the readings are quite similar between the two devices.  Just looking at the plot, it seems there are more points above the zero line, indicating that the chest strap records slightly higher values on average, but the difference is generally within 5 beats-per-minute.  Based on the colouring it looks like the largest differences occur when the heart-rate is high.
 
 # More details
 
