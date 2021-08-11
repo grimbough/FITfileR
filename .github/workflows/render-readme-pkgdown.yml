@@ -1,5 +1,3 @@
-
-
 name: render readme and pkgdown
 
 # Controls when the action will run
@@ -7,7 +5,6 @@ on:
   push:
     branches: 
       - master
-      - fit-class
 
 jobs:
   render:
@@ -17,7 +14,11 @@ jobs:
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@master
+    
     - uses: r-lib/actions/setup-r@master
+      with:
+        r-version: 'release'
+          
     - uses: r-lib/actions/setup-pandoc@master
 
     - name: Query dependencies
@@ -30,8 +31,8 @@ jobs:
       uses: actions/cache@v1
       with:
         path: ${{ env.R_LIBS_USER }}
-        key: macOS-r-4.0-1-${{ hashFiles('.github/depends.Rds') }}
-        restore-keys: macOS-r-4.0-1-
+        key: macOS-r-release-${{ hashFiles('.github/depends.Rds') }}
+        restore-keys: macOS-r-release
 
     - name: Install dependencies
       env:
@@ -39,7 +40,7 @@ jobs:
       run: |
         install.packages("remotes")
         remotes::install_deps(dependencies = TRUE)
-        remotes::install_dev("pkgdown")
+        remotes::install_cran("pkgdown")
         devtools::document()
       shell: Rscript {0}
 
@@ -56,7 +57,7 @@ jobs:
     - name: install required packages
       run: Rscript -e 'install.packages(c("rmarkdown", "knitr", "badger", "pkgdown"))'
 
-    # Render READEME.md using rmarkdown
+    # Render README.md using rmarkdown
     - name: render README
       run: Rscript -e 'rmarkdown::render("README.Rmd", output_format = "md_document")'
 
