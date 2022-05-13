@@ -14,8 +14,8 @@
     architecture <- ifelse(readBin(con = con, what = "int", n = 1, size = 1),
                            "big", "little")
     global_message_num <- readBin(con = con, what = "int", n = 1, size = 2,
-                                  endian = architecture)
-    n_fields <- readBin(con = con, what = "int", n = 1, size = 1)
+                                  endian = architecture, signed = FALSE)
+    n_fields <- readBin(con = con, what = "int", n = 1, size = 1, signed = FALSE)
     field_definition <- .processFieldDefs(
         readBin(con = con, what = "raw", n = 3 * n_fields, size = 1, signed = FALSE)
     )
@@ -109,6 +109,8 @@
     fieldTypes <- fieldDefs$base_type
     sizes <- fieldDefs$size
     
+    if(definition@is_little_endian) { endian <- "little" } else { endian <- "big" }
+    
     message <- vector(mode = "list", length = length(fieldTypes))
     for(i in seq_along(fieldTypes)) {
         
@@ -129,7 +131,7 @@
                     
                     dat <- readBin(con, what = readInfo[[1]], signed = readInfo[[2]],
                                    size = readInfo[[3]], n = readInfo[[4]], 
-                                   endian = ifelse(definition@is_little_endian, "little", "big"))
+                                   endian = endian)
                     
                     ## if we have unsigned ints, turn the bits into a numeric
                     if(fieldTypes[i] == '86' || fieldTypes[i] == '8c') {
