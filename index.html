@@ -28,6 +28,8 @@
 </script>
 </head>
 <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-home">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -40,18 +42,12 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">FITfileR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.5</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-<li>
-  <a href="index.html">
-    <span class="fas fa-home fa-lg"></span>
-     
-  </a>
-</li>
 <li>
   <a href="articles/FITfileR.html">Get started</a>
 </li>
@@ -64,7 +60,7 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/grimbough/FITfileR/">
+  <a href="https://github.com/grimbough/FITfileR/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -82,70 +78,82 @@
       </header><div class="row">
   <div class="contents col-md-9">
 
-<div id="fitfiler" class="section level1">
-<div class="page-header"><h1 class="hasAnchor">
-<a href="#fitfiler" class="anchor"></a>FITfileR</h1></div>
+<div class="section level1">
+<div class="page-header"><h1 id="fitfiler">FITfileR<a class="anchor" aria-label="anchor" href="#fitfiler"></a>
+</h1></div>
 
 <p><strong>FITfileR</strong> is an R package to read FIT files produced by fitness tracking devices like cycling computers or sports watches. The intention for <strong>FITfileR</strong> is to use native R code to read the files directly, with no reliance on the FIT SDK or other FIT parsing tools. As such it should be platform independent, and not require any additional software outside of a working version of R.</p>
 <p><strong>FITfileR</strong> should be considered a work in progress, and many features available in the complete SDK are not currently implemented.</p>
-<p>Feel free to open an <a href="https://github.com/grimbough/FITfileR/issues">issue</a> if something doesn’t work or you notice a feature you’d like adding.</p>
+<p>Feel free to open an <a href="https://github.com/grimbough/FITfileR/issues" class="external-link">issue</a> if something doesn’t work or you notice a feature you’d like adding.</p>
 </div>
-<div id="installing-from-github" class="section level1">
-<h1 class="hasAnchor">
-<a href="#installing-from-github" class="anchor"></a>Installing from GitHub</h1>
-<p>Currently <strong>FITfileR</strong> is only available on Github, and can be installed using the <strong><a href="https://cran.r-project.org/package=remotes">remotes</a> package.</strong></p>
+<div class="section level1">
+<h1 id="installing-from-github">Installing from GitHub<a class="anchor" aria-label="anchor" href="#installing-from-github"></a>
+</h1>
+<p>Currently <strong>FITfileR</strong> is only available on Github, and can be installed using the <strong><a href="https://cran.r-project.org/package=remotes" class="external-link">remotes</a> package.</strong></p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="cf">if</span>(<span class="op">!</span><span class="kw">requireNamespace</span>(<span class="st">"remotes"</span>)) {</span>
 <span id="cb1-2"><a href="#cb1-2"></a>    <span class="kw">install.packages</span>(<span class="st">"remotes"</span>)</span>
 <span id="cb1-3"><a href="#cb1-3"></a>}</span>
 <span id="cb1-4"><a href="#cb1-4"></a>remotes<span class="op">::</span><span class="kw">install_github</span>(<span class="st">"grimbough/FITfileR"</span>)</span></code></pre></div>
 </div>
-<div id="usage" class="section level1">
-<h1 class="hasAnchor">
-<a href="#usage" class="anchor"></a>Usage</h1>
-<p>You can find a vignette with examples of how to use the code at <a href="https://msmith.de/FITfileR/articles/FITfileR.html" class="uri">https://msmith.de/FITfileR/articles/FITfileR.html</a></p>
+<div class="section level1">
+<h1 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
+</h1>
+<p>You can find a vignette with examples of how to use the code at <a href="https://msmith.de/FITfileR/articles/FITfileR.html" class="external-link uri">https://msmith.de/FITfileR/articles/FITfileR.html</a></p>
 </div>
 
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <div class="links">
-<h2>Links</h2>
+<h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
-<li>Browse source code at <br><a href="https://github.com/grimbough/FITfileR/">https://​github.com/​grimbough/​FITfileR/​</a>
-</li>
-</ul>
-</div>
-<div class="license">
-<h2>License</h2>
-<ul class="list-unstyled">
-<li><a href="https://www.r-project.org/Licenses/Artistic-2.0">Artistic-2.0</a></li>
-</ul>
-</div>
-<div class="developers">
-<h2>Developers</h2>
-<ul class="list-unstyled">
-<li>Mike Smith <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0002-7800-3848" target="orcid.widget" aria-label="ORCID"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li><a href="https://github.com/grimbough/FITfileR/" class="external-link">Browse source code</a></li>
 </ul>
 </div>
 
-  <div class="dev-status">
-<h2>Dev status</h2>
+<div class="license">
+<h2 data-toc-skip>License</h2>
 <ul class="list-unstyled">
-<li><a href="https://github.com/grimbough/FITfileR"><img src="https://img.shields.io/badge/dev%20version-0.1.4-blue.svg"></a></li>
-<li><a href="https://github.com/grimbough/FITfileR/actions"><img src="https://github.com/grimbough/FITfileR/workflows/R-CMD-check/badge.svg" alt="R CMD check"></a></li>
-<li><a href="https://codecov.io/github/grimbough/FITfileR"><img src="https://codecov.io/github/grimbough/FITfileR/branch/fit-class/graphs/badge.svg" alt="codecov"></a></li>
+<li><a href="https://www.r-project.org/Licenses/Artistic-2.0" class="external-link">Artistic-2.0</a></li>
 </ul>
 </div>
+
+
+<div class="citation">
+<h2 data-toc-skip>Citation</h2>
+<ul class="list-unstyled">
+<li><a href="authors.html#citation">Citing FITfileR</a></li>
+</ul>
 </div>
+
+<div class="developers">
+<h2 data-toc-skip>Developers</h2>
+<ul class="list-unstyled">
+<li>Mike Smith <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0002-7800-3848" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+</ul>
+</div>
+
+<div class="dev-status">
+<h2 data-toc-skip>Dev status</h2>
+<ul class="list-unstyled">
+<li><a href="https://github.com/grimbough/FITfileR" class="external-link"><img src="https://img.shields.io/badge/dev%20version-0.1.5-blue.svg"></a></li>
+<li><a href="https://github.com/grimbough/FITfileR/actions" class="external-link"><img src="https://github.com/grimbough/FITfileR/workflows/R-CMD-check/badge.svg" alt="R CMD check"></a></li>
+<li><a href="https://codecov.io/github/grimbough/FITfileR" class="external-link"><img src="https://codecov.io/github/grimbough/FITfileR/branch/fit-class/graphs/badge.svg" alt="codecov"></a></li>
+</ul>
+</div>
+
+  </div>
 </div>
 
 
       <footer><div class="copyright">
-  <p>Developed by Mike Smith.</p>
+  <p></p>
+<p>Developed by Mike Smith.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
 </div>
 
       </footer>
@@ -153,6 +161,8 @@
 
   
 
+
+  
 
   </body>
 </html>
