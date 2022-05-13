@@ -22,7 +22,7 @@
   if(("manufacturer" %in% names(message_table)) && ("product" %in% names(message_table))) {
     garmin_idx <- which(message_table$manufacturer == "garmin")
     if(length(garmin_idx)) {
-      message_table$product[garmin_idx] <- .getFromDataTypeFactor(values = message_table$product[garmin_idx], 
+      message_table$product[garmin_idx] <- .getFromDataTypeFactor(values = as.integer(message_table$product[garmin_idx]), 
                                                             type = "garmin_product")
     }
   }
