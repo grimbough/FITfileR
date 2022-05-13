@@ -1,5 +1,5 @@
 Package: FITfileR
-Version: 0.1.4
+Version: 0.1.5
 Title: Read FIT files using only native R code
 Authors@R: c(person(
                     "Mike", "Smith", 
@@ -26,7 +26,7 @@ VignetteBuilder: knitr
 License: Artistic-2.0
 LazyLoad: yes
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Encoding: UTF-8
 Collate: 
     'FITfileR.R'
