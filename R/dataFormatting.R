@@ -171,7 +171,7 @@
 .processFieldsList <- function(x, global_message_number) {
 
     ## Message number 78 is 'hrv' which is special.  It contains only a single
-    ## array of integers, but the length of the array is varable.
+    ## array of integers, but the length of the array is variable.
     ## We want to concatenate these, rather than grouping by message signature
     unlist <- global_message_number == 78
   
