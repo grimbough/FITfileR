@@ -20,4 +20,4 @@ expect_inherits(laps(garmin530), "data.frame")
 expect_inherits(events(garmin530), "data.frame")
 expect_inherits(file_id(garmin530), "data.frame")
 ## hrv is not present in this file
-expect_null(hrv(garmin530))
+expect_null(suppressMessages(hrv(garmin530)))
