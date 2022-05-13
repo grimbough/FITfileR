@@ -22,17 +22,11 @@
 ## 
 .readRecordHeader <- function(con, prev_header) {
   
-  record_header <- rawToBits(readBin(con = con, what = "raw", n = 1, size = 1))
+  header <- readBin(con = con, what = "raw", n = 1, size = 1)
   
-  if(!is.null(prev_header) && identical(prev_header@raw_rep, record_header)) {
+  if(!is.null(prev_header) && identical(prev_header, header)) {
     header <- prev_header
-  } else if(record_header[8]) {
-    ## compressed time stamp header
-    header <- .readMessageHeader_compressed(record_header)
-  } else {
-    ## normal header
-    header <- .readMessageHeader_normal(record_header)
-  }
+  } 
   
   return(header)
   
@@ -65,4 +59,38 @@
   )
   
   return(header)
+}
+
+isCompressed <- function(header) {
+  header <- rawToBits(header)
+  return(as.logical(header)[8])
+}
+
+isDefinition <- function(header) {
+  rawToBits(header)[7] |>
+    as.logical()
+}
+
+hasDeveloperData <- function(object) {
+  
+  if(is(object, "FitDefinitionMessage")) {
+    header <- object@header
+  } else if (is(object, "FitDataMessage")) {
+    header <- object@definition@header
+  } else {
+    header <- object
+  }
+  
+  rawToBits(header)[6] |>
+    as.logical()
+}
+
+timeOffset <- function(header) {
+
+  if(isCompressed(header)) {
+    offset <- .binaryToInt(rawToBits(header)[1:5])
+  } else {
+    offset <- 0
+  }
+  return(offset)
 }

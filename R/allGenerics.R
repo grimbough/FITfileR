@@ -2,10 +2,6 @@ setGeneric("hasDeveloperData", function(object) {
     standardGeneric("hasDeveloperData")
 })
 
-setGeneric("isDefinition", function(object) {
-    standardGeneric("isDefinition")
-})
-
 setGeneric("fieldDefinition", function(object) {
     standardGeneric("fieldDefinition")
 })

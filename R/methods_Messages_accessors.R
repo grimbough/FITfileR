@@ -3,12 +3,12 @@
 ########################
 
 setMethod("localMessageNumber", 
-          signature = "FitMessageHeader",
+          signature = "raw",
           function(object) {
-              if(object@is_compressed)
-                  .binaryToInt(object@raw_rep[6:7])
+              if(isCompressed(object)) 
+                  .binaryToInt(rawToBits(object[6:7]))
               else
-                  .binaryToInt(object@raw_rep[1:4])
+                  .binaryToInt(rawToBits(object)[1:4])
           }
 )
 

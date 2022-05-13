@@ -31,7 +31,7 @@ setClass(Class = "FitMessageHeader",
 #' @rdname FitMessages 
 setClass("FitDefinitionMessage",
          slots = c(
-             header = "FitMessageHeader",
+             header = "raw",
              is_little_endian = "logical",
              global_message_number = "integer",
              field_defs = "data.frame",
@@ -48,7 +48,7 @@ setClass("FitDefinitionMessage",
 #' @rdname FitMessages 
 setClass("FitDataMessage",
          slots = c(
-             header = "FitMessageHeader",
+             header = "raw",
              definition = "FitDefinitionMessage",
              fields = "list"
          ))
