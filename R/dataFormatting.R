@@ -167,6 +167,11 @@
 
 }
 
+.field_list_to_tibble <- function(message, names) {
+  attributes(message@fields) <- list(names = names)
+  return(message@fields)
+}
+
 #' @importFrom dplyr bind_rows select mutate across everything cur_column
 .processFieldsList <- function(x, global_message_number) {
 
@@ -176,15 +181,8 @@
     unlist <- global_message_number == 78
   
     names <- fieldDefinition(x[[1]])$field_def_num
-    message_table <- lapply(x, 
-                            FUN = function(y, names, unlist) {
-                              attributes(y@fields) <- list(names = names) 
-                              if(unlist)
-                                return(y@fields)
-                              else
-                                return(unlist(y@fields))
-                            }, names = names, unlist = unlist 
-    ) 
+
+    message_table <- lapply(x, FUN = .field_list_to_tibble, names = names)
     
     if(unlist) {
       message_table <- tibble(unlist( message_table) )
