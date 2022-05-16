@@ -21,7 +21,8 @@ Suggests: knitr,
     ggplot2,
     tinytest,
     zoo,
-    tidyr
+    tidyr,
+    ggforce
 VignetteBuilder: knitr
 License: Artistic-2.0
 LazyLoad: yes

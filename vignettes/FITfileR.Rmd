@@ -226,6 +226,87 @@ ggplot(hr_differences, aes(x = timestamp, y = hr_diff)) +
 
 For the most part the readings are quite similar between the two devices.  Just looking at the plot, it seems there are more points above the zero line, indicating that the chest strap records slightly higher values on average, but the difference is generally within 5 beats-per-minute.  Based on the colouring it looks like the largest differences occur when the heart-rate is high.
 
+## Plotting "cycling dynamics"
+
+```{r}
+knitr::include_graphics(path = "img/power_phase.png")
+```
+
+We're again going to use the FIT file recorded during a Zwift ride on the turbo trainer as the bike had power pedal attached.
+
+```{r, eval = FALSE}
+garmin_file <- system.file("extdata", "Activities", "garmin-fenix6-turbo.fit", 
+                            package = "FITfileR")
+garmin <- readFitFile(garmin_file)
+```
+
+Next we need to extract the `session` message, which contains the summary of the pedal power phase for the workout.  Unlike most data fields the various `power_phase` columns are lists rather than vectors, where each element contains multiple values.  In this example each entry in the `avg_left_power_phase` column contains four values^[To interpret what each of those values are I had to manually check the annotation for appropriate entry in the *Profile.xlsx* from the [FIT SDK](https://developer.garmin.com/fit/download/)]
+
+```{r, eval = TRUE}
+session <- getMessagesByType(garmin, "session")
+is(session$avg_left_power_phase)
+session$avg_left_power_phase[[1]]
+```
+
+It takes some data wrangling with the **tidyr** packge to get the power data into a tidy format for **ggplot2**.  Here we also convert the angles from degress as they're provided by **FITfileR** into radians, as this will be useful for the plotting step next.
+
+We also seperatly extract the left/right pedal balance data, which can also be found in the *session* information.
+
+```{r, wrangle-power-data, eval = TRUE}
+library(tidyr)
+power <- session %>%
+  ## select the 4 columns that contain power phase data
+  select(contains("phase")) %>%
+  ## create a tibble with cols for variables, rows for observations 
+  unnest(cols = everything()) %>%
+  mutate(type = c("start_angle", "end_angle", "arc_length", "center")) %>%
+  pivot_longer(-5) %>%
+  pivot_wider(names_from = "type", values_from = "value") %>%
+  ## split out the side and peak metadata
+  mutate(side = if_else(grepl("left", name), "Left", "Right"),
+         peak = if_else(grepl("peak", name), "peak", "power_phase"),
+         ## convert angles to radians
+         start_angle = start_angle * (pi / 180),
+         end_angle = end_angle * (pi / 180)
+  ) %>%
+  ## ggforce works from -pi to pi radians
+  mutate(start_angle = if_else(start_angle > pi, start_angle - (2*pi), start_angle))
+
+## extract left_right_balance 
+balance <- tibble(side = c("Right", "Left"), 
+       balance = c(session$left_right_balance, 100 - session$left_right_balance)) %>%
+  mutate(balance = paste0(round(balance, digits = 1), "%"))
+```
+
+With the data formatted we can use the **ggforce** package to plot the complete and peak power arcs alongside the balance data for the left and right pedals.
+
+```{r, plot-power-arc, eval = TRUE, fig.cap="Power balance between pedal and the average power delivery arcs through the pedal stroke", fig.width=8, fig.height=4}
+library(ggforce)
+## create arc plot for each side
+ggplot() +
+  ## background circle
+  geom_arc(data = power, aes(x0 = 0, y0 = 0, r = 1, start = 0, end = 2*pi)) +
+  ## complete power phase
+  geom_arc(data = filter(power, peak == "power_phase"),
+           aes(x0 = 0, y0 = 0, r = 1, start = start_angle, end = end_angle), 
+           lwd = 5, color = "#023047") + 
+  ## peak power phase
+  geom_arc(data = filter(power, peak == "peak"), 
+           aes(x0 = 0, y0 = 0, r = 1, start = start_angle, end = end_angle),
+           lwd = 8, color = "#fb8500") +
+  ## compass points for orientation
+  geom_point(data = data.frame(x = c(0,0.8,0,-0.8), y = c(0.8, 0, -0.8, 0)),
+             aes(x = x, y = y), size = 3) +
+  ## pedal balance text
+  geom_text(data = balance, 
+            mapping = aes(x = 0, y = 0, label = balance), size = 10) +
+  ## plot layout and style
+  facet_row(~ side) +
+  coord_fixed() +
+  theme_void() + 
+  theme(strip.text.x = element_text(size = 25, margin = margin(b = 5)))
+```
+
 # More details
 
 In this section we describe a few more of the implementation details of **FITfileR** and some of the choices made in presenting the data in an R session.
