@@ -282,21 +282,21 @@ balance <- tibble(side = c("Right", "Left"),
 
 With the data formatted we can use the **ggforce** package to plot the complete and peak power arcs alongside the balance data for the left and right pedals.
 
-```{r, plot-power-arc, eval = TRUE, fig.cap="Power balance between pedal and the average power delivery arcs through the pedal stroke", fig.width=6, fig.height=3}
+```{r, plot-power-arc, eval = TRUE, fig.cap="Power balance between pedal and the average power delivery arcs through the pedal stroke", fig.width=8, fig.height=4, out.width = "75%"}
 library(ggforce)
 ## create arc plot for each side
 ggplot() +
   ## background circle
   geom_circle(data = power, aes(x0 = 0, y0 = 0, r = 1),
-           lwd = 9.8, color = "#023047") +
+           lwd = 7.8, color = "#023047") +
   ## complete power phase
   geom_arc(data = filter(power, peak == "power_phase"),
            aes(x0 = 0, y0 = 0, r = 1, start = start_angle, end = end_angle), 
-           lwd = 10, color = "#ffb703") + 
+           lwd = 8, color = "#ffb703") + 
   ## peak power phase
   geom_arc(data = filter(power, peak == "peak"), 
            aes(x0 = 0, y0 = 0, r = 1, start = start_angle, end = end_angle),
-           lwd = 14, color = "#fb8500") +
+           lwd = 10, color = "#fb8500") +
   ## compass points for orientation
   geom_point(data = data.frame(x = c(0,0.8,0,-0.8), y = c(0.8, 0, -0.8, 0)),
              aes(x = x, y = y), size = 3, color = "#023047") +
