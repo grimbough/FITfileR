@@ -300,8 +300,9 @@ ggplot() +
   ## compass points for orientation
   geom_point(data = data.frame(x = c(0,0.8,0,-0.8), y = c(0.8, 0, -0.8, 0)),
              aes(x = x, y = y), size = 3, color = "#023047") +
-    geom_circle(data = power, aes(x0 = 0, y0 = 0, r = 0.8),
-           lwd = 2, color = "#023047", n= 8) +
+  geom_point(data = data.frame(x = c(0.56, 0.56, -0.56, -0.56),
+                               y = c(0.56, -0.56, -0.56, 0.56)),
+             aes(x = x, y = y), size = 1, color = "#023047") +
   ## pedal balance text
   geom_text(data = balance, 
             mapping = aes(x = 0, y = 0, label = balance), 
