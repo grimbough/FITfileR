@@ -228,11 +228,13 @@ For the most part the readings are quite similar between the two devices.  Just 
 
 ## Plotting "cycling dynamics"
 
-```{r}
+If you have access to two-sided power data from a bike power meter, it's possible to examine the left/right balance between the riders legs and examine the where in the stroke the power is being applied.  In Garmin Connect this type of analysis is called "cycling dynamics" and is encapsulated in a figure like the one below.  Let's see if we can make something similar in R.
+
+```{r, echo = FALSE, fig.cap="Example of the 'cycling dynamics' report from Garmin Connect.'}
 knitr::include_graphics(path = "img/power_phase.png")
 ```
 
-We're again going to use the FIT file recorded during a Zwift ride on the turbo trainer as the bike had power pedal attached.
+We're again going to use the FIT file recorded during a Zwift ride on the turbo trainer as the bike had power pedals attached.
 
 ```{r, eval = FALSE}
 garmin_file <- system.file("extdata", "Activities", "garmin-fenix6-turbo.fit", 
@@ -248,9 +250,9 @@ is(session$avg_left_power_phase)
 session$avg_left_power_phase[[1]]
 ```
 
-It takes some data wrangling with the **tidyr** packge to get the power data into a tidy format for **ggplot2**.  Here we also convert the angles from degress as they're provided by **FITfileR** into radians, as this will be useful for the plotting step next.
+It takes some data wrangling with the **tidyr** packge to get the power data into a tidy format for **ggplot2**.  Here we also convert the angles from degrees, as they're produced by **FITfileR**, into radians, which will be useful for the plotting step next.
 
-We also seperatly extract the left/right pedal balance data, which can also be found in the *session* information.
+We also separately extract the left/right pedal balance data, which can also be found in the *session* information.
 
 ```{r, wrangle-power-data, eval = TRUE}
 library(tidyr)
@@ -280,26 +282,30 @@ balance <- tibble(side = c("Right", "Left"),
 
 With the data formatted we can use the **ggforce** package to plot the complete and peak power arcs alongside the balance data for the left and right pedals.
 
-```{r, plot-power-arc, eval = TRUE, fig.cap="Power balance between pedal and the average power delivery arcs through the pedal stroke", fig.width=8, fig.height=4}
+```{r, plot-power-arc, eval = TRUE, fig.cap="Power balance between pedal and the average power delivery arcs through the pedal stroke", fig.width=6, fig.height=3}
 library(ggforce)
 ## create arc plot for each side
 ggplot() +
   ## background circle
-  geom_arc(data = power, aes(x0 = 0, y0 = 0, r = 1, start = 0, end = 2*pi)) +
+  geom_circle(data = power, aes(x0 = 0, y0 = 0, r = 1),
+           lwd = 9.8, color = "#023047") +
   ## complete power phase
   geom_arc(data = filter(power, peak == "power_phase"),
            aes(x0 = 0, y0 = 0, r = 1, start = start_angle, end = end_angle), 
-           lwd = 5, color = "#023047") + 
+           lwd = 10, color = "#ffb703") + 
   ## peak power phase
   geom_arc(data = filter(power, peak == "peak"), 
            aes(x0 = 0, y0 = 0, r = 1, start = start_angle, end = end_angle),
-           lwd = 8, color = "#fb8500") +
+           lwd = 14, color = "#fb8500") +
   ## compass points for orientation
   geom_point(data = data.frame(x = c(0,0.8,0,-0.8), y = c(0.8, 0, -0.8, 0)),
-             aes(x = x, y = y), size = 3) +
+             aes(x = x, y = y), size = 3, color = "#023047") +
+    geom_circle(data = power, aes(x0 = 0, y0 = 0, r = 0.8),
+           lwd = 2, color = "#023047", n= 8) +
   ## pedal balance text
   geom_text(data = balance, 
-            mapping = aes(x = 0, y = 0, label = balance), size = 10) +
+            mapping = aes(x = 0, y = 0, label = balance), 
+            size = 10, color = "#023047") +
   ## plot layout and style
   facet_row(~ side) +
   coord_fixed() +
