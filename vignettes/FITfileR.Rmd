@@ -230,7 +230,7 @@ For the most part the readings are quite similar between the two devices.  Just 
 
 If you have access to two-sided power data from a bike power meter, it's possible to examine the left/right balance between the riders legs and examine the where in the stroke the power is being applied.  In Garmin Connect this type of analysis is called "cycling dynamics" and is encapsulated in a figure like the one below.  Let's see if we can make something similar in R.
 
-```{r, echo = FALSE, fig.cap="Example of the 'cycling dynamics' report from Garmin Connect.'}
+```{r, echo = FALSE, fig.cap="Example of the 'cycling dynamics' report from Garmin Connect."}
 knitr::include_graphics(path = "img/power_phase.png")
 ```
 
