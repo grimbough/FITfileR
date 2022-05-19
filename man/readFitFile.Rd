@@ -4,7 +4,7 @@
 \alias{readFitFile}
 \title{Read a FIT file}
 \usage{
-readFitFile(fileName, dropUnknown = TRUE, mergeMessages = TRUE)
+readFitFile(fileName)
 }
 \arguments{
 \item{fileName}{A character specifying the FIT file to be read.}

@@ -23,20 +23,27 @@
 #' garmin <- readFitFile(garmin_file)
 #' 
 #' @export
-readFitFile <- function(fileName, dropUnknown = TRUE, mergeMessages = TRUE) {
+readFitFile <- function(fileName) {
   
-  tmp <- .readFile(fileName)
+  tmp <- .readFile(fileName, preallocate = TRUE)
   return(tmp)
 }
 
 #' @importFrom methods is new
-.readFile <- function(fileName) {
+.readFile <- function(fileName, preallocate = TRUE) {
   
   con <- file(fileName, "rb")
   on.exit(close(con))
   file_header <- .readFileHeader(con)
   
-  messages <- list()
+  ## prealloacting space for the list of messages saves a bit of time
+  ## if there are more than 25,000 messages it will just grow anyway
+  if(preallocate) {
+    messages <- vector(mode = "list", length = 25000)
+  } else {
+    messages <- list()
+  }
+
   msgDefs <- list()
   devMessages <- list()
   count <- 1
@@ -51,7 +58,8 @@ readFitFile <- function(fileName, dropUnknown = TRUE, mergeMessages = TRUE) {
       msgDefs[[ count ]] <- .readMessage_definition(con = con, message_header = record_header)
       count <- count + 1
     } else {
-      definition <- .matchDefinition(msgDefs, local_message_number = localMessageNumber(record_header))
+      local_message_number = localMessageNumber(record_header)
+      definition <- .matchDefinition(msgDefs, local_message_number = local_message_number)
       
       ## is this a developer data definition message?
       if(globalMessageNumber(definition) == 206) {
@@ -71,12 +79,16 @@ readFitFile <- function(fileName, dropUnknown = TRUE, mergeMessages = TRUE) {
         }
       
         msg_count <- msg_count + 1
+        
       }
     }
     
     prev_header <- record_header
     
   }
+  
+  ## trim any unused spaces we assigned when 'messages' was preallocated
+  messages <- messages[seq_len(msg_count-1)]
   
   fit <- new("FitFile", header = file_header, messages = messages)
   return(fit)

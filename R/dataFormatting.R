@@ -1,5 +1,5 @@
-## fit time stamps are from 31st December 1989
-## this function transforms them into data/times
+## FIT time stamps are from 31st December 1989
+## this function transforms them into date/times
 .adjustTimeStamp <- function(values) {
   values <- as.integer(values)
   as.POSIXct(values, origin = "1989-12-31", tz = "UTC")  
