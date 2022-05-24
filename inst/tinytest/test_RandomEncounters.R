@@ -8,6 +8,6 @@ files <- list.files( "~/Projects/personal/FITfileR/inst/extdata/RandomEncounters
 
 for(f in files) {
     expect_silent(
-      fit <- readFitFile(f, mergeMessages = FALSE)
+      fit <- readFitFile(f)
     )
 }

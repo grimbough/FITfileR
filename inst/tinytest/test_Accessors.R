@@ -21,3 +21,10 @@ expect_inherits(events(garmin530), "data.frame")
 expect_inherits(file_id(garmin530), "data.frame")
 ## hrv is not present in this file
 expect_null(suppressMessages(hrv(garmin530)))
+
+## Test we can get the local message number for both data and definition messages
+expect_equal(FITfileR:::localMessageNumber(garmin530@messages[[1]]), 0L)
+expect_equal(FITfileR:::localMessageNumber(garmin530@messages[[5]]), 4L)
+
+expect_equal(FITfileR:::localMessageNumber(garmin530@messages[[1]]@definition), 0L)
+expect_equal(FITfileR:::localMessageNumber(garmin530@messages[[5]]@definition), 4L)

@@ -18,14 +18,12 @@
     field_definition <- .processFieldDefs(
        readBin(con = con, what = "raw", n = 3 * n_fields, size = 1, signed = FALSE)
     )
-    #field_definition <- readBin(con = con, what = "raw", n = 3 * n_fields, size = 1, signed = FALSE)
     if(hasDeveloperData(message_header)){
         ## do something with the developer fields
         n_dev_fields <- readBin(con = con, what = "int", n = 1, size = 1, signed = FALSE)
         dev_field_definition <- .processFieldDefs(
            readBin(con = con, what = "raw", n = 3 * n_dev_fields, size = 1)
         )
-        #dev_field_definition <- readBin(con = con, what = "raw", n = 3 * n_dev_fields, size = 1)
     } else {
         dev_field_definition = NULL
     }
