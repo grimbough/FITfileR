@@ -2,9 +2,8 @@
     
     fields <- as.integer(fields)
     fields <- split(fields, rep(1:3, by = length(fields)/3))
+    fields[[3]] <- format(as.hexmode(fields[[3]]), width = 2)
     names(fields) = c('field_def_num', 'size', 'base_type')
-    fields <- as_tibble(fields) %>%
-        mutate(base_type = format(as.hexmode(base_type), width = 2))
     return(fields)
 }
 
@@ -17,14 +16,16 @@
                                   endian = architecture, signed = FALSE)
     n_fields <- readBin(con = con, what = "int", n = 1, size = 1, signed = FALSE)
     field_definition <- .processFieldDefs(
-        readBin(con = con, what = "raw", n = 3 * n_fields, size = 1, signed = FALSE)
+       readBin(con = con, what = "raw", n = 3 * n_fields, size = 1, signed = FALSE)
     )
+    #field_definition <- readBin(con = con, what = "raw", n = 3 * n_fields, size = 1, signed = FALSE)
     if(hasDeveloperData(message_header)){
         ## do something with the developer fields
         n_dev_fields <- readBin(con = con, what = "int", n = 1, size = 1, signed = FALSE)
         dev_field_definition <- .processFieldDefs(
-            readBin(con = con, what = "raw", n = 3 * n_dev_fields, size = 1)
+           readBin(con = con, what = "raw", n = 3 * n_dev_fields, size = 1)
         )
+        #dev_field_definition <- readBin(con = con, what = "raw", n = 3 * n_dev_fields, size = 1)
     } else {
         dev_field_definition = NULL
     }
@@ -34,8 +35,7 @@
                    is_little_endian = (architecture == "little"),
                    global_message_number = global_message_num,
                    field_defs = field_definition,
-                   dev_field_defs = dev_field_definition,
-                   .signature = .definitionSignature(field_definition)
+                   dev_field_defs = dev_field_definition
     )
     
     return(message)
@@ -44,7 +44,7 @@
 ## should be refactored!!!
 ## currently just copy/paste from .readMessage_data()
 .readMessage_devdata <- function(con, field_defs, is_little_endian) {
-    
+  
     fieldTypes <- field_defs$base_type
     sizes <- field_defs$size
     

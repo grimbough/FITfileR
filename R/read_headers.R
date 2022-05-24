@@ -94,3 +94,22 @@ timeOffset <- function(header) {
   }
   return(offset)
 }
+
+localMessageNumber <- function(object) {
+    
+    if(is(object, "FitDefinitionMessage")) {
+        header <- object@header
+    } else if (is(object, "FitDataMessage")) {
+        header <- object@definition@header
+    } else {
+        header <- object
+    }
+    
+    if(isCompressed(header)) {
+        rawToBits(header)[6:7] |>
+            .binaryToInt()
+    } else {
+        rawToBits(header)[1:4] |>
+            .binaryToInt()
+    }
+}

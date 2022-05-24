@@ -34,9 +34,8 @@ setClass("FitDefinitionMessage",
              header = "raw",
              is_little_endian = "logical",
              global_message_number = "integer",
-             field_defs = "data.frame",
-             dev_field_defs = "ANY",
-             .signature = "character"
+             field_defs = "list",
+             dev_field_defs = "ANY"
          ))
 
 #' The \code{FitDataMessage} class holds data messages.
@@ -66,7 +65,7 @@ setClass("FitDataMessageWithDevData",
          ),
          contains = "FitDataMessage", 
 )
-setValidity("FitDataMessageWithDevData", validDevData)
+#setValidity("FitDataMessageWithDevData", validDevData)
 
 #' An S4 class representing a FIT file
 #' 
