@@ -55,11 +55,14 @@ readFitFile <- function(fileName) {
     record_header <- .readRecordHeader(con, prev_header)
     
     if(isDefinition(record_header)) {
-      msgDefs[[ count ]] <- .readMessage_definition(con = con, message_header = record_header)
-      count <- count + 1
+      #msgDefs[[ count ]] <- .readMessage_definition(con = con, message_header = record_header)
+      #count <- count + 1
+      def <- .readMessage_definition(con = con, message_header = record_header)
+      msgDefs[[ as.character(localMessageNumber(def)) ]] <- def
     } else {
       local_message_number = localMessageNumber(record_header)
-      definition <- .matchDefinition(msgDefs, local_message_number = local_message_number)
+      #definition <- .matchDefinition(msgDefs, local_message_number = local_message_number)
+      definition <- msgDefs[[ as.character(local_message_number) ]]
       
       ## is this a developer data definition message?
       if(globalMessageNumber(definition) == 206) {
