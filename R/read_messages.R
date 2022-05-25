@@ -46,55 +46,57 @@
     fieldTypes <- field_defs$base_type
     sizes <- field_defs$size
     
-    if(any(!fieldTypes %in% names(data_type_lookup))) {
-        stop("Unable to read data message with developer data\n",
-             "Unknown field types detected.")
-    }
-    
     message <- vector(mode = "list", length = length(fieldTypes))
     for(i in seq_along(fieldTypes)) {
         
-        readInfo <- data_type_lookup[[ fieldTypes[i] ]]
-        
-        ## a single field can have an array of values 
-        single_size <- prod(as.integer(readInfo[3:4]))
-        
-        n_values <- sizes[i] %/% single_size
-        if(fieldTypes[i] == "07") {
-            suppressWarnings(
-                message[[i]] <- readChar(con = con, nchars = n_values, useBytes = TRUE)
-            )
-        } else {
-            for(j in seq_len( n_values ) ) {
-                
-                dat <- readBin(con, what = readInfo[[1]], signed = readInfo[[2]],
-                               size = readInfo[[3]], n = readInfo[[4]], 
-                               endian = ifelse(is_little_endian, "little", "big"))
-                
-                ## if we have unsigned ints, turn the bits into a numeric
-                if(fieldTypes[i] %in% c('86', '8c')) {
-                    if(is_little_endian) {
-                        bits <- as.logical(rawToBits(dat[1:4]))
-                    } else {
-                        bits <- as.logical(rawToBits(dat[4:1]))
+        if (fieldTypes[i] %in% names(data_type_lookup)) {
+            
+            readInfo <- data_type_lookup[[ fieldTypes[i] ]]
+            
+            ## a single field can have an array of values 
+            single_size <- prod(as.integer(readInfo[3:4]))
+            
+            n_values <- sizes[i] %/% single_size
+            if(fieldTypes[i] == "07") {
+                suppressWarnings(
+                    message[[i]] <- readChar(con = con, nchars = n_values, useBytes = TRUE)
+                )
+            } else {
+                for(j in seq_len( n_values ) ) {
+                    
+                    dat <- readBin(con, what = readInfo[[1]], signed = readInfo[[2]],
+                                   size = readInfo[[3]], n = readInfo[[4]], 
+                                   endian = ifelse(is_little_endian, "little", "big"))
+                    
+                    ## if we have unsigned ints, turn the bits into a numeric
+                    if(fieldTypes[i] %in% c('86', '8c')) {
+                        if(is_little_endian) {
+                            bits <- as.logical(rawToBits(dat[1:4]))
+                        } else {
+                            bits <- as.logical(rawToBits(dat[4:1]))
+                        }
+                        dat <- sum(2^(.subset(0:31, bits)))
+                    } else if (fieldTypes[i] == '0d') { ## maybe this conversion should be done when reading?
+                        dat <- as.integer(dat)
                     }
-                    dat <- sum(2^(.subset(0:31, bits)))
-                } else if (fieldTypes[i] == '0d') { ## maybe this conversion should be done when reading?
-                    dat <- as.integer(dat)
-                }
-                
-                if(n_values == 1) {
-                    message[[i]] <- c(message[[i]], dat)
-                } else { ## put multiple values in a list, otherwise the tibble has columns with different lengths.
-                    if(j == 1) {
-                        message[[i]] <- list(dat)
-                    } else {
-                        message[[i]][[1]] <- c(message[[i]][[1]], dat)
+                    
+                    if(n_values == 1) {
+                        message[[i]] <- c(message[[i]], dat)
+                    } else { ## put multiple values in a list, otherwise the tibble has columns with different lengths.
+                        if(j == 1) {
+                            message[[i]] <- list(dat)
+                        } else {
+                            message[[i]][[1]] <- c(message[[i]][[1]], dat)
+                        }
                     }
                 }
             }
+        } else {
+            readBin(con, what = "integer", size = 1, n = sizes[i])
+            message[[i]] <- 0
         }
     }
+    
     return(message)
 }
 
@@ -117,7 +119,7 @@
         readInfo <- data_type_lookup[[ fieldTypes[i] ]]
         
         ## a single field can have an array of values 
-        single_size <- prod(as.integer(readInfo[3:4]))
+        single_size <- prod(readInfo$size, readInfo$n)
         
         n_values <- sizes[i] %/% single_size
         if(fieldTypes[i] == "07") {
@@ -127,8 +129,8 @@
         } else {
             for(j in seq_len( n_values ) ) {
                 
-                dat <- readBin(con, what = readInfo[[1]], signed = readInfo[[2]],
-                               size = readInfo[[3]], n = readInfo[[4]], 
+                dat <- readBin(con, what = readInfo$what, signed = readInfo$signed,
+                               size = readInfo$size, n = readInfo$n, 
                                endian = endian)
                 
                 ## if we have unsigned ints, turn the bits into a numeric
