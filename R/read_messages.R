@@ -7,6 +7,14 @@
     return(fields)
 }
 
+.processDevFieldDefs <- function(fields) {
+    
+    fields <- as.integer(fields)
+    fields <- split(fields, rep(1:3, by = length(fields)/3))
+    names(fields) = c('field_num', 'size', 'developer_idx')
+    return(fields)
+}
+
 .readMessage_definition <- function(con, message_header) {
     
     reserved <- readBin(con = con, what = "raw", n = 1, size = 1)
@@ -21,8 +29,9 @@
     if(hasDeveloperData(message_header)){
         ## do something with the developer fields
         n_dev_fields <- readBin(con = con, what = "int", n = 1, size = 1, signed = FALSE)
-        dev_field_definition <- .processFieldDefs(
-            readBin(con = con, what = "raw", n = 3 * n_dev_fields, size = 1)
+        dev_fields_raw <- readBin(con = con, what = "raw", n = 3 * n_dev_fields, size = 1, signed = FALSE)
+        dev_field_definition <- .processDevFieldDefs(
+            dev_fields_raw
         )
     } else {
         dev_field_definition = NULL
@@ -41,17 +50,21 @@
 
 ## should be refactored!!!
 ## currently just copy/paste from .readMessage_data()
-.readMessage_devdata <- function(con, field_defs, is_little_endian) {
+.readMessage_devdata <- function(con, header, definition, developer_msgs) {
     
-    fieldTypes <- field_defs$base_type
-    sizes <- field_defs$size
+    fieldDefs <- fieldDefinition(definition)
+    fieldTypes <- fieldDefs$base_type
+    sizes <- fieldDefs$size
+    devFieldDefs <- devFieldDefinition(definition)
     
-    message <- vector(mode = "list", length = length(fieldTypes))
+    if(definition@is_little_endian) { endian <- "little" } else { endian <- "big" }
+    
+    message <- vector(mode = "list", length = length(fieldTypes) + length(devFieldDefs$field_num))
     for(i in seq_along(fieldTypes)) {
         
         if (fieldTypes[i] %in% names(data_type_lookup)) {
             
-            readInfo <- data_type_lookup[[ fieldTypes[i] ]]
+            readInfo <- data_type_lookup[[ fieldTypes[i] ]] 
             
             ## a single field can have an array of values 
             single_size <- prod(as.integer(readInfo[3:4]))
@@ -66,11 +79,11 @@
                     
                     dat <- readBin(con, what = readInfo[[1]], signed = readInfo[[2]],
                                    size = readInfo[[3]], n = readInfo[[4]], 
-                                   endian = ifelse(is_little_endian, "little", "big"))
+                                   endian = endian)
                     
                     ## if we have unsigned ints, turn the bits into a numeric
                     if(fieldTypes[i] %in% c('86', '8c')) {
-                        if(is_little_endian) {
+                        if(definition@is_little_endian) {
                             bits <- as.logical(rawToBits(dat[1:4]))
                         } else {
                             bits <- as.logical(rawToBits(dat[4:1]))
@@ -97,6 +110,62 @@
         }
     }
     
+    k <- length(fieldTypes)
+    ## loop over the developer fields
+    for(i in seq_along(devFieldDefs$field_num)) {
+        
+        ## index within the set of developer messages
+        idx <- devFieldDefs$developer_idx[i] + 1
+        size <- devFieldDefs$size[i]
+        field_num <- devFieldDefs$field_num[i] + 1
+        
+        developer_msg <- developer_msgs[[idx]]$messages[[field_num]]
+        dm_fieldDefs <- fieldDefinition(developer_msg)
+        
+        base_type <- developer_msg@fields[[which(dm_fieldDefs$field_def_num == 2)]] %>% 
+            as.hexmode() %>% format(width = 2)
+        readInfo <- data_type_lookup[[ base_type ]] 
+        
+        ## a single field can have an array of values 
+        single_size <- prod(as.integer(readInfo[3:4]))
+        
+        n_values <- size %/% single_size
+        if(base_type == "07") {
+            suppressWarnings(
+                message[[i+k]] <- readChar(con = con, nchars = n_values, useBytes = TRUE)
+            )
+        } else {
+            for(j in seq_len( n_values ) ) {
+                
+                dat <- readBin(con, what = readInfo[[1]], signed = readInfo[[2]],
+                               size = readInfo[[3]], n = readInfo[[4]], 
+                               endian = endian)
+                
+                ## if we have unsigned ints, turn the bits into a numeric
+                if(base_type %in% c('86', '8c')) {
+                    if(definition@is_little_endian) {
+                        bits <- as.logical(rawToBits(dat[1:4]))
+                    } else {
+                        bits <- as.logical(rawToBits(dat[4:1]))
+                    }
+                    dat <- sum(2^(.subset(0:31, bits)))
+                } else if (base_type == '0d') { ## maybe this conversion should be done when reading?
+                    dat <- as.integer(dat)
+                }
+                
+                if(n_values == 1) {
+                    message[[i+k]] <- c(message[[i+k]], dat)
+                } else { ## put multiple values in a list, otherwise the tibble has columns with different lengths.
+                    if(j == 1) {
+                        message[[i+k]] <- list(dat)
+                    } else {
+                        message[[i+k]][[1]] <- c(message[[i+k]][[1]], dat)
+                    }
+                }
+            }
+        }
+        
+    }
     return(message)
 }
 

@@ -62,22 +62,31 @@ readFitFile <- function(fileName) {
       definition <- msgDefs[[ as.character(local_message_number) ]]
       
       ## is this a developer data definition message?
-      if(globalMessageNumber(definition) == 206) {
+      if(globalMessageNumber(definition) == 207) {
+          tmp <- .readMessage_data(con = con, header = record_header, definition = definition)
+          idx <- tmp@fields[[ 2 ]]+1
+          devMessages[[idx]] <- list()
+          devMessages[[idx]][["maunfacturer"]] <- fit_data_types$manufacturer |> filter(key == tmp@fields[[1]][1]) |> pull(value)
+          devMessages[[idx]][["messages"]] <- list()
+      } else if(globalMessageNumber(definition) == 206) {
          tmp <- .readMessage_data(con = con, header = record_header, definition = definition)
-         idx <- which(tmp@definition@field_defs$field_def_num == 1)
-         dev_data_idx <- as.integer(tmp@fields[[ idx ]]) + 1
-         devMessages[[ dev_data_idx ]] <- tmp
+         developer_idx <- which(tmp@definition@field_defs$field_def_num == 0)
+         field_idx <- which(tmp@definition@field_defs$field_def_num == 1)
+         dev_data_idx <- as.integer(tmp@fields[[ developer_idx ]]) + 1
+         field_number <- as.integer(tmp@fields[[ field_idx ]]) + 1
+         devMessages[[ dev_data_idx ]][[ "messages" ]][[ field_number ]] <- tmp
       } else {
-        messages[[ msg_count ]] <- .readMessage_data(con = con, 
-                                                   header = record_header, 
-                                                   definition = definition)
+          if(!hasDeveloperData(definition)) {
+            messages[[ msg_count ]] <- .readMessage_data(con = con, 
+                                                       header = record_header, 
+                                                       definition = definition)
+          } else {
+              messages[[ msg_count ]] <- .readMessage_devdata(con = con, 
+                                                             header = record_header,
+                                                             definition = definition,
+                                                             devMessages)
+          }
 
-        if(is( messages[[ msg_count ]], "FitDataMessageWithDevData")) {
-          dev_data_idx <- names(messages[[ msg_count ]]@dev_fields)
-          messages[[ msg_count ]]@dev_field_details <- .matchDevDefinition(devMessages, 
-                                                                           dev_data_idx = as.integer(dev_data_idx) + 1)
-        }
-      
         msg_count <- msg_count + 1
         
       }

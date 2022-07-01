@@ -79,7 +79,7 @@ setMethod("getMessagesByType",
                   messages <- messages(fitFile)[ idx ]
                   
                   signatures <- vapply(messages, 
-                                       function(x) { paste0(x@definition@field_defs, collapse = "") }, 
+                                       function(x) { paste0(x@definition@field_defs$field_def_num, collapse = "") }, 
                                        FUN.VALUE = character(1))
                   
                   ## this 
