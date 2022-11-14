@@ -59,7 +59,7 @@
     
     if(definition@is_little_endian) { endian <- "little" } else { endian <- "big" }
     
-    message <- vector(mode = "list", length = length(fieldTypes) + length(devFieldDefs$field_num))
+    message <- vector(mode = "list", length = length(fieldTypes))
     for(i in seq_along(fieldTypes)) {
         
         if (fieldTypes[i] %in% names(data_type_lookup)) {
@@ -113,6 +113,7 @@
     k <- length(fieldTypes)
     
     dev_data <- vector(mode = "list", length = length(devFieldDefs$field_num))
+    dev_data_mesg_defs <- vector(mode = "list", length = length(devFieldDefs$field_num))
     ## loop over the developer fields
     for(i in seq_along(devFieldDefs$field_num)) {
         
@@ -122,6 +123,7 @@
         field_num <- devFieldDefs$field_num[i] + 1
         
         developer_msg <- developer_msgs[[idx]]$messages[[field_num]]
+        dev_data_mesg_defs[[i]] <- developer_msg
         dm_fieldDefs <- fieldDefinition(developer_msg)
         
         base_type <- developer_msg@fields[[which(dm_fieldDefs$field_def_num == 2)]] %>% 
@@ -173,7 +175,8 @@
                header = header,
                definition = definition,
                fields = message,
-               dev_fields = dev_data)
+               dev_fields = dev_data,
+               dev_field_details = dev_data_mesg_defs)
 }
 
 .readMessage_data <- function(con, header, definition) {

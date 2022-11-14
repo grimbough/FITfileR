@@ -76,3 +76,9 @@ setMethod("devFieldDefinition",
           }
 )
 
+
+.getValueForFieldNum <- function(object, value) {
+    idx <- which(object@definition@field_defs$field_def_num == value)
+    if(length(idx) == 0) { stop("Unkown field requested") }
+    return(object@fields[[idx]])
+}

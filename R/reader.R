@@ -68,7 +68,7 @@ readFitFile <- function(fileName) {
           manufacturer_id_idx <- which(tmp@definition@field_defs$field_def_num == 2)
           idx <- tmp@fields[[ dev_data_idx_idx ]]+1
           devMessages[[idx]] <- list()
-          devMessages[[idx]][["maunfacturer"]] <- fit_data_types$manufacturer |> 
+          devMessages[[idx]][["manufacturer"]] <- fit_data_types$manufacturer |> 
               filter(key == tmp@fields[[manufacturer_id_idx]][1]) |> 
               pull(value)
           devMessages[[idx]][["messages"]] <- list()

@@ -223,7 +223,8 @@
   message_table <- .fixGarminProducts(message_table)
   
   if(hasDeveloperData(x[[1]])) {
-    message_table <- bind_cols(message_table, .processDevFieldsList(x))
+    developer_message_table <- .processDevFieldsList(x)
+    message_table <- bind_cols(message_table, developer_message_table)
   }
   
   return(message_table)
@@ -231,17 +232,22 @@
 
 
 .processDevFieldsList <- function(x) {
+    
+  dev_msg_defs <- x[[1]]@dev_field_details
+    
+  field_names <- vapply(dev_msg_defs, .getValueForFieldNum, 3L, FUN.VALUE = character(1))
+  units <- vapply(dev_msg_defs, .getValueForFieldNum, 8L, FUN.VALUE = character(1))
+    
   message_table <- lapply(x, 
                           FUN = function(y) {
-                            y@dev_fields
+                            tmp <- y@dev_fields
+                            names(tmp) <- field_names
+                            return(tmp)
                           } 
-  ) %>% 
-    dplyr::bind_rows( ) 
-  
-  names(message_table) <- x[[1]]@dev_field_details$field_name
-  
+  ) |> bind_rows()
+
   for(i in ncol(message_table)) {
-    attributes(message_table[[i]]) <- list(units = x[[1]]@dev_field_details$units)
+    attributes(message_table[[i]]) <- list(units = units[i])
   }
   
   return(message_table)

@@ -57,29 +57,43 @@ setMethod("show", signature = "FitDataMessageWithDevData", function(object) {
     field_defs <- fieldDefinition(object)
     cat("fields: ", nrow(field_defs), ", bytes: ", sum(field_defs$size), ")", sep = "")
     
-    for(field in field_defs$field_def_num) {
+    for(i in seq_along(field_defs$field_def_num)) {
+        field <- field_defs$field_def_num[i]
         translated <- .translateField(field, globalMessageNumber( object ))
         cat("\n ", translated$value, " (", translated$key, ", ", translated$type, "):", sep = "")
         
-        original <- object@fields[[ paste(field) ]] %>% unlist()
+        original <- object@fields[[ i ]] |> unlist()
         adjusted <- .applyScaleAndOffset( original, field, globalMessageNumber( object ) ) 
         units <- ifelse(is.na(translated$units), "", paste0(" ", translated$units))
         
         if(length(original) > 1) { cat(" {") }
-        for(i in seq_along(original)) {
-            cat(" ", adjusted[i], units, " (", original[i], ")", sep = "")
+        for(j in seq_along(original)) {
+            cat(" ", adjusted[j], units, " (", original[j], ")", sep = "")
         }
         if(length(original) > 1) { cat(" }") }
         
     }
     
-    for(field in object@definition@dev_field_defs$field_def_num) {
-        idx <- which(object@dev_field_details$field_def_num == field)
-        cat("\n ", object@dev_field_details$field_name[idx], ": ", sep = "")
-        original <- object@dev_fields[[ paste(field) ]] %>% unlist()
-        cat(original, object@dev_field_details$units)
+    for(i in seq_along(object@definition@dev_field_defs$field_num)) {
+        field <- object@definition@dev_field_defs$field_num[i]
+        
+        dev_idx <- object@definition@dev_field_defs$developer_idx[i]
+        ## identify the correct developer message definition
+        dev_msg_idxs <- vapply(object@dev_field_details, FUN = .getValueForFieldNum, 
+               value = 0L, FUN.VALUE = integer(1))
+        
+        dev_msg_def <- object@dev_field_details[[ which(dev_msg_idxs == dev_idx) ]]
+        
+        name <- .getValueForFieldNum(dev_msg_def, value = 3L)
+        units <- .getValueForFieldNum(dev_msg_def, value = 8L)
+        field_def_num <- .getValueForFieldNum(dev_msg_def, value = 1L)
+        
+        cat(
+        sprintf("\n %s (%i, %i): %s %s", 
+                name, dev_idx, field_def_num, object@dev_fields[[i]], units)
+        )
+        
     }
-    
     
 })
 
