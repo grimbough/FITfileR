@@ -27,19 +27,20 @@ setMethod("show", signature = "FitDataMessage", function(object) {
     cat("message type: ", globalMessageNumber( object ), ", ", sep = "")
     
     field_defs <- fieldDefinition(object)
-    cat("fields: ", nrow(field_defs), ", bytes: ", sum(field_defs$size), ")", sep = "")
+    cat("fields: ", length(field_defs$field_def_num), ", bytes: ", sum(field_defs$size), ")", sep = "")
     
-    for(field in field_defs$field_def_num) {
+    for(i in seq_along(field_defs$field_def_num)) {
+        field <- field_defs$field_def_num[i]
         translated <- .translateField(field, globalMessageNumber( object ))
         cat("\n ", translated$value, " (", translated$key, ", ", translated$type, "):", sep = "")
         
-        original <- object@fields[[ paste(field) ]] %>% unlist()
+        original <- object@fields[[ i ]] |> unlist()
         adjusted <- .applyScaleAndOffset( original, field, globalMessageNumber( object ) ) 
         units <- ifelse(is.na(translated$units), "", paste0(" ", translated$units))
         
         if(length(original) > 1) { cat(" {") }
-        for(i in seq_along(original)) {
-            cat(" ", adjusted[i], units, " (", original[i], ")", sep = "")
+        for(j in seq_along(original)) {
+            cat(" ", adjusted[j], units, " (", original[j], ")", sep = "")
         }
         if(length(original) > 1) { cat(" }") }
         

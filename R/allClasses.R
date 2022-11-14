@@ -76,7 +76,8 @@ setClass("FitDataMessageWithDevData",
 setClass("FitFile", 
          slots = c(
            header = "list", 
-           messages = "list"
+           messages = "list",
+           developer_msg_defs = "list"
          )
 )
 

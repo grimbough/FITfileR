@@ -36,7 +36,7 @@ readFitFile <- function(fileName) {
   on.exit(close(con))
   file_header <- .readFileHeader(con)
   
-  ## prealloacting space for the list of messages saves a bit of time
+  ## pre-allocating space for the list of messages saves a bit of time
   ## if there are more than 25,000 messages it will just grow anyway
   if(preallocate) {
     messages <- vector(mode = "list", length = 25000)
@@ -64,9 +64,13 @@ readFitFile <- function(fileName) {
       ## is this a developer data definition message?
       if(globalMessageNumber(definition) == 207) {
           tmp <- .readMessage_data(con = con, header = record_header, definition = definition)
-          idx <- tmp@fields[[ 2 ]]+1
+          dev_data_idx_idx <- which(tmp@definition@field_defs$field_def_num == 3)
+          manufacturer_id_idx <- which(tmp@definition@field_defs$field_def_num == 2)
+          idx <- tmp@fields[[ dev_data_idx_idx ]]+1
           devMessages[[idx]] <- list()
-          devMessages[[idx]][["maunfacturer"]] <- fit_data_types$manufacturer |> filter(key == tmp@fields[[1]][1]) |> pull(value)
+          devMessages[[idx]][["maunfacturer"]] <- fit_data_types$manufacturer |> 
+              filter(key == tmp@fields[[manufacturer_id_idx]][1]) |> 
+              pull(value)
           devMessages[[idx]][["messages"]] <- list()
       } else if(globalMessageNumber(definition) == 206) {
          tmp <- .readMessage_data(con = con, header = record_header, definition = definition)
@@ -99,6 +103,6 @@ readFitFile <- function(fileName) {
   ## trim any unused spaces we assigned when 'messages' was preallocated
   messages <- messages[seq_len(msg_count-1)]
   
-  fit <- new("FitFile", header = file_header, messages = messages)
+  fit <- new("FitFile", header = file_header, messages = messages, developer_msg_defs = devMessages)
   return(fit)
 }

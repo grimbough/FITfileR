@@ -111,6 +111,8 @@
     }
     
     k <- length(fieldTypes)
+    
+    dev_data <- vector(mode = "list", length = length(devFieldDefs$field_num))
     ## loop over the developer fields
     for(i in seq_along(devFieldDefs$field_num)) {
         
@@ -132,7 +134,7 @@
         n_values <- size %/% single_size
         if(base_type == "07") {
             suppressWarnings(
-                message[[i+k]] <- readChar(con = con, nchars = n_values, useBytes = TRUE)
+                dev_data[[i]] <- readChar(con = con, nchars = n_values, useBytes = TRUE)
             )
         } else {
             for(j in seq_len( n_values ) ) {
@@ -154,19 +156,24 @@
                 }
                 
                 if(n_values == 1) {
-                    message[[i+k]] <- c(message[[i+k]], dat)
+                    dev_data[[i]] <- c(dev_data[[i]], dat)
                 } else { ## put multiple values in a list, otherwise the tibble has columns with different lengths.
                     if(j == 1) {
-                        message[[i+k]] <- list(dat)
+                        dev_data[[i]] <- list(dat)
                     } else {
-                        message[[i+k]][[1]] <- c(message[[i+k]][[1]], dat)
+                        dev_data[[i]][[1]] <- c(dev_data[[i]][[1]], dat)
                     }
                 }
             }
         }
         
     }
-    return(message)
+    
+    res <- new("FitDataMessageWithDevData",
+               header = header,
+               definition = definition,
+               fields = message,
+               dev_fields = dev_data)
 }
 
 .readMessage_data <- function(con, header, definition) {
