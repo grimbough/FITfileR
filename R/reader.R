@@ -63,22 +63,13 @@ readFitFile <- function(fileName) {
       
       ## is this a developer data definition message?
       if(globalMessageNumber(definition) == 207) {
-          tmp <- .readMessage_data(con = con, header = record_header, definition = definition)
-          dev_data_idx_idx <- which(tmp@definition@field_defs$field_def_num == 3)
-          manufacturer_id_idx <- which(tmp@definition@field_defs$field_def_num == 2)
-          idx <- tmp@fields[[ dev_data_idx_idx ]]+1
-          devMessages[[idx]] <- list()
-          devMessages[[idx]][["manufacturer"]] <- fit_data_types$manufacturer |> 
-              filter(key == tmp@fields[[manufacturer_id_idx]][1]) |> 
-              pull(value)
-          devMessages[[idx]][["messages"]] <- list()
+          devMessages <- .readMessage_dev_data_id(con = con, header = record_header, 
+                                                  definition = definition, devMessages = devMessages)
       } else if(globalMessageNumber(definition) == 206) {
-         tmp <- .readMessage_data(con = con, header = record_header, definition = definition)
-         developer_idx <- which(tmp@definition@field_defs$field_def_num == 0)
-         field_idx <- which(tmp@definition@field_defs$field_def_num == 1)
-         dev_data_idx <- as.integer(tmp@fields[[ developer_idx ]]) + 1
-         field_number <- as.integer(tmp@fields[[ field_idx ]]) + 1
-         devMessages[[ dev_data_idx ]][[ "messages" ]][[ field_number ]] <- tmp
+          devMessages <- .readMessage_dev_data_field_definition(con = con, 
+                                                               header = record_header, 
+                                                               definition = definition,
+                                                               devMessages = devMessages)
       } else {
           if(!hasDeveloperData(definition)) {
             messages[[ msg_count ]] <- .readMessage_data(con = con, 

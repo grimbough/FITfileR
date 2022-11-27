@@ -258,3 +258,29 @@
     return(res)
 }
 
+.readMessage_dev_data_id <- function(con, header, definition, devMessages) {
+    tmp <- .readMessage_data(con = con, header = header, definition = definition)
+    dev_data_idx_idx <- which(tmp@definition@field_defs$field_def_num == 3)
+    manufacturer_id_idx <- which(tmp@definition@field_defs$field_def_num == 2)
+    
+    ## add 1 becuase FIT file indices are 0-based
+    idx <- tmp@fields[[ dev_data_idx_idx ]]+1
+    
+    devMessages[[idx]] <- list()
+    devMessages[[idx]][["messages"]] <- list()
+    
+    return(devMessages)
+}
+
+.readMessage_dev_data_field_definition <- function(con, header, definition, devMessages) {
+    msg <- .readMessage_data(con = con, header = header, definition = definition)
+    developer_idx <- which(msg@definition@field_defs$field_def_num == 0)
+    field_idx <- which(msg@definition@field_defs$field_def_num == 1)
+    
+    ## add 1 becuase FIT file indices are 0-based
+    dev_data_idx <- as.integer(msg@fields[[ developer_idx ]]) + 1
+    field_number <- as.integer(msg@fields[[ field_idx ]]) + 1
+    
+    devMessages[[ dev_data_idx ]][[ "messages" ]][[ field_number ]] <- msg
+    return(devMessages)
+}
