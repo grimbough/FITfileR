@@ -1,3 +1,10 @@
+# FITfileR 0.1.6
+
+## BUG FIXES
+
+* Improved handling of files with multiple developer data message types.
+Reported in (#20) and (#23).
+
 # FITfileR 0.1.4
 
 ## NEW FEATURES
