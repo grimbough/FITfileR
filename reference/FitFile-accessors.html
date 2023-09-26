@@ -23,7 +23,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FITfileR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.6</span>
       </span>
     </div>
 
@@ -62,64 +62,69 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">listMessageTypes</span><span class="op">(</span><span class="va">fitFile</span><span class="op">)</span>
-
-<span class="co"># S4 method for FitFile</span>
-<span class="fu">listMessageTypes</span><span class="op">(</span><span class="va">fitFile</span><span class="op">)</span>
-
-<span class="fu">getMessagesByType</span><span class="op">(</span><span class="va">fitFile</span>, <span class="va">message_type</span><span class="op">)</span>
-
-<span class="co"># S4 method for FitFile,integer</span>
-<span class="fu">getMessagesByType</span><span class="op">(</span><span class="va">fitFile</span>, <span class="va">message_type</span><span class="op">)</span>
-
-<span class="co"># S4 method for FitFile,character</span>
-<span class="fu">getMessagesByType</span><span class="op">(</span><span class="va">fitFile</span>, <span class="va">message_type</span><span class="op">)</span>
-
-<span class="co"># S4 method for FitFile</span>
-<span class="fu">messages</span><span class="op">(</span><span class="va">fitFile</span><span class="op">)</span>
-
-<span class="fu">file_id</span><span class="op">(</span><span class="va">fitFile</span><span class="op">)</span>
-
-<span class="co"># S4 method for FitFile</span>
-<span class="fu">file_id</span><span class="op">(</span><span class="va">fitFile</span><span class="op">)</span>
-
-<span class="fu">records</span><span class="op">(</span><span class="va">fitFile</span><span class="op">)</span>
-
-<span class="co"># S4 method for FitFile</span>
-<span class="fu">records</span><span class="op">(</span><span class="va">fitFile</span><span class="op">)</span>
-
-<span class="fu">laps</span><span class="op">(</span><span class="va">fitFile</span><span class="op">)</span>
-
-<span class="co"># S4 method for FitFile</span>
-<span class="fu">laps</span><span class="op">(</span><span class="va">fitFile</span><span class="op">)</span>
-
-<span class="fu">events</span><span class="op">(</span><span class="va">fitFile</span><span class="op">)</span>
-
-<span class="co"># S4 method for FitFile</span>
-<span class="fu">events</span><span class="op">(</span><span class="va">fitFile</span><span class="op">)</span>
-
-<span class="fu">hrv</span><span class="op">(</span><span class="va">fitFile</span><span class="op">)</span>
-
-<span class="co"># S4 method for FitFile</span>
-<span class="fu">hrv</span><span class="op">(</span><span class="va">fitFile</span><span class="op">)</span>
-
-<span class="fu">monitoring</span><span class="op">(</span><span class="va">fitFile</span><span class="op">)</span>
-
-<span class="co"># S4 method for FitFile</span>
-<span class="fu">monitoring</span><span class="op">(</span><span class="va">fitFile</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">listMessageTypes</span><span class="op">(</span><span class="va">fitFile</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for FitFile</span></span>
+<span><span class="fu">listMessageTypes</span><span class="op">(</span><span class="va">fitFile</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">getMessagesByType</span><span class="op">(</span><span class="va">fitFile</span>, <span class="va">message_type</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for FitFile,integer</span></span>
+<span><span class="fu">getMessagesByType</span><span class="op">(</span><span class="va">fitFile</span>, <span class="va">message_type</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for FitFile,character</span></span>
+<span><span class="fu">getMessagesByType</span><span class="op">(</span><span class="va">fitFile</span>, <span class="va">message_type</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for FitFile</span></span>
+<span><span class="fu">messages</span><span class="op">(</span><span class="va">fitFile</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">file_id</span><span class="op">(</span><span class="va">fitFile</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for FitFile</span></span>
+<span><span class="fu">file_id</span><span class="op">(</span><span class="va">fitFile</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">records</span><span class="op">(</span><span class="va">fitFile</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for FitFile</span></span>
+<span><span class="fu">records</span><span class="op">(</span><span class="va">fitFile</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">laps</span><span class="op">(</span><span class="va">fitFile</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for FitFile</span></span>
+<span><span class="fu">laps</span><span class="op">(</span><span class="va">fitFile</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">events</span><span class="op">(</span><span class="va">fitFile</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for FitFile</span></span>
+<span><span class="fu">events</span><span class="op">(</span><span class="va">fitFile</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">hrv</span><span class="op">(</span><span class="va">fitFile</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for FitFile</span></span>
+<span><span class="fu">hrv</span><span class="op">(</span><span class="va">fitFile</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">monitoring</span><span class="op">(</span><span class="va">fitFile</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for FitFile</span></span>
+<span><span class="fu">monitoring</span><span class="op">(</span><span class="va">fitFile</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>fitFile</dt>
 <dd><p>A <code><a href="FitFile-class.html">FitFile-class</a></code> object.</p></dd>
+
+
 <dt>message_type</dt>
 <dd><p>Either an integer or character vector (length 1),
 specifying either a global message number or message type respectively.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Either a <code>tibble</code> or a <code>list</code> of <code>tibble</code>. See <code>details</code> for more
+    
+
+<p>Either a <code>tibble</code> or a <code>list</code> of <code>tibble</code>. See <code>details</code> for more
 information.</p>
     </div>
     <div id="details">
@@ -156,7 +161,7 @@ this is left to the user.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>

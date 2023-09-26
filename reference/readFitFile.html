@@ -23,7 +23,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FITfileR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.6</span>
       </span>
     </div>
 
@@ -62,19 +62,23 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">readFitFile</span><span class="op">(</span><span class="va">fileName</span>, dropUnknown <span class="op">=</span> <span class="cn">TRUE</span>, mergeMessages <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">readFitFile</span><span class="op">(</span><span class="va">fileName</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>fileName</dt>
 <dd><p>A character specifying the FIT file to be read.</p></dd>
+
+
 <dt>dropUnknown</dt>
 <dd><p>Many FIT files contain data that is not defined in the FIT
 file specification.  This may be used by the device manufacturer for
 debugging purposes, but is typically not useful to an end user.  The default
 value of this argument will exclude these fields from the returned data
 structure.  Setting a value of <code>FALSE</code> will retain them.</p></dd>
+
+
 <dt>mergeMessages</dt>
 <dd><p>FIT files may contain similar 'messages' with varying
 numbers of fields e.g. if a new sensor is added during an activity the
@@ -82,18 +86,23 @@ numbers of fields e.g. if a new sensor is added during an activity the
 The default value of this argument will merge all messages of the same type,
 and insert <code>NA</code> to pad missing fields.  Setting this to <code>FALSE</code>
 will return a separate <code>data.frame</code> for each distinct message type.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>An object of class <code>[FitFile-class]</code></p>
+    
+
+<p>An object of class <code>[FitFile-class]</code></p>
+
+
     </div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">garmin_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"Activities"</span>, <span class="st">"garmin-edge530-ride.fit"</span>,</span>
-<span class="r-in">                           package <span class="op">=</span> <span class="st">"FITfileR"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">garmin</span> <span class="op">&lt;-</span> <span class="fu">readFitFile</span><span class="op">(</span><span class="va">garmin_file</span><span class="op">)</span></span>
-<span class="r-in"></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">garmin_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"Activities"</span>, <span class="st">"garmin-edge530-ride.fit"</span>,</span></span>
+<span class="r-in"><span>                           package <span class="op">=</span> <span class="st">"FITfileR"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">garmin</span> <span class="op">&lt;-</span> <span class="fu">readFitFile</span><span class="op">(</span><span class="va">garmin_file</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -108,7 +117,7 @@ will return a separate <code>data.frame</code> for each distinct message type.</
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>

@@ -42,7 +42,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">FITfileR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.6</span>
       </span>
     </div>
 
@@ -81,7 +81,7 @@
 <div class="section level1">
 <div class="page-header"><h1 id="fitfiler">FITfileR<a class="anchor" aria-label="anchor" href="#fitfiler"></a>
 </h1></div>
-
+<p><a href="https://github.com/grimbough/FITfileR" class="external-link"><img src="https://img.shields.io/badge/dev%20version-0.1.6-blue.svg"></a> <a href="https://github.com/grimbough/FITfileR/actions" class="external-link"><img src="https://github.com/grimbough/FITfileR/workflows/R-CMD-check/badge.svg" alt="R CMD check"></a> <a href="https://codecov.io/github/grimbough/FITfileR" class="external-link"><img src="https://codecov.io/github/grimbough/FITfileR/branch/fit-class/graphs/badge.svg" alt="codecov"></a></p>
 <p><strong>FITfileR</strong> is an R package to read FIT files produced by fitness tracking devices like cycling computers or sports watches. The intention for <strong>FITfileR</strong> is to use native R code to read the files directly, with no reliance on the FIT SDK or other FIT parsing tools. As such it should be platform independent, and not require any additional software outside of a working version of R.</p>
 <p><strong>FITfileR</strong> should be considered a work in progress, and many features available in the complete SDK are not currently implemented.</p>
 <p>Feel free to open an <a href="https://github.com/grimbough/FITfileR/issues" class="external-link">issue</a> if something doesn’t work or you notice a feature you’d like adding.</p>
@@ -90,10 +90,10 @@
 <h1 id="installing-from-github">Installing from GitHub<a class="anchor" aria-label="anchor" href="#installing-from-github"></a>
 </h1>
 <p>Currently <strong>FITfileR</strong> is only available on Github, and can be installed using the <strong><a href="https://cran.r-project.org/package=remotes" class="external-link">remotes</a> package.</strong></p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="cf">if</span>(<span class="op">!</span><span class="kw">requireNamespace</span>(<span class="st">"remotes"</span>)) {</span>
-<span id="cb1-2"><a href="#cb1-2"></a>    <span class="kw">install.packages</span>(<span class="st">"remotes"</span>)</span>
-<span id="cb1-3"><a href="#cb1-3"></a>}</span>
-<span id="cb1-4"><a href="#cb1-4"></a>remotes<span class="op">::</span><span class="kw">install_github</span>(<span class="st">"grimbough/FITfileR"</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">requireNamespace</span>(<span class="st">"remotes"</span>)) {</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">install.packages</span>(<span class="st">"remotes"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>remotes<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">"grimbough/FITfileR"</span>)</span></code></pre></div>
 </div>
 <div class="section level1">
 <h1 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
@@ -133,14 +133,7 @@
 </ul>
 </div>
 
-<div class="dev-status">
-<h2 data-toc-skip>Dev status</h2>
-<ul class="list-unstyled">
-<li><a href="https://github.com/grimbough/FITfileR" class="external-link"><img src="https://img.shields.io/badge/dev%20version-0.1.5-blue.svg"></a></li>
-<li><a href="https://github.com/grimbough/FITfileR/actions" class="external-link"><img src="https://github.com/grimbough/FITfileR/workflows/R-CMD-check/badge.svg" alt="R CMD check"></a></li>
-<li><a href="https://codecov.io/github/grimbough/FITfileR" class="external-link"><img src="https://codecov.io/github/grimbough/FITfileR/branch/fit-class/graphs/badge.svg" alt="codecov"></a></li>
-</ul>
-</div>
+
 
   </div>
 </div>
@@ -153,7 +146,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>
