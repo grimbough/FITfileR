@@ -1,7 +1,6 @@
-FITfileR
-========
+# FITfileR
 
-[![](https://img.shields.io/badge/dev%20version-0.1.5-blue.svg)](https://github.com/grimbough/FITfileR)
+[![](https://img.shields.io/badge/dev%20version-0.1.6-blue.svg)](https://github.com/grimbough/FITfileR)
 [![R CMD
 check](https://github.com/grimbough/FITfileR/workflows/R-CMD-check/badge.svg)](https://github.com/grimbough/FITfileR/actions)
 [![codecov](https://codecov.io/github/grimbough/FITfileR/branch/fit-class/graphs/badge.svg)](https://codecov.io/github/grimbough/FITfileR)
@@ -20,8 +19,7 @@ Feel free to open an
 [issue](https://github.com/grimbough/FITfileR/issues) if something
 doesn’t work or you notice a feature you’d like adding.
 
-Installing from GitHub
-======================
+# Installing from GitHub
 
 Currently **FITfileR** is only available on Github, and can be installed
 using the **[remotes](https://cran.r-project.org/package=remotes)
@@ -32,8 +30,7 @@ package.**
     }
     remotes::install_github("grimbough/FITfileR")
 
-Usage
-=====
+# Usage
 
 You can find a vignette with examples of how to use the code at
-<a href="https://msmith.de/FITfileR/articles/FITfileR.html" class="uri">https://msmith.de/FITfileR/articles/FITfileR.html</a>
+<https://msmith.de/FITfileR/articles/FITfileR.html>
