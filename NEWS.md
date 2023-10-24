@@ -1,3 +1,15 @@
+# FITfileR 0.1.7
+
+## NEW FEATURES
+
+* It is now possible to read messages containing 64-bit integer data types.
+Initially reported in (#26) and (#30).
+
+## BUG FIXES
+
+* Fixed an issue where string datatypes that were flagged as having endianness
+would not be read correctly resulting in an error.  Reported in (#29).
+
 # FITfileR 0.1.6
 
 ## BUG FIXES
