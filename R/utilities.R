@@ -18,6 +18,23 @@
     return(res)
 }
 
+
+#' @importFrom bit64 as.integer64
+.rawToInt64 <- function(raw, endian = "little", signed = FALSE) {
+
+    stopifnot(length(raw) == 8L)
+    
+    bits <- rawToBits(raw)
+    
+    bitstring <- structure(
+            paste0(substr(rev(bits), start = 2, stop = 2), collapse = ""), 
+        class= "bitstring")
+      
+    int64 <- as.integer64(bitstring)
+    return(int64)
+}
+
+
 ## create a signature for each definition message
 ## so we can easily separate message of the same type 
 .definitionSignature <- function(field_defs) {
