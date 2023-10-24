@@ -1,5 +1,5 @@
 Package: FITfileR
-Version: 0.1.6
+Version: 0.1.7
 Title: Read FIT files using only native R code
 Authors@R: c(person(
                     "Mike", "Smith", 
@@ -14,7 +14,7 @@ Description: The 'FIT' (Flexible and Interoperable Data Transfer)
     dependence on external software or SDKs. 
 URL: https://github.com/grimbough/FITfileR
 Depends: R (>= 3.5.0)
-Imports: dplyr, tibble, magrittr, methods
+Imports: dplyr, tibble, magrittr, methods, bit64
 Suggests: knitr,
     rmarkdown,
     leaflet, 
@@ -27,7 +27,7 @@ VignetteBuilder: knitr
 License: Artistic-2.0
 LazyLoad: yes
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.3
 Encoding: UTF-8
 Collate: 
     'FITfileR.R'
