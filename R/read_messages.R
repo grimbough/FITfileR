@@ -2,7 +2,12 @@
     
     fields <- as.integer(fields)
     fields <- split(fields, rep(1:3, by = length(fields)/3))
-    fields[[3]] <- format(as.hexmode(fields[[3]]), width = 2)
+    #fields[[3]] <- format(as.hexmode(fields[[3]]), width = 2)
+    fields[[3]] <- unlist(
+        lapply(fields[[3]], function(x) { 
+            FITfileR:::.binaryToInt(intToBits(x)[1:4])  
+        })
+    )
     names(fields) = c('field_def_num', 'size', 'base_type')
     return(fields)
 }
@@ -53,7 +58,8 @@
 .readMessage_devdata <- function(con, header, definition, developer_msgs) {
     
     fieldDefs <- fieldDefinition(definition)
-    fieldTypes <- fieldDefs$base_type
+    ## we add 1 here because R indexing starts at 1 not 0
+    fieldTypes <- fieldDefs$base_type + 1
     sizes <- fieldDefs$size
     devFieldDefs <- devFieldDefinition(definition)
     
@@ -70,7 +76,7 @@
             single_size <- prod(as.integer(readInfo[3:4]))
             
             n_values <- sizes[i] %/% single_size
-            if(fieldTypes[i] == "07") {
+            if(fieldTypes[i] == 8L) {
                 suppressWarnings(
                     message[[i]] <- readChar(con = con, nchars = n_values, useBytes = TRUE)
                 )
@@ -82,15 +88,17 @@
                                    endian = endian)
                     
                     ## if we have unsigned ints, turn the bits into a numeric
-                    if(fieldTypes[i] %in% c('86', '8c')) {
+                    if(fieldTypes[i] %in% c(7L, 13L)) {
                         if(definition@is_little_endian) {
                             bits <- as.logical(rawToBits(dat[1:4]))
                         } else {
                             bits <- as.logical(rawToBits(dat[4:1]))
                         }
                         dat <- sum(2^(.subset(0:31, bits)))
-                    } else if (fieldTypes[i] == '0d') { ## maybe this conversion should be done when reading?
+                    } else if (fieldTypes[i] == 14L) { ## maybe this conversion should be done when reading?
                         dat <- as.integer(dat)
+                    } else if (base_type %in% c(15L, 16L)) {
+                        dat <- .rawToInt64(raw = dat)
                     }
                     
                     if(n_values == 1) {
@@ -134,7 +142,7 @@
         single_size <- prod(as.integer(readInfo[3:4]))
         
         n_values <- size %/% single_size
-        if(base_type == "07") {
+        if(base_type == 8L) {
             suppressWarnings(
                 dev_data[[i]] <- readChar(con = con, nchars = n_values, useBytes = TRUE)
             )
@@ -146,15 +154,17 @@
                                endian = endian)
                 
                 ## if we have unsigned ints, turn the bits into a numeric
-                if(base_type %in% c('86', '8c')) {
+                if(base_type %in% c(7L, 13L)) {
                     if(definition@is_little_endian) {
                         bits <- as.logical(rawToBits(dat[1:4]))
                     } else {
                         bits <- as.logical(rawToBits(dat[4:1]))
                     }
                     dat <- sum(2^(.subset(0:31, bits)))
-                } else if (base_type == '0d') { ## maybe this conversion should be done when reading?
+                } else if (base_type == 14L) { ## maybe this conversion should be done when reading?
                     dat <- as.integer(dat)
+                } else if (base_type %in% c(15L, 16L)) {
+                    dat <- .rawToInt64(raw = dat)
                 }
                 
                 if(n_values == 1) {
@@ -182,10 +192,11 @@
 .readMessage_data <- function(con, header, definition) {
     
     fieldDefs <- fieldDefinition(definition)
-    fieldTypes <- fieldDefs$base_type
+    ## we add 1 here because R indexing starts at 1 not 0
+    fieldTypes <- fieldDefs$base_type + 1
     sizes <- fieldDefs$size
     
-    if(any(!fieldTypes %in% names(data_type_lookup))) {
+    if(any(fieldTypes > length(data_type_lookup))) {
         stop("Unable to read data message.\n",
              "Unknown field types detected.")
     }
@@ -201,7 +212,7 @@
         single_size <- prod(readInfo$size, readInfo$n)
         
         n_values <- sizes[i] %/% single_size
-        if(fieldTypes[i] == "07") {
+        if(fieldTypes[i] == 8L) {
             suppressWarnings(
                 message[[i]] <- readChar(con = con, nchars = n_values, useBytes = TRUE)
             )
@@ -213,15 +224,17 @@
                                endian = endian)
                 
                 ## if we have unsigned ints, turn the bits into a numeric
-                if(fieldTypes[i] == '86' || fieldTypes[i] == '8c') {
+                if(fieldTypes[i] == 7L || fieldTypes[i] == 13L) {
                     if(definition@is_little_endian) {
                         bits <- as.logical(rawToBits(dat[1:4]))
                     } else {
                         bits <- as.logical(rawToBits(dat[4:1]))
                     }
                     dat <- sum(2^(.subset(0:31, bits)))
-                } else if (fieldTypes[i] == '0d') { ## maybe this conversion should be done when reading?
+                } else if (fieldTypes[i] == 14L) { ## maybe this conversion should be done when reading?
                     dat <- as.integer(dat)
+                } else if (fieldTypes[i] %in% c(15L, 16L)) {
+                    dat <- .rawToInt64(raw = dat)
                 }
                 
                 if(n_values == 1) {
