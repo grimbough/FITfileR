@@ -191,12 +191,24 @@
       message_table <- tryCatch({
         dplyr::bind_rows( message_table )},
         error = function(e) {
+          
           types <- lapply(message_table, function(x) sapply(x, class))
+          types <- dplyr::bind_rows(types)
+          types <- sapply(names(types), function(x) {
+            x <- types[[x]]
+            x <- x[!is.na(x)]
+            if(any(x == "POSIXct")) return("POSIXct")
+            if(any(x == "character")) return("character")
+            if(any(x == "integer")) return("integer")
+            "numeric"
+          })
           
-          types <- sapply(types, function(x) all(x == x[1]))
-          
-          message_table <- lapply(message_table, 
-                                  function(x) lapply(x, function(y) as.character(y)))
+          message_table <- lapply(message_table, function(x) {
+            for(y in names(x)) {
+              x[[y]] <- methods::as(x[[y]], types[names(types) == y])
+            }
+            x
+          })
           
           dplyr::bind_rows(message_table)
           
