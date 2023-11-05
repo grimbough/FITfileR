@@ -68,7 +68,7 @@
     message <- vector(mode = "list", length = length(fieldTypes))
     for(i in seq_along(fieldTypes)) {
         
-        if (fieldTypes[i] %in% names(data_type_lookup)) {
+        if (fieldTypes[i] %in% seq_along(data_type_lookup)) {
             
             readInfo <- data_type_lookup[[ fieldTypes[i] ]] 
             
@@ -97,7 +97,7 @@
                         dat <- sum(2^(.subset(0:31, bits)))
                     } else if (fieldTypes[i] == 14L) { ## maybe this conversion should be done when reading?
                         dat <- as.integer(dat)
-                    } else if (base_type %in% c(15L, 16L)) {
+                    } else if (fieldTypes[i] %in% c(15L, 16L)) {
                         dat <- .rawToInt64(raw = dat)
                     }
                     
