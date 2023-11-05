@@ -188,7 +188,19 @@
       message_table <- tibble(unlist( message_table) )
       colnames(message_table) <- names
     } else {
-      message_table <- dplyr::bind_rows( message_table )
+      message_table <- tryCatch({
+        dplyr::bind_rows( message_table )},
+        error = function(e) {
+          types <- lapply(message_table, function(x) sapply(x, class))
+          
+          types <- sapply(types, function(x) all(x == x[1]))
+          
+          message_table <- lapply(message_table, 
+                                  function(x) lapply(x, function(y) as.character(y)))
+          
+          dplyr::bind_rows(message_table)
+          
+        })
     }
   
   ## some columns are not defined in the FIT profile.  We remove them here
