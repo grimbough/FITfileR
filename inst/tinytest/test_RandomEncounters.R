@@ -11,3 +11,9 @@ for(f in files) {
       fit <- readFitFile(f)
     )
 }
+
+for(f in files) {
+ message(f)
+        fit <- readFitFile(f)
+
+}
