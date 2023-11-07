@@ -3,3 +3,4 @@
 .github
 .gitignore
 _config.yml
+_pkgdown.yml
