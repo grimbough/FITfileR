@@ -2,7 +2,6 @@
     
     fields <- as.integer(fields)
     fields <- split(fields, rep(1:3, by = length(fields)/3))
-    #fields[[3]] <- format(as.hexmode(fields[[3]]), width = 2)
     fields[[3]] <- unlist(
         lapply(fields[[3]], function(x) { 
             FITfileR:::.binaryToInt(intToBits(x)[1:4])  
