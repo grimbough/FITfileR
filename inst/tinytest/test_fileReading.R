@@ -9,12 +9,10 @@ tomtom_file <- system.file("extdata", "Activities", "tomtom-runner3-ride.fit",
 expect_silent(
     garmin <- readFitFile(garmin_file)
 )
-
-## check we got a list back
-expect_true( class(garmin) == "FitFile" )
+## check we got a "FitFile" back
+expect_inherits(garmin, "FitFile")
 
 expect_silent(
     tomtom <- readFitFile(tomtom_file)
 )
-
-expect_true( class(tomtom) == "FitFile" )
+expect_inherits(tomtom, "FitFile")

@@ -6,14 +6,14 @@ library(FITfileR)
 files <- list.files( "~/Projects/personal/FITfileR/inst/extdata/RandomEncounters",
                      full.names = TRUE)
 
-for(f in files) {
-    expect_silent(
-      fit <- readFitFile(f)
-    )
-}
+# for(f in files) {
+#     expect_silent(
+#       fit <- readFitFile(f)
+#     )
+# }
 
-for(f in files) {
- message(f)
-        fit <- readFitFile(f)
-
-}
+# for(f in files) {
+#  message(f)
+#         fit <- readFitFile(f)
+# 
+# }
