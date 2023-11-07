@@ -18,7 +18,7 @@ expect_equal(
 
 ## test the conversion of 8 raw values into int64
 
-if(require(bit64)) {
+if(suppressPackageStartupMessages(require(bit64, quietly = TRUE))) {
     
     input <- list(
         as.raw(rep(0,8)),           # 0
