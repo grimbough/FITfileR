@@ -1,3 +1,11 @@
+# FITfileR 0.1.8
+
+## BUG FIXES
+
+* Version 0.1.7 had a significant bug where the presence of developer data 
+would break reading all other data fields in a message.  Reported in 
+(#32, #33, #34).  Thanks @dblodgett-cycling for a diagnosis and initial patch.
+
 # FITfileR 0.1.7
 
 ## NEW FEATURES
