@@ -4,7 +4,7 @@
     fields <- split(fields, rep(1:3, by = length(fields)/3))
     fields[[3]] <- unlist(
         lapply(fields[[3]], function(x) { 
-            FITfileR:::.binaryToInt(intToBits(x)[1:4])  
+            .binaryToInt(intToBits(x)[1:4])  
         })
     )
     names(fields) = c('field_def_num', 'size', 'base_type')
