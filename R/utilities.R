@@ -27,21 +27,11 @@
     bits <- rawToBits(raw)
     
     bitstring <- structure(
-            paste0(substr(rev(bits), start = 2, stop = 2), collapse = ""), 
-        class= "bitstring")
-      
+        paste0(substr(rev(bits), start = 2, stop = 2), collapse = ""), 
+        class = "bitstring")
+    
     int64 <- as.integer64(bitstring)
     return(int64)
-}
-
-
-## create a signature for each definition message
-## so we can easily separate message of the same type 
-.definitionSignature <- function(field_defs) {
-  paste(field_defs$field_def_num, 
-        field_defs$size, 
-        sep = "x",
-        collapse = "_")
 }
 
 ## for a given local message type, find the most recent definition message

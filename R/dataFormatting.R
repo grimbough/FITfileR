@@ -188,7 +188,32 @@
       message_table <- tibble(unlist( message_table) )
       colnames(message_table) <- names
     } else {
-      message_table <- dplyr::bind_rows( message_table )
+        message_table <- dplyr::bind_rows( message_table )
+      # message_table <- tryCatch({
+      #   dplyr::bind_rows( message_table )},
+      #   error = function(e) {
+      #     
+      #     types <- lapply(message_table, function(x) sapply(x, class))
+      #     types <- dplyr::bind_rows(types)
+      #     types <- sapply(names(types), function(x) {
+      #       x <- types[[x]]
+      #       x <- x[!is.na(x)]
+      #       if(any(x == "POSIXct")) return("POSIXct")
+      #       if(any(x == "character")) return("character")
+      #       if(any(x == "integer")) return("integer")
+      #       "numeric"
+      #     })
+      #     
+      #     message_table <- lapply(message_table, function(x) {
+      #       for(y in names(x)) {
+      #         x[[y]] <- methods::as(x[[y]], types[names(types) == y])
+      #       }
+      #       x
+      #     })
+      #     
+      #     dplyr::bind_rows(message_table)
+      #     
+      #   })
     }
   
   ## some columns are not defined in the FIT profile.  We remove them here

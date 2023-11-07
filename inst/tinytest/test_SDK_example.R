@@ -30,3 +30,10 @@ expect_true(
     "doughnuts_earned" %in% names(records(devdata))
 )
 
+expect_equivalent(
+    records(devdata)[["cadence"]], c(88, 90, 92)
+)
+expect_equivalent(
+    records(devdata)[["doughnuts_earned"]], c(1, 2, 3)
+)
+

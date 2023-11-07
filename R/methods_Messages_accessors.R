@@ -1,32 +1,4 @@
 ########################
-## Local Message Number
-########################
-
-setMethod("localMessageNumber", 
-          signature = "raw",
-          function(object) {
-              if(isCompressed(object)) 
-                  .binaryToInt(rawToBits(object[6:7]))
-              else
-                  .binaryToInt(rawToBits(object)[1:4])
-          }
-)
-
-setMethod("localMessageNumber", 
-          signature = "FitDefinitionMessage",
-          function(object) {
-              localMessageNumber(object@header)
-          }
-)
-
-setMethod("localMessageNumber", 
-          signature = "FitDataMessage",
-          function(object) {
-              localMessageNumber(object@definition)
-          }
-)
-
-########################
 ## Global Message Number
 ########################
 

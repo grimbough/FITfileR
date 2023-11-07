@@ -2,10 +2,9 @@
     
     fields <- as.integer(fields)
     fields <- split(fields, rep(1:3, by = length(fields)/3))
-    #fields[[3]] <- format(as.hexmode(fields[[3]]), width = 2)
     fields[[3]] <- unlist(
         lapply(fields[[3]], function(x) { 
-            FITfileR:::.binaryToInt(intToBits(x)[1:4])  
+            .binaryToInt(intToBits(x)[1:4])  
         })
     )
     names(fields) = c('field_def_num', 'size', 'base_type')
@@ -53,8 +52,6 @@
     return(message)
 }
 
-## should be refactored!!!
-## currently just copy/paste from .readMessage_data()
 .readMessage_devdata <- function(con, header, definition, developer_msgs) {
     
     fieldDefs <- fieldDefinition(definition)
@@ -65,121 +62,37 @@
     
     if(definition@is_little_endian) { endian <- "little" } else { endian <- "big" }
     
-    message <- vector(mode = "list", length = length(fieldTypes))
-    for(i in seq_along(fieldTypes)) {
-        
-        if (fieldTypes[i] %in% names(data_type_lookup)) {
-            
-            readInfo <- data_type_lookup[[ fieldTypes[i] ]] 
-            
-            ## a single field can have an array of values 
-            single_size <- prod(as.integer(readInfo[3:4]))
-            
-            n_values <- sizes[i] %/% single_size
-            if(fieldTypes[i] == 8L) {
-                suppressWarnings(
-                    message[[i]] <- readChar(con = con, nchars = n_values, useBytes = TRUE)
-                )
-            } else {
-                for(j in seq_len( n_values ) ) {
-                    
-                    dat <- readBin(con, what = readInfo[[1]], signed = readInfo[[2]],
-                                   size = readInfo[[3]], n = readInfo[[4]], 
-                                   endian = endian)
-                    
-                    ## if we have unsigned ints, turn the bits into a numeric
-                    if(fieldTypes[i] %in% c(7L, 13L)) {
-                        if(definition@is_little_endian) {
-                            bits <- as.logical(rawToBits(dat[1:4]))
-                        } else {
-                            bits <- as.logical(rawToBits(dat[4:1]))
-                        }
-                        dat <- sum(2^(.subset(0:31, bits)))
-                    } else if (fieldTypes[i] == 14L) { ## maybe this conversion should be done when reading?
-                        dat <- as.integer(dat)
-                    } else if (base_type %in% c(15L, 16L)) {
-                        dat <- .rawToInt64(raw = dat)
-                    }
-                    
-                    if(n_values == 1) {
-                        message[[i]] <- c(message[[i]], dat)
-                    } else { ## put multiple values in a list, otherwise the tibble has columns with different lengths.
-                        if(j == 1) {
-                            message[[i]] <- list(dat)
-                        } else {
-                            message[[i]][[1]] <- c(message[[i]][[1]], dat)
-                        }
-                    }
-                }
-            }
-        } else {
-            readBin(con, what = "integer", size = 1, n = sizes[i])
-            message[[i]] <- 0
-        }
-    }
+    message <- mapply(FUN = .readFields, fieldTypes, sizes, 
+                      MoreArgs = list(definition = definition, con = con), 
+                      SIMPLIFY = FALSE,
+                      USE.NAMES = FALSE)
     
-    k <- length(fieldTypes)
-    
-    dev_data <- vector(mode = "list", length = length(devFieldDefs$field_num))
     dev_data_mesg_defs <- vector(mode = "list", length = length(devFieldDefs$field_num))
+    baseTypes <- sizes <- integer(length = length(devFieldDefs$field_num))
     ## loop over the developer fields
     for(i in seq_along(devFieldDefs$field_num)) {
         
         ## index within the set of developer messages
         idx <- devFieldDefs$developer_idx[i] + 1
-        size <- devFieldDefs$size[i]
         field_num <- devFieldDefs$field_num[i] + 1
         
         developer_msg <- developer_msgs[[idx]]$messages[[field_num]]
         dev_data_mesg_defs[[i]] <- developer_msg
         dm_fieldDefs <- fieldDefinition(developer_msg)
         
-        base_type <- developer_msg@fields[[which(dm_fieldDefs$field_def_num == 2)]] %>% 
-            as.hexmode() %>% format(width = 2)
-        readInfo <- data_type_lookup[[ base_type ]] 
-        
-        ## a single field can have an array of values 
-        single_size <- prod(as.integer(readInfo[3:4]))
-        
-        n_values <- size %/% single_size
-        if(base_type == 8L) {
-            suppressWarnings(
-                dev_data[[i]] <- readChar(con = con, nchars = n_values, useBytes = TRUE)
-            )
-        } else {
-            for(j in seq_len( n_values ) ) {
-                
-                dat <- readBin(con, what = readInfo[[1]], signed = readInfo[[2]],
-                               size = readInfo[[3]], n = readInfo[[4]], 
-                               endian = endian)
-                
-                ## if we have unsigned ints, turn the bits into a numeric
-                if(base_type %in% c(7L, 13L)) {
-                    if(definition@is_little_endian) {
-                        bits <- as.logical(rawToBits(dat[1:4]))
-                    } else {
-                        bits <- as.logical(rawToBits(dat[4:1]))
-                    }
-                    dat <- sum(2^(.subset(0:31, bits)))
-                } else if (base_type == 14L) { ## maybe this conversion should be done when reading?
-                    dat <- as.integer(dat)
-                } else if (base_type %in% c(15L, 16L)) {
-                    dat <- .rawToInt64(raw = dat)
-                }
-                
-                if(n_values == 1) {
-                    dev_data[[i]] <- c(dev_data[[i]], dat)
-                } else { ## put multiple values in a list, otherwise the tibble has columns with different lengths.
-                    if(j == 1) {
-                        dev_data[[i]] <- list(dat)
-                    } else {
-                        dev_data[[i]][[1]] <- c(dev_data[[i]][[1]], dat)
-                    }
-                }
-            }
-        }
-        
+        sizes[i] <- devFieldDefs$size[i]
+        encodedType <- developer_msg@fields[[which(dm_fieldDefs$field_def_num == 2)]] %>% 
+            as.integer() 
+        baseTypes[i] <- .binaryToInt(intToBits(encodedType)[1:4])
     }
+    
+    ## we add 1 here because R indexing starts at 1 not 0
+    baseTypes <- baseTypes + 1
+        
+    dev_data <- mapply(FUN = .readFields, baseTypes, sizes, 
+                          MoreArgs = list(definition = definition, con = con), 
+                          SIMPLIFY = FALSE,
+                          USE.NAMES = FALSE)
     
     res <- new("FitDataMessageWithDevData",
                header = header,
@@ -201,73 +114,65 @@
              "Unknown field types detected.")
     }
     
-    if(definition@is_little_endian) { endian <- "little" } else { endian <- "big" }
+    message <- mapply(FUN = .readFields, fieldTypes, sizes, 
+                      MoreArgs = list(definition = definition, con = con), 
+                      SIMPLIFY = FALSE,
+                      USE.NAMES = FALSE)
     
-    message <- vector(mode = "list", length = length(fieldTypes))
-    for(i in seq_along(fieldTypes)) {
-        
-        readInfo <- data_type_lookup[[ fieldTypes[i] ]]
-        
-        ## a single field can have an array of values 
-        single_size <- prod(readInfo$size, readInfo$n)
-        
-        n_values <- sizes[i] %/% single_size
-        if(fieldTypes[i] == 8L) {
-            suppressWarnings(
-                message[[i]] <- readChar(con = con, nchars = n_values, useBytes = TRUE)
-            )
-        } else {
-            for(j in seq_len( n_values ) ) {
-                
-                dat <- readBin(con, what = readInfo$what, signed = readInfo$signed,
-                               size = readInfo$size, n = readInfo$n, 
-                               endian = endian)
-                
-                ## if we have unsigned ints, turn the bits into a numeric
-                if(fieldTypes[i] == 7L || fieldTypes[i] == 13L) {
-                    if(definition@is_little_endian) {
-                        bits <- as.logical(rawToBits(dat[1:4]))
-                    } else {
-                        bits <- as.logical(rawToBits(dat[4:1]))
-                    }
-                    dat <- sum(2^(.subset(0:31, bits)))
-                } else if (fieldTypes[i] == 14L) { ## maybe this conversion should be done when reading?
-                    dat <- as.integer(dat)
-                } else if (fieldTypes[i] %in% c(15L, 16L)) {
-                    dat <- .rawToInt64(raw = dat)
+    res <- new("FitDataMessage",
+               header = header,
+               definition = definition,
+               fields = message
+    )
+    
+    return(res)
+}
+
+.readFields <- function(fieldType, sizes, definition, con) {
+    
+    if(definition@is_little_endian) { endian <- "little" } else { endian <- "big" }
+    readInfo <- data_type_lookup[[ fieldType ]]
+    
+    ## a single field can have an array of values 
+    single_size <- prod(readInfo$size, readInfo$n)
+    n_values <- sizes %/% single_size
+    
+    if(fieldType == 8L) {
+        suppressWarnings(
+            res <- readChar(con = con, nchars = n_values, useBytes = TRUE)
+        )
+    } else {
+        for(j in seq_len( n_values ) ) {
+            
+            dat <- readBin(con, what = readInfo$what, signed = readInfo$signed,
+                           size = readInfo$size, n = readInfo$n, 
+                           endian = endian)
+            
+            ## if we have unsigned ints, turn the bits into a numeric
+            if(fieldType == 7L || fieldType == 13L) {
+                if(definition@is_little_endian) {
+                    bits <- as.logical(rawToBits(dat[1:4]))
+                } else {
+                    bits <- as.logical(rawToBits(dat[4:1]))
                 }
-                
-                if(n_values == 1) {
-                    message[[i]] <- c(message[[i]], dat)
-                } else { ## put multiple values in a list, otherwise the tibble has columns with different lengths.
-                    if(j == 1) {
-                        message[[i]] <- list(dat)
-                    } else {
-                        message[[i]][[1]] <- c(message[[i]][[1]], dat)
-                    }
+                dat <- sum(2^(.subset(0:31, bits)))
+            } else if (fieldType == 14L) { ## maybe this conversion should be done when reading?
+                dat <- as.integer(dat)
+            } else if (fieldType %in% c(15L, 16L)) {
+                dat <- .rawToInt64(raw = dat)
+            }
+            
+            if(n_values == 1) {
+                res <- dat
+            } else { ## put multiple values in a list, otherwise the tibble has columns with different lengths.
+                if(j == 1) {
+                    res <- list(dat)
+                } else {
+                    res[[1]] <- c(res[[1]], dat)
                 }
             }
         }
     }
-    
-    if(hasDeveloperData(definition)) {
-        dev_data <- .readMessage_devdata(con, definition@dev_field_defs, definition@is_little_endian)
-        names(dev_data) <- devFieldDefinition(definition)$field_def_num
-        
-        res <- new("FitDataMessageWithDevData",
-                   header = header,
-                   definition = definition,
-                   fields = message,
-                   dev_fields = dev_data
-        )
-    } else {
-        res <- new("FitDataMessage",
-                   header = header,
-                   definition = definition,
-                   fields = message
-        )
-    }
-    
     return(res)
 }
 
@@ -276,7 +181,7 @@
     dev_data_idx_idx <- which(tmp@definition@field_defs$field_def_num == 3)
     manufacturer_id_idx <- which(tmp@definition@field_defs$field_def_num == 2)
     
-    ## add 1 becuase FIT file indices are 0-based
+    ## add 1 because FIT file indices are 0-based
     idx <- tmp@fields[[ dev_data_idx_idx ]]+1
     
     devMessages[[idx]] <- list()
@@ -290,7 +195,7 @@
     developer_idx <- which(msg@definition@field_defs$field_def_num == 0)
     field_idx <- which(msg@definition@field_defs$field_def_num == 1)
     
-    ## add 1 becuase FIT file indices are 0-based
+    ## add 1 because FIT file indices are 0-based
     dev_data_idx <- as.integer(msg@fields[[ developer_idx ]]) + 1
     field_number <- as.integer(msg@fields[[ field_idx ]]) + 1
     

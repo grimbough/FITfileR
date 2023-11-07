@@ -20,5 +20,8 @@ An S4 class representing a FIT file
 \item{\code{header}}{A list containing details of the file header}
 
 \item{\code{messages}}{A list of \linkS4class{FitDataMessage}s}
+
+\item{\code{developer_msg_defs}}{A list of lists containing the definitions for
+any developer messages included in the file.}
 }}
 

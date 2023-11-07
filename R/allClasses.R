@@ -71,6 +71,8 @@ setClass("FitDataMessageWithDevData",
 #' 
 #' @slot header A list containing details of the file header
 #' @slot messages A list of [FitDataMessage-class]s
+#' @slot developer_msg_defs A list of lists containing the definitions for
+#' any developer messages included in the file.
 #' 
 #' @exportClass FitFile 
 setClass("FitFile", 

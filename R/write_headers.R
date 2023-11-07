@@ -31,7 +31,7 @@
 #     developer_data <- FALSE
 #     reserved_bit <- FALSE
 #     lmt <- as.logical(intToBits(local_message_type)[1:4])
-#     header_as_int <- FITfileR:::.binaryToInt( 
+#     header_as_int <- .binaryToInt( 
 #         c(lmt, reserved_bit, developer_data, definition_message, normal_header) 
 #     )
 #     

@@ -28,3 +28,5 @@ expect_equal(FITfileR:::localMessageNumber(garmin530@messages[[5]]), 4L)
 
 expect_equal(FITfileR:::localMessageNumber(garmin530@messages[[1]]@definition), 0L)
 expect_equal(FITfileR:::localMessageNumber(garmin530@messages[[5]]@definition), 4L)
+
+## Testing whether a message has developer data

@@ -32,35 +32,6 @@
   
 }
 
-## takes the 8 bits from a normal message header
-## determines if this is a definition or data message, the presence of
-## developer data, and the local message type.
-## 
-## Currently developer data isn't supported
-##
-.readMessageHeader_normal <- function(record_header) {
-  
-  header <- new("FitMessageHeader",
-      raw_rep = record_header,
-      is_compressed = FALSE
-  )
-  
-  return(header)
-}
-
-## takes the 8 bits from a compressed timestamp message header
-## determines the local message type and the time offset
-##
-.readMessageHeader_compressed <- function(record_header) {
-  
-  header <- new("FitMessageHeader",
-                raw_rep = record_header,
-                is_compressed = FALSE
-  )
-  
-  return(header)
-}
-
 isCompressed <- function(header) {
   header <- rawToBits(header)
   return(as.logical(header)[8])

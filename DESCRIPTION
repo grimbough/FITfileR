@@ -1,5 +1,5 @@
 Package: FITfileR
-Version: 0.1.7
+Version: 0.1.8
 Title: Read FIT files using only native R code
 Authors@R: c(person(
                     "Mike", "Smith", 
@@ -39,7 +39,6 @@ Collate:
     'methods_FitFile_accessors.R'
     'methods_FitFile_dim.R'
     'methods_Messages_accessors.R'
-    'methods_Messages_header.R'
     'read_headers.R'
     'read_messages.R'
     'reader.R'
