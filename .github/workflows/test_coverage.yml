@@ -2,7 +2,7 @@ on:
   push:
     branches:
       - master
-      - fit-class
+      - refactor-dev-messages
   pull_request:
     branches:
       - master
