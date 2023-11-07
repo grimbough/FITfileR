@@ -23,7 +23,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FITfileR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.7</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.8</span>
       </span>
     </div>
 
@@ -69,23 +69,6 @@
     <h2>Arguments</h2>
     <dl><dt>fileName</dt>
 <dd><p>A character specifying the FIT file to be read.</p></dd>
-
-
-<dt>dropUnknown</dt>
-<dd><p>Many FIT files contain data that is not defined in the FIT
-file specification.  This may be used by the device manufacturer for
-debugging purposes, but is typically not useful to an end user.  The default
-value of this argument will exclude these fields from the returned data
-structure.  Setting a value of <code>FALSE</code> will retain them.</p></dd>
-
-
-<dt>mergeMessages</dt>
-<dd><p>FIT files may contain similar 'messages' with varying
-numbers of fields e.g. if a new sensor is added during an activity the
-'records' messages recorded after this will contain an extra data column.
-The default value of this argument will merge all messages of the same type,
-and insert <code>NA</code> to pad missing fields.  Setting this to <code>FALSE</code>
-will return a separate <code>data.frame</code> for each distinct message type.</p></dd>
 
 </dl></div>
     <div id="value">
