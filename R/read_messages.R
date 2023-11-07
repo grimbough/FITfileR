@@ -182,7 +182,7 @@
     dev_data_idx_idx <- which(tmp@definition@field_defs$field_def_num == 3)
     manufacturer_id_idx <- which(tmp@definition@field_defs$field_def_num == 2)
     
-    ## add 1 becuase FIT file indices are 0-based
+    ## add 1 because FIT file indices are 0-based
     idx <- tmp@fields[[ dev_data_idx_idx ]]+1
     
     devMessages[[idx]] <- list()
@@ -196,7 +196,7 @@
     developer_idx <- which(msg@definition@field_defs$field_def_num == 0)
     field_idx <- which(msg@definition@field_defs$field_def_num == 1)
     
-    ## add 1 becuase FIT file indices are 0-based
+    ## add 1 because FIT file indices are 0-based
     dev_data_idx <- as.integer(msg@fields[[ developer_idx ]]) + 1
     field_number <- as.integer(msg@fields[[ field_idx ]]) + 1
     
