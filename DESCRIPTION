@@ -13,7 +13,7 @@ Description: The 'FIT' (Flexible and Interoperable Data Transfer)
     devices.  This package allows reading 'FIT' files in pure R without any 
     dependence on external software or SDKs. 
 URL: https://github.com/grimbough/FITfileR
-Depends: R (>= 3.5.0)
+Depends: R (>= 4.1)
 Imports: dplyr, tibble, magrittr, methods, bit64
 Suggests: knitr,
     rmarkdown,
