@@ -1,8 +1,10 @@
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
 # FITfileR
 
-[![](https://img.shields.io/badge/dev%20version-0.1.7-blue.svg)](https://github.com/grimbough/FITfileR)
-[![R CMD
-check](https://github.com/grimbough/FITfileR/workflows/R-CMD-check/badge.svg)](https://github.com/grimbough/FITfileR/actions)
+[![](https://img.shields.io/badge/dev%20version-0.1.8-blue.svg)](https://github.com/grimbough/FITfileR)
+[![R-CMD-check](https://github.com/grimbough/FITfileR/actions/workflows/main.yml/badge.svg)](https://github.com/grimbough/FITfileR/actions/workflows/main.yml)
 [![codecov](https://codecov.io/github/grimbough/FITfileR/branch/fit-class/graphs/badge.svg)](https://codecov.io/github/grimbough/FITfileR)
 
 **FITfileR** is an R package to read FIT files produced by fitness
@@ -25,10 +27,12 @@ Currently **FITfileR** is only available on Github, and can be installed
 using the **[remotes](https://cran.r-project.org/package=remotes)
 package.**
 
-    if(!requireNamespace("remotes")) {
-        install.packages("remotes")
-    }
-    remotes::install_github("grimbough/FITfileR")
+``` r
+if(!requireNamespace("remotes")) {
+    install.packages("remotes")
+}
+remotes::install_github("grimbough/FITfileR")
+```
 
 # Usage
 
