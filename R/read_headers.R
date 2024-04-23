@@ -38,8 +38,9 @@ isCompressed <- function(header) {
 }
 
 isDefinition <- function(header) {
-  rawToBits(header)[7] |>
-    as.logical()
+  as.logical(
+    rawToBits(header)[7] 
+  )
 }
 
 hasDeveloperData <- function(object) {
@@ -52,8 +53,9 @@ hasDeveloperData <- function(object) {
     header <- object
   }
   
-  rawToBits(header)[6] |>
-    as.logical()
+  as.logical(
+    rawToBits(header)[6] 
+  )
 }
 
 timeOffset <- function(header) {

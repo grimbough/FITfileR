@@ -34,7 +34,7 @@ setMethod("show", signature = "FitDataMessage", function(object) {
         translated <- .translateField(field, globalMessageNumber( object ))
         cat("\n ", translated$value, " (", translated$key, ", ", translated$type, "):", sep = "")
         
-        original <- object@fields[[ i ]] |> unlist()
+        original <- unlist( object@fields[[ i ]] )
         adjusted <- .applyScaleAndOffset( original, field, globalMessageNumber( object ) ) 
         units <- ifelse(is.na(translated$units), "", paste0(" ", translated$units))
         
@@ -62,7 +62,7 @@ setMethod("show", signature = "FitDataMessageWithDevData", function(object) {
         translated <- .translateField(field, globalMessageNumber( object ))
         cat("\n ", translated$value, " (", translated$key, ", ", translated$type, "):", sep = "")
         
-        original <- object@fields[[ i ]] |> unlist()
+        original <- unlist( object@fields[[ i ]] )
         adjusted <- .applyScaleAndOffset( original, field, globalMessageNumber( object ) ) 
         units <- ifelse(is.na(translated$units), "", paste0(" ", translated$units))
         
