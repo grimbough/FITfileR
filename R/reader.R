@@ -41,6 +41,10 @@ readFitFile <- function(fileName) {
   
   while(seek(con, where = NA) < (file_header$data_size + file_header$size)) {
     
+    if(nzchar(Sys.getenv("DEBUG_FITFILER"))) {
+      message(seek(con, where = NA), ":", file_header$data_size + file_header$size)
+    }
+    
     record_header <- .readRecordHeader(con, prev_header)
     
     if(isDefinition(record_header)) {
@@ -49,6 +53,12 @@ readFitFile <- function(fileName) {
     } else {
       local_message_number = localMessageNumber_header(record_header)
       definition <- msgDefs[[ as.character(local_message_number) ]]
+      
+      
+      if(nzchar(Sys.getenv("DEBUG_FITFILER"))) {
+          message("Definition:");
+          message(str(definition))
+      }
       
       ## is this a developer data definition message?
       if(globalMessageNumber(definition) == 207) {
