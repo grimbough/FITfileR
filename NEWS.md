@@ -1,3 +1,9 @@
+# FITfileR 0.1.9
+
+## BUG FIXES
+
+* Fixed issue when a definition message contained zero fields. Reported in (#40)
+
 # FITfileR 0.1.8
 
 ## BUG FIXES

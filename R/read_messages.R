@@ -27,9 +27,16 @@
     global_message_num <- readBin(con = con, what = "int", n = 1, size = 2,
                                   endian = architecture, signed = FALSE)
     n_fields <- readBin(con = con, what = "int", n = 1, size = 1, signed = FALSE)
-    field_definition <- .processFieldDefs(
-        readBin(con = con, what = "raw", n = 3 * n_fields, size = 1, signed = FALSE)
-    )
+    
+    ## some devices seem to create messages with no fields defined
+    if(n_fields > 0) {
+      field_definition <- .processFieldDefs(
+          readBin(con = con, what = "raw", n = 3 * n_fields, size = 1, signed = FALSE)
+      )
+    } else {
+      field_definition <- vector(mode = 'list', length = 3L)
+    }
+    
     if(hasDeveloperData(message_header)){
         ## do something with the developer fields
         n_dev_fields <- readBin(con = con, what = "int", n = 1, size = 1, signed = FALSE)
