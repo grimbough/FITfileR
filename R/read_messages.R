@@ -143,6 +143,16 @@
     ## a single field can have an array of values 
     single_size <- prod(readInfo$size, readInfo$n)
     n_values <- sizes %/% single_size
+
+    ## sometimes we encounter invalid data, where the size and base type
+    ## are inconsistent (e.g. see issue 41).  A working solution seems to be
+    ## to read a single byte and then proceed.
+    if(n_values == 0) { 
+      readBin(con, what = 'raw', signed = FALSE,
+              size = 1, n = sizes, 
+              endian = 'little')
+      return(NA)
+    }
     
     if(fieldType == 8L) {
         suppressWarnings(
