@@ -2,9 +2,21 @@
 % Please edit documentation in R/FITfileR.R
 \docType{package}
 \name{FITfileR}
+\alias{FITfileR-package}
 \alias{FITfileR}
 \title{FITfileR: A package reading FIT files using native R code.}
 \description{
 Provides functionality for reading FIT (Flexible and Interoperable Data
 Transfer) files without any dependence on external software or SDKs.
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/grimbough/FITfileR}
+}
+
+}
+\author{
+\strong{Maintainer}: Mike Smith \email{grimbough@gmail.com} (\href{https://orcid.org/0000-0002-7800-3848}{ORCID})
+
 }
