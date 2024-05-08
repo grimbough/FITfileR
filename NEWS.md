@@ -1,4 +1,4 @@
-# FITfileR 0.1.9
+# FITfileR 0.1.10
 
 ## BUG FIXES
 
