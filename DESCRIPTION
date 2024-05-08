@@ -1,5 +1,5 @@
 Package: FITfileR
-Version: 0.1.9
+Version: 0.1.20
 Title: Read FIT files using only native R code
 Authors@R: c(person(
                     "Mike", "Smith", 

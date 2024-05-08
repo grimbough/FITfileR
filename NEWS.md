@@ -2,6 +2,13 @@
 
 ## BUG FIXES
 
+* Fixed issue with files produced by Coros watches, where a start event had
+an invalid data field that contain no value. Reported in (#38 & #41)
+
+# FITfileR 0.1.9
+
+## BUG FIXES
+
 * Fixed issue when a definition message contained zero fields. Reported in (#40)
 
 # FITfileR 0.1.8
