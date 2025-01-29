@@ -16,3 +16,9 @@ expect_silent(
     tomtom <- readFitFile(tomtom_file)
 )
 expect_inherits(tomtom, "FitFile")
+
+## test reading just the file type
+expect_silent(
+  garmin_type <- readFitFileType(garmin_file)
+)
+expect_equal(garmin_type, "activity")
