@@ -1,45 +1,18 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>/404.html</loc>
-  </url>
-  <url>
-    <loc>/articles/FITfileR.html</loc>
-  </url>
-  <url>
-    <loc>/articles/index.html</loc>
-  </url>
-  <url>
-    <loc>/authors.html</loc>
-  </url>
-  <url>
-    <loc>/index.html</loc>
-  </url>
-  <url>
-    <loc>/news/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/FITfileR.html</loc>
-  </url>
-  <url>
-    <loc>/reference/FitFile-accessors.html</loc>
-  </url>
-  <url>
-    <loc>/reference/FitFile-class.html</loc>
-  </url>
-  <url>
-    <loc>/reference/FitMessageHeader-class.html</loc>
-  </url>
-  <url>
-    <loc>/reference/FitMessages.html</loc>
-  </url>
-  <url>
-    <loc>/reference/dot-isKnownField.html</loc>
-  </url>
-  <url>
-    <loc>/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/readFitFile.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>/404.html</loc></url>
+<url><loc>/articles/FITfileR.html</loc></url>
+<url><loc>/articles/index.html</loc></url>
+<url><loc>/authors.html</loc></url>
+<url><loc>/index.html</loc></url>
+<url><loc>/news/index.html</loc></url>
+<url><loc>/reference/FITfileR.html</loc></url>
+<url><loc>/reference/FitFile-accessors.html</loc></url>
+<url><loc>/reference/FitFile-class.html</loc></url>
+<url><loc>/reference/FitMessageHeader-class.html</loc></url>
+<url><loc>/reference/FitMessages.html</loc></url>
+<url><loc>/reference/dot-isKnownField.html</loc></url>
+<url><loc>/reference/index.html</loc></url>
+<url><loc>/reference/readFitFile.html</loc></url>
+<url><loc>/reference/readFitFileType.html</loc></url>
 </urlset>
+
