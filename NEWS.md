@@ -1,3 +1,10 @@
+# FITfileR 0.1.11
+
+## NEW FEATURES
+
+* Added the function `readFitFileType()` to rapidly determine what type of 
+FIT file you have, without needing to decode the entire file.
+
 # FITfileR 0.1.10
 
 ## BUG FIXES
